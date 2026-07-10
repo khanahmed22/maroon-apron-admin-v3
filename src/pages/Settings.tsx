@@ -34,7 +34,7 @@ interface UploadResponse {
 interface RestListProps {
   id?: string
   restName: string
-  restPhone: number
+  restPhone: string
   restEmail: string
   restAddress: string
   restLogo: string
@@ -140,7 +140,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   const [bannerFile, setBannerFile] = useState<File | null>(null)
   const [updateRest, setUpdateRest] = useState<RestListProps>({
     restName: "",
-    restPhone: 0,
+    restPhone: "",
     restEmail: "",
     restAddress: "",
     restLogo: "",
@@ -205,7 +205,7 @@ export default function Settings({ restId }: { restId: string | null }) {
     setUpdateRest({
       id: restDetails.getRest.id,
       restName: restDetails.getRest.restName,
-      restPhone: restDetails.getRest.restPhone ?? 0,
+      restPhone: restDetails.getRest.restPhone ?? "",
       restEmail: restDetails.getRest.restEmail ?? "",
       restAddress: restDetails.getRest.restAddress ?? "",
       restLogo: restDetails.getRest.restLogo ?? "",
@@ -410,7 +410,7 @@ export default function Settings({ restId }: { restId: string | null }) {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restPhone: Number(e.target.value) })
+                        setUpdateRest({ ...updateRest, restPhone:e.target.value })
                       }
                     />
                   </div>

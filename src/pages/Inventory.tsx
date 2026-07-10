@@ -332,8 +332,7 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-const isProductLimitReached =
-  merchantStatus?.plan === "free" && inventQuery.length >= 5;
+
 
 
 if (isPending) {

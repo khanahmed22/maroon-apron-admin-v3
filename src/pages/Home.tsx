@@ -14,7 +14,7 @@ import {
   ShoppingBag,
   LayoutDashboard,
   Check,
-  MessageCircle,
+
   ArrowDown,
   ChevronDown,
   ArrowRight,
@@ -31,8 +31,6 @@ import type { LucideIcon } from "lucide-react";
 import type { HTMLMotionProps } from "motion/react";
 import { UserAuth } from "../context/AuthContext";
 import type { Variants } from "motion/react";
-
-
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 interface NavLink {
   label: string;

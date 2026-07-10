@@ -16,7 +16,7 @@ import {
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
-const MUTE = "#9CA3AF"
+
 const BORDER = "#FFFFFF"
 
 const navLinks = [

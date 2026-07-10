@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { UserAuth } from "../context/AuthContext";
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, ChefHat, UserRound } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
 
 export default function Register(){
   const [name,setName] = useState<string>("")

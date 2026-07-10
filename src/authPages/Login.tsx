@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router"
 import { UserAuth } from "../context/AuthContext";
-import { Mail, Lock, Eye, EyeOff, ChefHat } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 
 
 export default function Login(){

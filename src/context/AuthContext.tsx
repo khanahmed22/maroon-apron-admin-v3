@@ -56,6 +56,7 @@ export const AuthContextProvider = ({children}:AuthProviderProps)=>{
     setSession(data.user);
   } catch (err) {
     setSession(null);
+    console.log(err)
   } finally {
     setLoading(false);
   }

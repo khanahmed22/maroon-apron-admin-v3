@@ -1,7 +1,7 @@
 {
-  "name": "react-express",
+  "name": "crimson-admin-v3",
   "private": true,
-  "version": "0.0.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

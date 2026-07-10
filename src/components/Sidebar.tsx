@@ -1,0 +1,259 @@
+import { Link, useLocation } from "react-router"
+import { useQuery } from "@tanstack/react-query"
+import { useState } from "react"
+import {
+  LayoutDashboard,
+  ClipboardList,
+  PlusCircle,
+  Boxes,
+  Users,
+  Settings,
+  User,
+  Menu,
+  X,
+  ShieldAlert,
+} from "lucide-react"
+
+const ACCENT = "#D6293F"
+const INK = "#171717"
+const MUTE = "#9CA3AF"
+const BORDER = "#FFFFFF"
+
+const navLinks = [
+  { label: "Home", link: "/dashboard", icon: LayoutDashboard },
+  { label: "Orders", link: "/orders", icon: ClipboardList },
+  { label: "Place Order", link: "/place-order", icon: PlusCircle },
+  { label: "Inventory", link: "/inventory", icon: Boxes },
+  { label: "Customers", link: "/customers", icon: Users },
+  { label: "Settings", link: "/settings", icon: Settings },
+  { label: "Account", link: "/account", icon: User },
+]
+
+function NavItem({
+  n,
+  active,
+  onClick,
+}: {
+  n: (typeof navLinks)[number]
+  active: boolean
+  onClick?: () => void
+}) {
+  return (
+    <Link
+  to={n.link}
+  onClick={onClick}
+  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+    active ? "text-white" : "text-black hover:bg-gray-100"
+  }`}
+  style={
+    active
+      ? {
+          backgroundColor: ACCENT,
+        }
+      : {
+          backgroundColor: "transparent",
+        }
+  }
+>
+  <n.icon className="w-5 h-5 shrink-0" />
+  <span>{n.label}</span>
+</Link>
+  )
+}
+
+export default function SideBar() {
+  const getPaymentStatus = async () => {
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/paddle/account`,
+      {
+        credentials: "include",
+      }
+    )
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch account")
+    }
+
+    return res.json()
+  }
+
+  const { data: merchantStatus } = useQuery({
+    queryKey: ["account"],
+    queryFn: getPaymentStatus,
+    refetchOnWindowFocus: false,
+  })
+
+  const isVerified = !!merchantStatus?.merchant_verify
+
+  const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  const isActive = (link: string) =>
+    location.pathname === link ||
+    location.pathname.startsWith(link + "/")
+
+  const visibleLinks = isVerified
+    ? navLinks
+    : navLinks.filter((n) => n.link === "/account")
+
+  return (
+    <>
+      {/* ================= MOBILE TOP BAR ================= */}
+      {/* ================= MOBILE TOP BAR ================= */}
+<div
+  className="md:hidden flex items-center justify-between px-4 h-16 sticky top-0 z-40 border-b bg-white"
+  style={{ borderColor: BORDER }}
+>
+  <div className="flex items-center gap-3 max-md:hidden">
+    <div
+      className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: ACCENT }}
+    >
+      <img src="/cc.jpg" alt="logo" className="w-full h-full object-cover" />
+    </div>
+
+    <span
+      className="font-bold text-base"
+      style={{ color: INK }}
+    >
+      Crimson Castle
+    </span>
+  </div>
+
+  <button
+    onClick={() => setMobileOpen(true)}
+    className="p-2 -mr-2"
+    style={{ color: INK }}
+    aria-label="Open menu"
+  >
+    <Menu className="w-7 h-7" />
+  </button>
+</div>
+
+{/* ================= MOBILE DRAWER ================= */}
+<div
+  className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ${
+    mobileOpen
+      ? "pointer-events-auto"
+      : "pointer-events-none"
+  }`}
+>
+  {/* Overlay */}
+  <div
+    onClick={() => setMobileOpen(false)}
+    className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+      mobileOpen ? "opacity-100" : "opacity-0"
+    }`}
+  />
+
+  {/* Drawer */}
+  <div
+    className={`relative h-full w-72 bg-white flex flex-col p-5 shadow-2xl transition-transform duration-300 ease-out ${
+      mobileOpen ? "translate-x-0" : "-translate-x-full"
+    }`}
+  >
+    <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center gap-3">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
+          style={{ backgroundColor: ACCENT }}
+        >
+          <img
+            src="/cc.jpg"
+            alt="logo"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <span
+          className="font-bold text-lg"
+          style={{ color: INK }}
+        >
+          Crimson Castle
+        </span>
+      </div>
+
+      <button
+        onClick={() => setMobileOpen(false)}
+        className="p-1"
+        style={{ color: INK }}
+        aria-label="Close menu"
+      >
+        <X className="w-7 h-7" />
+      </button>
+    </div>
+
+    <nav className="flex flex-col gap-2">
+      {visibleLinks.map((n) => (
+        <NavItem
+          key={n.link}
+          n={n}
+          active={isActive(n.link)}
+          onClick={() => setMobileOpen(false)}
+        />
+      ))}
+
+      {!isVerified && (
+        <Link
+          to="/merchant-app"
+          onClick={() => setMobileOpen(false)}
+          className="mt-5 flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-base font-semibold text-white"
+          style={{ backgroundColor: ACCENT }}
+        >
+          <ShieldAlert className="w-5 h-5" />
+          Complete Verification
+        </Link>
+      )}
+    </nav>
+  </div>
+</div>
+
+{/* ================= DESKTOP SIDEBAR ================= */}
+<div
+  className="hidden md:flex flex-col w-72 h-screen sticky top-0 shrink-0 p-5 border-r bg-white"
+  style={{ borderColor: BORDER }}
+>
+  <div className="flex items-center gap-3 mb-10">
+    <div
+      className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: ACCENT }}
+    >
+      <img
+        src="/cc.jpg"
+        alt="logo"
+        className="w-full h-full object-cover"
+      />
+    </div>
+
+    <span
+      className="font-bold text-lg"
+      style={{ color: INK }}
+    >
+      Crimson Castle
+    </span>
+  </div>
+
+  <nav className="flex flex-col gap-2">
+    {visibleLinks.map((n) => (
+      <NavItem
+        key={n.link}
+        n={n}
+        active={isActive(n.link)}
+      />
+    ))}
+
+    {!isVerified && (
+      <Link
+        to="/verification"
+        className="mt-5 flex items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-base font-semibold text-white"
+        style={{ backgroundColor: ACCENT }}
+      >
+        <ShieldAlert className="w-5 h-5" />
+        Complete Verification
+      </Link>
+    )}
+  </nav>
+</div>
+    </>
+  )
+}

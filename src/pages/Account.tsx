@@ -76,6 +76,14 @@ export default function Account() {
     try {
       setLoading(true)
       const paddle = await initPaddle()
+      if (!paddle) {
+  toast.error("Failed to initialize Paddle");
+  return;
+}
+if (!session?.email || !session?.id) {
+  toast.error("Please sign in again.");
+  return;
+}
       paddle.Checkout.open({
         items: [
           {

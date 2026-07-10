@@ -15,6 +15,7 @@ import {
 } from "../components/ui/dialog"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 interface VariantProps {
   id: string;
   variantName: string;
@@ -324,13 +325,7 @@ const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
  
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <label className="text-sm font-semibold" style={{ color: INK }}>
-      {children}
-    </label>
-  )
-}
+
 
 
 
@@ -492,7 +487,7 @@ if (isPending) {
  
           <form onSubmit={addItemM} className="flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Item Name</FieldLabel>
+              <Label>Item Name</Label>
               <Input
                 placeholder="Enter item name"
                 value={addForm.name}
@@ -509,7 +504,7 @@ if (isPending) {
             </div>
  
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Item Price</FieldLabel>
+              <Label>Item Price</Label>
               <Input
                 placeholder="Enter price"
                 type="number"
@@ -527,7 +522,7 @@ if (isPending) {
             </div>
  
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Category</FieldLabel>
+              <Label>Category</Label>
               <Input
                 placeholder="Enter category"
                 value={addForm.category}
@@ -544,7 +539,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Stock Amount</FieldLabel>
+              <Label>Stock Amount</Label>
               <Input
                 placeholder="Enter Stock Amount"
                 value={addForm.stockAmount}
@@ -561,7 +556,7 @@ if (isPending) {
             </div>
  
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Image</FieldLabel>
+              <Label>Image</Label>
               <label
                 className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                 style={{ borderColor: BORDER, color: MUTE }}
@@ -578,7 +573,7 @@ if (isPending) {
  
             {addForm.variants.length > 0 && (
               <div className="flex flex-col gap-y-3">
-                <FieldLabel>Variants</FieldLabel>
+                <Label>Variants</Label>
                 {addForm.variants.map((variant, index) => (
                   <div
                     key={index}
@@ -666,7 +661,7 @@ if (isPending) {
  
           <form onSubmit={updateItemM} className="flex flex-col gap-y-4">
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Item Name</FieldLabel>
+              <Label>Item Name</Label>
               <Input
                 placeholder="Enter item name"
                 value={updateForm.name}
@@ -683,7 +678,7 @@ if (isPending) {
             </div>
  
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Item Price</FieldLabel>
+              <Label>Item Price</Label>
               <Input
                 placeholder="Enter price"
                 type="number"
@@ -701,7 +696,7 @@ if (isPending) {
             </div>
  
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Category</FieldLabel>
+              <Label>Category</Label>
               <Input
                 placeholder="Enter category"
                 required
@@ -718,7 +713,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Stock Amount</FieldLabel>
+              <Label>Stock Amount</Label>
               <Input
                 placeholder="Enter Stock"
                 required
@@ -735,7 +730,7 @@ if (isPending) {
             </div>
  
             <div className="flex flex-col gap-y-1.5">
-              <FieldLabel>Image</FieldLabel>
+              <Label>Image</Label>
               <label
                 className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                 style={{ borderColor: BORDER, color: MUTE }}
@@ -752,7 +747,7 @@ if (isPending) {
  
             {updateForm.variants.length > 0 && (
               <div className="flex flex-col gap-y-3">
-                <FieldLabel>Variants</FieldLabel>
+                <Label>Variants</Label>
                 {updateForm.variants.map((variant, index) => (
                   <div
                     key={index}

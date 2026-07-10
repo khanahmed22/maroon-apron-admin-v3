@@ -1,9 +1,22 @@
 import { useState } from 'react'
 import { Search, ChevronDown, Settings, ShoppingCart, Package, BarChart3, Truck, Tag, Users, Folder, User, HelpCircle } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Input } from '../components/ui/input'
+import type { LucideIcon } from "lucide-react";
 
+type KnowledgeBaseItem = {
+  id: string;
+  title: string;
+  icon: LucideIcon;
+  description: string;
+  content: string | string[];
+};
 
-const knowledgeBaseItems = [
+type AccordionItemProps = {
+  item: KnowledgeBaseItem;
+  isOpen: boolean;
+  onToggle: () => void;
+};
+const knowledgeBaseItems:KnowledgeBaseItem[] = [
   {
     id: 'getting-started',
     title: 'Getting Started',
@@ -144,7 +157,7 @@ const knowledgeBaseItems = [
   },
 ]
 
-function AccordionItem({ item, isOpen, onToggle }) {
+function AccordionItem({ item, isOpen, onToggle }:AccordionItemProps) {
   const IconComponent = item.icon
 
   return (
@@ -186,7 +199,7 @@ function AccordionItem({ item, isOpen, onToggle }) {
 }
 
 export default function KnowledgeBase() {
-  const [openItem, setOpenItem] = useState('getting-started')
+  const [openItem, setOpenItem] = useState<string | null>('getting-started')
   const [searchQuery, setSearchQuery] = useState('')
   
 

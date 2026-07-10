@@ -1,13 +1,12 @@
+import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 
-import { initializePaddle } from "@paddle/paddle-js";
+let paddleInstance: Paddle | undefined;
 
-let paddleInstance = null;
-
-export async function initPaddle() {
+export async function initPaddle(): Promise<Paddle | undefined> {
   if (paddleInstance) return paddleInstance;
 
   paddleInstance = await initializePaddle({
-    environment:'sandbox',
+    environment: import.meta.env.VITE_PADDLE_ENV,
     token: import.meta.env.VITE_PADDLE_KEY,
   });
 

@@ -172,7 +172,7 @@ export default function DeliveryZones({ restId }: RestProps) {
     },
   });
 
-  // ---- Dialog open/close + save helpers ----
+ 
 
   const openAddDialog = () => {
     setEditingAreaId(null);

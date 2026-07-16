@@ -168,9 +168,7 @@ const setItemQuantity = (
             custDetails.recieveMethod === "delivery"
               ? selectedArea?.areaName ?? ""
               : "",
-          // deliveryFee is already folded into orderTotal above — this is
-          // just so the fee itself is also recorded on the order, stored
-          // as a string like every other price/amount field in the DB.
+         
           deliveryFee:
             custDetails.recieveMethod === "delivery"
               ? String(deliveryFee)
@@ -215,9 +213,7 @@ const setItemQuantity = (
       enabled: !!restId,
     });
 
-  // Selected delivery area — custDetails.deliveryArea only ever stores the
-  // areaId, this derives the full area record (name, city, fee, minOrder)
-  // from it.
+ 
   const selectedArea = deliveryList?.find(
     (area) => area.areaId === custDetails.deliveryArea
   );
@@ -226,8 +222,7 @@ const setItemQuantity = (
   const minimumOrder = Number(selectedArea?.minOrder ?? 0);
   const finalTotal = subtotal + deliveryFee;
 
-  // Per the spec: minimum order is checked against the subtotal only,
-  // never against the total after delivery fee is added.
+  
   const belowMinimumOrder =
     custDetails.recieveMethod === "delivery" &&
     !!selectedArea &&
@@ -570,7 +565,6 @@ onChange={() => setItemVariant(f.id, v.id)}
                         setCustDetails({
                           ...custDetails,
                           recieveMethod: e.target.value,
-                          // switching to pickup drops the delivery-only fields
                           deliveryArea: "",
                           custAddress: "",
                         })

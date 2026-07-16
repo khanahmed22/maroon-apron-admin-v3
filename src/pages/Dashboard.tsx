@@ -19,7 +19,7 @@ const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
 
-// Same destinations as the sidebar, minus "Home" since that's this page.
+
 const quickLinks = [
   {
     label: "Orders",

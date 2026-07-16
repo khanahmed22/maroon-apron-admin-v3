@@ -120,9 +120,9 @@ export default function Inventory({restId,restName}:restProps) {
       let publicId = "";
       
 
-      // 1. upload image first
+  
       if (file) {
-        const formData = new FormData(); //allows to create multipart form data
+        const formData = new FormData(); 
         formData.append("image", file);
         formData.append("folder", "inventory");
 
@@ -139,7 +139,7 @@ export default function Inventory({restId,restName}:restProps) {
       
       }
 
-      // 2. create inventory item
+    
       const cleanVariants = addForm.variants.filter(v => v.variantName.trim() !== "");
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {

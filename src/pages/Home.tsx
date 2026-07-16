@@ -109,12 +109,11 @@ const ACCENT = "#D6293F";
 const INK = "#171717";
 const MUTE = "#6B7280";
 const BORDER = "#E7E5E4";
-const SOFT = "#FBF7F6"; // a very light tint of the accent, not a second background
+const SOFT = "#FBF7F6"; 
 
 const DEMO_STORE_URL = "https://pizzatown.crimsoncastle.shop";
 
-// Real product footage, served straight from Cloudinary  no SDK needed,
-// just the standard delivery URL pattern.
+
 const CLOUD_NAME = "dkkvyxpdc";
 const cldVideo = (
   id: string,
@@ -137,13 +136,12 @@ const NAV_LINKS:NavLink[] = [
   { label: "FAQ", href: "#faq" },
 ];
 
-// A little warm color per card instead of one flat gray icon everywhere —
-// still built entirely around the brand accent, just less monotone.
+
 const TINTS :Tint[]= [
-  { bg: "#FFF3E8", fg: "#C2600A" }, // warm amber
-  { bg: "#EFF6FF", fg: "#2563EB" }, // sky
-  { bg: "#F3EEFF", fg: "#7C3AED" }, // violet
-  { bg: "#ECFDF5", fg: "#059669" }, // emerald
+  { bg: "#FFF3E8", fg: "#C2600A" }, 
+  { bg: "#EFF6FF", fg: "#2563EB" }, 
+  { bg: "#F3EEFF", fg: "#7C3AED" }, 
+  { bg: "#ECFDF5", fg: "#059669" }, 
 ];
 
 const PROBLEMS:Problem[] = [
@@ -187,7 +185,7 @@ const STEPS :Step[]= [
   },
 ];
 
-// Every feature now shows the real screen it's describing.
+
 const FEATURES :Feature[]= [
   {
     icon: LayoutDashboard,

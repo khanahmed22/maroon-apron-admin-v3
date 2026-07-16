@@ -34,7 +34,7 @@ interface OrderProps {
 interface CartItemSnapshot {
   dbId: string;
   name: string;
-  price: number; // unit price * quantity, per addCart in PlaceOrder
+  price: number; 
   quantity: number;
   variantName?: string;
 }
@@ -241,7 +241,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
 
   /* ---------------------- Analytics ---------------------- */
   const analyticsData = useMemo(() => {
-    // dbId -> costPrice, for computing cost of making per order line
+  
     const costByDbId: Record<string, number> = {};
     menuItems.forEach((item) => {
       costByDbId[item.id] = toNumber(item.costPrice);
@@ -256,7 +256,6 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
     orders.forEach((order) => {
       const dayKey = isoDayKey(new Date(order.createdAt));
 
-      // orderTotal already includes delivery fee (see Checkout/PlaceOrder)
       const orderRevenue = toNumber(order.orderTotal);
       const deliveryFee = toNumber(order.deliveryFee);
 
@@ -266,7 +265,6 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
       if (!dailyRevenueMap[dayKey]) dailyRevenueMap[dayKey] = 0;
       dailyRevenueMap[dayKey] += orderRevenue;
 
-      // orderDetails holds the cart array at time of purchase
       let details: CartItemSnapshot[] = [];
       if (typeof order.orderDetails === "string") {
         try { details = JSON.parse(order.orderDetails); } catch { details = []; }
@@ -277,7 +275,6 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
       details.forEach((item) => {
         const name = item.variantName ? `${item.name} (${item.variantName})` : (item.name || "Unknown Item");
         const qty = Math.max(1, toNumber(item.quantity));
-        // item.price is already unit price * quantity (see addCart)
         const itemRevenue = toNumber(item.price);
 
         const unitCost = costByDbId[item.dbId] ?? 0;
@@ -290,7 +287,6 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
       });
     });
 
-    // Profit excludes delivery fee — it's a pass-through, not margin
     const profit = totalRevenue - totalCostMaking - totalDeliveryFees;
     const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
 

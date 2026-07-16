@@ -174,22 +174,17 @@ export default function Settings({ restId }: { restId: string | null }) {
   })
   const { session, subdomain } = UserAuth()
 
-  // Free plan merchants can't set a custom domain — treat a missing plan
-  // the same as "free" so the field stays locked until we actually know
-  // the merchant is on a paid plan.
+ 
   const isFreePlan = !merchantStatus?.plan || merchantStatus.plan === "free"
 
-  // A custom domain must be the merchant's subdomain plus a TLD, e.g.
-  // subdomain "pizzatown" only allows "pizzatown.com", "pizzatown.lol", etc.
-  // — never an unrelated domain or a different prefix.
+  
   const isValidCustomDomain = (domain: string, sub?: string) => {
     if (!domain || !sub) return false
     const value = domain.trim().toLowerCase()
     const prefix = `${sub.toLowerCase()}.`
     if (!value.startsWith(prefix)) return false
     const suffix = value.slice(prefix.length)
-    // suffix must look like a real domain tail: letters/numbers/hyphens,
-    // one or more dot-separated labels (e.g. "com", "co.uk", "lol")
+   
     return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/.test(suffix)
   }
 
@@ -273,9 +268,7 @@ export default function Settings({ restId }: { restId: string | null }) {
         bannerId = uploadedBanner.publicId
       }
 
-      // Belt-and-braces: never send a custom domain change for a free-plan
-      // merchant, or one that doesn't match their subdomain, even if the
-      // disabled/validated input were somehow bypassed client-side.
+     
       const customDomain =
         isFreePlan || !isValidCustomDomain(updateRest.customDomain, subdomain)
           ? restDetails?.getRest?.customDomain ?? ""
@@ -326,7 +319,6 @@ export default function Settings({ restId }: { restId: string | null }) {
     )
   }
 
-  // Instant preview for a newly picked file, falling back to the saved URL
   const logoPreview = logoFile ? URL.createObjectURL(logoFile) : updateRest.restLogo
   const bannerPreview = bannerFile ? URL.createObjectURL(bannerFile) : updateRest.restBanner
 

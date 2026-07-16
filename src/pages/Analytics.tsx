@@ -13,7 +13,7 @@ import { TrendingUp, Package, DollarSign, ShoppingCart, RefreshCcw, CircleGauge 
 
 /* ---------------------- Types ---------------------- */
 interface AnalyticsProps {
-  restId: string | undefined;
+  restId: string | null;
 }
 
 interface OrderProps {
@@ -26,7 +26,7 @@ interface OrderProps {
   recieveMethod: string;
   status: string;
   orderTotal: number;
-  restId: string;
+  restId: string | null;
   deliveryArea: string | null;
   deliveryFee: string | null;
 }

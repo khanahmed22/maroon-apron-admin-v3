@@ -34,7 +34,7 @@ const Settings = lazy(() => import("./pages/Settings"));
 const MerchantApp = lazy(() => import("./pages/MerchantApp"));
 const DeliveryZones = lazy(()=>import("./pages/DeliveryZones"))
 const Analytics = lazy(()=>import("./pages/Analytics"))
-
+const Contact = lazy(()=>import("./pages/Contact"))
 const DeliveryPolicy = lazy(
   () => import("./policyPages/DeliveryPolicy")
 );
@@ -143,6 +143,11 @@ function App() {
           <Route
             path="/verify-email/:token"
             element={<VerifyEmail />}
+          />
+
+          <Route
+            path="/contact"
+            element={<Contact/>}
           />
           <Route
             path="/forgot-password"

@@ -32,6 +32,7 @@ import type { HTMLMotionProps } from "motion/react";
 import { UserAuth } from "../context/AuthContext";
 import type { Variants } from "motion/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { useNavigate } from "react-router";
 interface NavLink {
   label: string;
   href: string;
@@ -389,6 +390,7 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const { session } = UserAuth();
+  const navigate = useNavigate()
 
   const handleNavClick =
   (href: string) =>
@@ -473,7 +475,6 @@ export default function Home() {
 
       {/* ================= HERO ================= */}
       <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12 overflow-hidden">
-        {/* soft decorative color, not stock imagery  keeps things warm without being noisy */}
         <div
           aria-hidden
           className="absolute -top-10 -left-16 w-72 h-72 rounded-full blur-3xl opacity-40 pointer-events-none"
@@ -506,7 +507,7 @@ export default function Home() {
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <PrimaryButton>
+            <PrimaryButton onClick={()=>navigate("/register")}>
               Start now <ArrowRight size={16} />
             </PrimaryButton>
 
@@ -521,6 +522,7 @@ export default function Home() {
             src="/Cooking.lottie"
             loop
             autoplay
+          
             className="w-full max-w-[500px] h-[500px] relative z-10"
           />
         </div>
@@ -821,9 +823,9 @@ export default function Home() {
                   ))}
                 </ul>
                 {plan.highlighted ? (
-                  <PrimaryButton className="w-full justify-center">Start now</PrimaryButton>
+                  <PrimaryButton className="w-full justify-center" onClick={()=>navigate("/register")}>Start now</PrimaryButton>
                 ) : (
-                  <SecondaryButton className="w-full justify-center">Start now</SecondaryButton>
+                  <SecondaryButton className="w-full justify-center" onClick={()=>navigate("/register")}>Start now</SecondaryButton>
                 )}
               </div>
             </Reveal>
@@ -880,7 +882,7 @@ export default function Home() {
               Set up your store today.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <PrimaryButton>Start now</PrimaryButton>
+              <PrimaryButton onClick={()=>navigate("/register")}>Start now</PrimaryButton>
               <a href={DEMO_STORE_URL} target="_blank" rel="noreferrer">
                 <SecondaryButton style={{ color: "#fff", borderColor: "#3A3A3A" }}>
                   See demo store
@@ -899,7 +901,7 @@ export default function Home() {
               <h3 className="font-semibold text-base mb-1">Have questions?</h3>
               <p className="text-sm" style={{ color: MUTE }}>Send us a message and we'll get back to you.</p>
             </div>
-            <PrimaryButton>Contact us</PrimaryButton>
+            <PrimaryButton onClick={()=>navigate("/contact")}>Contact us</PrimaryButton>
           </div>
         </Reveal>
       </section>

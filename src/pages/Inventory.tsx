@@ -26,6 +26,7 @@ interface InventProps {
   id: string,
   name: string,
   price: number,
+  costPrice:string,
   variants: VariantProps[],
   imageUrl: string,
   category:string,
@@ -48,14 +49,10 @@ export default function Inventory({restId,restName}:restProps) {
   const [addForm, setAddForm] = useState({
     name: "",
     price: 0,
+    costPrice:"",
     category:"",
     stockAmount:0,
-    variants: [
-      {
-        variantName: "",
-        variantPrice: 0,
-      },
-    ],
+    variants: [] as { variantName: string; variantPrice: number }[],
   });
   
   const queryClient = useQueryClient()
@@ -68,15 +65,11 @@ export default function Inventory({restId,restName}:restProps) {
     userId: session?.id,
     name: "",
     price: 0,
+    costPrice:"",
     category:"",
     stockAmount:0,
 
-    variants: [
-      {
-        variantName: "",
-        variantPrice: 0,
-      },
-    ],
+    variants: [] as { variantName: string; variantPrice: number }[],
   });
   
   const fetchInventory = async () => {
@@ -147,7 +140,8 @@ export default function Inventory({restId,restName}:restProps) {
       }
 
       // 2. create inventory item
-     
+      const cleanVariants = addForm.variants.filter(v => v.variantName.trim() !== "");
+
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
         method: "POST",
         headers: {
@@ -156,10 +150,11 @@ export default function Inventory({restId,restName}:restProps) {
         credentials: "include",
         body: JSON.stringify({
           ...addForm,
+          variants: cleanVariants,
           imageUrl,
           publicId,
           restId,
-          restName
+          restName,
         }),
       });
 
@@ -173,14 +168,10 @@ export default function Inventory({restId,restName}:restProps) {
       setAddForm({
     name: "",
     price: 0,
+    costPrice:"",
     category:"",
     stockAmount:0,
-    variants: [
-      {
-        variantName: "",
-        variantPrice: 0,
-      },
-    ],
+    variants: [],
   })
     } catch (err) {
       console.log(err);
@@ -278,7 +269,9 @@ export default function Inventory({restId,restName}:restProps) {
         imageUrl = imageData.imageUrl;
         publicId = imageData.publicId;
       }
-     
+
+      const cleanVariants = updateForm.variants.filter(v => v.variantName.trim() !== "");
+
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
         method: "PUT",
         headers: {
@@ -287,6 +280,7 @@ export default function Inventory({restId,restName}:restProps) {
         credentials: "include",
         body: JSON.stringify({
           ...updateForm,
+          variants: cleanVariants,
           imageUrl,
           publicId,
           restId,
@@ -391,14 +385,17 @@ if (isPending) {
               />
  
               <div className="p-4 flex flex-col flex-1">
-                <div className="flex items-start justify-between gap-2 mb-1">
+                <div className="flex flex-col items-start justify-between gap-2 mb-1">
                   <span className="text-lg font-bold" style={{ color: INK }}>
                     {inv.name}
                   </span>
                   <span className="text-lg font-bold shrink-0" style={{ color: ACCENT }}>
                     Rs. {inv.price}
                   </span>
-                   <span className="text-lg font-semibold shrink-0" style={{ color: MUTE }}>
+                  <span className="text-sm font-bold shrink-0" style={{ color: ACCENT }}>
+                    Cost Price Rs. {inv.costPrice || ""}
+                  </span>
+                   <span className="text-sm font-semibold shrink-0" style={{ color: MUTE }}>
                     In Stock {inv.stockAmount || 0}
                   </span>
                 </div>
@@ -437,6 +434,7 @@ if (isPending) {
                         userId: session?.id,
                         name: inv.name,
                         price: inv.price,
+                        costPrice:inv.costPrice,
                         category: inv.category,
                         stockAmount:inv.stockAmount,
                         variants: inv.variants.map((v) => ({
@@ -516,6 +514,24 @@ if (isPending) {
                   setAddForm({
                     ...addForm,
                     price: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-y-1.5">
+              <Label>Cost Price</Label>
+              <Input
+                placeholder="Enter Cost Price"
+                type="number"
+                required
+                value={addForm.costPrice}
+                className="h-11 rounded-xl text-base"
+                style={{ borderColor: BORDER }}
+                onChange={(e) =>
+                  setAddForm({
+                    ...addForm,
+                    costPrice: e.target.value,
                   })
                 }
               />
@@ -690,6 +706,24 @@ if (isPending) {
                   setupdateForm({
                     ...updateForm,
                     price: Number(e.target.value),
+                  })
+                }
+              />
+            </div>
+
+            <div className="flex flex-col gap-y-1.5">
+              <Label>Cost Price</Label>
+              <Input
+                placeholder="Enter Cost price"
+                type="number"
+                required
+                value={updateForm.costPrice}
+                className="h-11 rounded-xl text-base"
+                style={{ borderColor: BORDER }}
+                onChange={(e) =>
+                  setupdateForm({
+                    ...updateForm,
+                    costPrice: e.target.value,
                   })
                 }
               />

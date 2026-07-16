@@ -36,7 +36,9 @@ interface OrderProps{
   recieveMethod :string,
   status: string,
   createdAt: string,
-  orderTotal:number
+  orderTotal:number,
+  deliveryArea:string,
+  deliveryFee:string
   
 }
 
@@ -79,6 +81,7 @@ export default function Orders({restId}:{restId:string | null}){
     headers: {
       "Content-Type": "application/json",
     },
+    credentials:'include',
     body: JSON.stringify({ id, status }),
   });
 
@@ -91,7 +94,7 @@ export default function Orders({restId}:{restId:string | null}){
   mutationFn: handleStatusChange,
   onSuccess: (_, variables) => {
     toast.success(`Order ${variables.status}`);
-    queryClient.invalidateQueries({queryKey:['orderData']})
+    queryClient.invalidateQueries({queryKey:['orderData',restId]})
   },
 });
 
@@ -344,6 +347,12 @@ if (isPending) {
             </div>
           ))}
         </div>
+        <div>
+          {o?.deliveryFee && <div className="flex justify-between items-center font-semibold text-sm p-2">
+            <span>Delivery Fee</span>
+            <span>Rs. {o?.deliveryFee || 0}</span>
+            </div>}
+        </div>
  
         <div
           className="flex items-center justify-between mt-3 pt-3 border-t text-lg font-bold"
@@ -482,16 +491,24 @@ function MethodBadge({ method }: { method: string }) {
               </div>
  
               <div className="mb-3">
-                <p className="font-medium text-base" style={{ color: INK }}>{o.custName}</p>
-                <p className="text-sm mt-0.5" style={{ color: MUTE }}>{o.custPhone}</p>
-                <p className="text-sm" style={{ color: MUTE }}>{o.custEmail}</p>
+                <p className="font-medium text-base" style={{ color: INK }}>Customer Name: {o.custName}</p>
+                <p className="text-sm mt-0.5" style={{ color: MUTE }}>Customer Phone: {o.custPhone}</p>
+                <p className="text-sm" style={{ color: MUTE }}>Customer Email: {o.custEmail}</p>
                 {o.custAddress && (
-                  <p className="text-sm" style={{ color: MUTE }}>{o.custAddress}</p>
+                  <p className="text-sm" style={{ color: MUTE }}>Delivery Address: {o.custAddress}</p>
                 )}
+                {o.deliveryArea && (
+                  <p className="text-sm" style={{ color: MUTE }}>Delivery Area: {o.deliveryArea}</p>
+                )}
+                {o.deliveryFee && (
+                  <p className="text-sm" style={{ color: MUTE }}>Delivery Fee: Rs.{o.deliveryFee}</p>
+                )}
+                
               </div>
  
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <MethodBadge method={o.recieveMethod} />
+                
                 <div className="flex items-center gap-4">
                   <OrderDetailsDialog o={o} />
                   <Button

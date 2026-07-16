@@ -32,6 +32,8 @@ const Inventory = lazy(() => import("./pages/Inventory"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Settings = lazy(() => import("./pages/Settings"));
 const MerchantApp = lazy(() => import("./pages/MerchantApp"));
+const DeliveryZones = lazy(()=>import("./pages/DeliveryZones"))
+const Analytics = lazy(()=>import("./pages/Analytics"))
 
 const DeliveryPolicy = lazy(
   () => import("./policyPages/DeliveryPolicy")
@@ -185,9 +187,18 @@ function App() {
                 path="/account"
                 element={<Account />}
               />
+
+               <Route
+                path="/delivery-zones"
+                element={<DeliveryZones restId={restId} />}
+              />
               <Route
                 path="/orders"
                 element={<Orders restId={restId} />}
+              />
+              <Route
+                path="/analytics"
+                element={<Analytics restId={restId} />}
               />
               <Route
                 path="/place-order"

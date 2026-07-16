@@ -12,6 +12,8 @@ import {
   Menu,
   X,
   ShieldAlert,
+  MotorbikeIcon,
+  TrendingUp
 } from "lucide-react"
 
 const ACCENT = "#D6293F"
@@ -21,9 +23,14 @@ const BORDER = "#FFFFFF"
 
 const navLinks = [
   { label: "Home", link: "/dashboard", icon: LayoutDashboard },
+     { label: "Analytics", link: "/analytics", icon: TrendingUp },
+
   { label: "Orders", link: "/orders", icon: ClipboardList },
   { label: "Place Order", link: "/place-order", icon: PlusCircle },
   { label: "Inventory", link: "/inventory", icon: Boxes },
+   { label: "Delivery Zones", link: "/delivery-zones", icon: MotorbikeIcon },
+   
+
   { label: "Customers", link: "/customers", icon: Users },
   { label: "Settings", link: "/settings", icon: Settings },
   { label: "Account", link: "/account", icon: User },

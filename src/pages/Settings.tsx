@@ -19,13 +19,30 @@ import {
   Store,
   Globe,
   Lock,
+  Palette,
 } from "lucide-react"
+import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
+import type { ThemeName } from "../lib/themes"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select"
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
 const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
+const THEME_META: Record<ThemeName, { label: string; swatch: string }> = {
+  red: { label: "Red", swatch: "oklch(0.637 0.237 25.331)" },
+  pink: { label: "Pink", swatch: "oklch(0.637 0.237 350)" },
+  blue: { label: "Blue", swatch: "oklch(0.637 0.237 255)" },
+  green: { label: "Green", swatch: "oklch(0.637 0.237 150)" },
+  purple: { label: "Purple", swatch: "oklch(0.637 0.237 300)" },
+}
 
 interface UploadResponse {
   imageUrl: string
@@ -45,7 +62,8 @@ interface RestListProps {
   metaDesc: string
   logoId: string
   bannerId: string
-  customDomain: string
+  customDomain: string,
+  restTheme: string
 }
 interface RestResponse {
   getRest: RestListProps
@@ -152,6 +170,7 @@ export default function Settings({ restId }: { restId: string | null }) {
     logoId: "",
     bannerId: "",
     customDomain: "",
+    restTheme:""
   })
   const { session, subdomain } = UserAuth()
 
@@ -217,6 +236,7 @@ export default function Settings({ restId }: { restId: string | null }) {
       logoId: restDetails.getRest.logoId ?? "",
       bannerId: restDetails.getRest.bannerId ?? "",
       customDomain: restDetails.getRest.customDomain ?? "",
+      restTheme: restDetails.getRest.restTheme ?? "",
     })
 
     setEditMode(true)
@@ -274,6 +294,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           logoId,
           bannerId,
           customDomain,
+          
         }),
       })
 
@@ -379,6 +400,8 @@ export default function Settings({ restId }: { restId: string | null }) {
             <InfoRow icon='/facebook.svg' label="Facebook" value={restDetails?.getRest?.restFB} />
             <InfoRow icon={Tag} label="Meta Title" value={restDetails?.getRest?.metaTitle} />
             <InfoRow icon={FileText} label="Meta Description" value={restDetails?.getRest?.metaDesc} />
+                        <InfoRow icon={Palette} label="Theme" value={restDetails?.getRest?.restTheme} />
+
             <InfoRow icon={Globe} label="Custom Domain" value={restDetails?.getRest?.customDomain} />
           </div>
         ) : (
@@ -401,6 +424,9 @@ export default function Settings({ restId }: { restId: string | null }) {
                       }
                     />
                   </div>
+
+                  
+                  
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon={Phone}>Phone</FieldLabel>
                     <Input
@@ -538,6 +564,32 @@ export default function Settings({ restId }: { restId: string | null }) {
                       }
                     />
                   </div>
+                  <div className="flex flex-col gap-y-1.5">
+  <FieldLabel icon={Palette}>Theme</FieldLabel>
+  <Select
+    value={updateRest.restTheme || DEFAULT_THEME}
+    onValueChange={(value) =>
+      setUpdateRest({ ...updateRest, restTheme: value as ThemeName })
+    }
+  >
+    <SelectTrigger className="h-11 rounded-xl text-base w-full">
+      <SelectValue placeholder="Select a theme" />
+    </SelectTrigger>
+    <SelectContent>
+      {THEME_NAMES.map((theme) => (
+        <SelectItem key={theme} value={theme}>
+          <span className="flex items-center gap-2">
+            <span
+              className="w-3.5 h-3.5 rounded-full border border-border shrink-0"
+              style={{ backgroundColor: THEME_META[theme].swatch }}
+            />
+            {THEME_META[theme].label}
+          </span>
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
                 </div>
               </div>
 

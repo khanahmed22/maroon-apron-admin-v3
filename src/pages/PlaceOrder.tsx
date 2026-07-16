@@ -7,6 +7,13 @@ import { Button } from "../components/ui/button.tsx";
 import { Input } from "../components/ui/input.tsx";
 import { Plus, Minus, Trash2, ShoppingBag, Store, Truck, Package ,Loader2} from "lucide-react"
 import { UserAuth } from "../context/AuthContext.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select.tsx";
 interface VariantProps {
   id: string;
   variantName: string;
@@ -33,6 +40,8 @@ interface CustomerProps {
   createdAt: Date;
   
   orderTotal: number;
+  deliveryArea:string
+  deliveryFee:string
   
 }
 
@@ -43,6 +52,14 @@ interface RestResponse{
 interface Selection {
   variantId?: string;
   quantity: number;
+}
+
+interface AreaProps {
+  areaId: string;
+  areaName: string;
+  cityName: string;
+  deliveryFee: string;
+  minOrder: string;
 }
 
 export default function PlaceOrder({ restId ,restName}:RestResponse) {
@@ -89,7 +106,9 @@ const setItemQuantity = (
     recieveMethod: "",
     status: "pending",
     createdAt: new Date(),
-  
+    deliveryArea: "",
+    deliveryFee:"",
+
     orderTotal: 0,
     
   });
@@ -121,6 +140,21 @@ const setItemQuantity = (
     ) {
       return toast.error("Fill all fields");
     }
+
+    if (custDetails.recieveMethod === "delivery") {
+      if (!custDetails.custAddress) {
+        return toast.error("Address is required for delivery");
+      }
+      if (!custDetails.deliveryArea) {
+        return toast.error("Please select a delivery area");
+      }
+      if (belowMinimumOrder) {
+        return toast.error(
+          `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`
+        );
+      }
+    }
+
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/orders`, {
       method: "POST",
       headers: {
@@ -129,7 +163,18 @@ const setItemQuantity = (
       body: JSON.stringify({
         custDetails: {
           ...custDetails,
-          orderTotal: subtotal,
+          orderTotal: finalTotal,
+          deliveryArea:
+            custDetails.recieveMethod === "delivery"
+              ? selectedArea?.areaName ?? ""
+              : "",
+          // deliveryFee is already folded into orderTotal above — this is
+          // just so the fee itself is also recorded on the order, stored
+          // as a string like every other price/amount field in the DB.
+          deliveryFee:
+            custDetails.recieveMethod === "delivery"
+              ? String(deliveryFee)
+              : "",
           restId,
           restName
         },
@@ -151,6 +196,45 @@ const setItemQuantity = (
   function generateUUID(): string {
     return uuidv4();
   }
+
+  const fetchDeliveryZones = async (): Promise<AreaProps[]> => {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/area-list/${restId}/view`
+      );
+  
+      if (!res.ok) {
+        throw new Error("Failed to fetch delivery zones");
+      }
+  
+      return res.json();
+    };
+  
+    const { data: deliveryList } = useQuery({
+      queryKey: ["deliveryZone", restId],
+      queryFn: fetchDeliveryZones,
+      enabled: !!restId,
+    });
+
+  // Selected delivery area — custDetails.deliveryArea only ever stores the
+  // areaId, this derives the full area record (name, city, fee, minOrder)
+  // from it.
+  const selectedArea = deliveryList?.find(
+    (area) => area.areaId === custDetails.deliveryArea
+  );
+
+  const deliveryFee = Number(selectedArea?.deliveryFee ?? 0);
+  const minimumOrder = Number(selectedArea?.minOrder ?? 0);
+  const finalTotal = subtotal + deliveryFee;
+
+  // Per the spec: minimum order is checked against the subtotal only,
+  // never against the total after delivery fee is added.
+  const belowMinimumOrder =
+    custDetails.recieveMethod === "delivery" &&
+    !!selectedArea &&
+    subtotal < minimumOrder;
+
+  const deliveryAreaMissing =
+    custDetails.recieveMethod === "delivery" && !custDetails.deliveryArea;
 
   const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -375,12 +459,36 @@ onChange={() => setItemVariant(f.id, v.id)}
             )}
  
             <div
-              className="flex items-center justify-between mt-4 pt-4 border-t text-lg font-bold"
+              className="flex items-center justify-between mt-4 pt-4 border-t text-base"
               style={{ borderColor: BORDER, color: INK }}
             >
               <span>Subtotal</span>
               <span>Rs. {subtotal || 0}</span>
             </div>
+
+            {custDetails.recieveMethod === "delivery" && selectedArea && (
+              <div
+                className="flex items-center justify-between mt-2 text-base"
+                style={{ color: INK }}
+              >
+                <span>Delivery Fee</span>
+                <span>Rs. {deliveryFee}</span>
+              </div>
+            )}
+
+            <div
+              className="flex items-center justify-between mt-2 pt-2 border-t text-lg font-bold"
+              style={{ borderColor: BORDER, color: INK }}
+            >
+              <span>Final Total</span>
+              <span>Rs. {finalTotal || 0}</span>
+            </div>
+
+            {belowMinimumOrder && (
+              <p className="mt-3 text-sm font-medium" style={{ color: ACCENT }}>
+                Minimum order for {selectedArea?.areaName} is Rs.{minimumOrder}
+              </p>
+            )}
           </div>
  
           <div className="bg-white rounded-2xl border p-5" style={{ borderColor: BORDER }}>
@@ -462,6 +570,9 @@ onChange={() => setItemVariant(f.id, v.id)}
                         setCustDetails({
                           ...custDetails,
                           recieveMethod: e.target.value,
+                          // switching to pickup drops the delivery-only fields
+                          deliveryArea: "",
+                          custAddress: "",
                         })
                       }
                       className="sr-only"
@@ -514,29 +625,71 @@ onChange={() => setItemVariant(f.id, v.id)}
               </div>
  
               {custDetails.recieveMethod === "delivery" && (
-                <div className="flex flex-col gap-y-1.5">
-                  <label className="text-sm font-semibold" style={{ color: INK }}>
-                    Address
-                  </label>
-                  <Input
-                    value={custDetails.custAddress}
-                    onChange={(e) =>
-                      setCustDetails({
-                        ...custDetails,
-                        custAddress: e.target.value,
-                      })
-                    }
-                    type="text"
-                    placeholder="e.g: C-423, Block 1, Gulshan"
-                    className="h-11 rounded-xl text-base"
-                    style={{ borderColor: BORDER }}
-                    required
-                  />
-                </div>
-              )}
+  <div className="flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-1.5">
+      <label
+        className="text-sm font-semibold"
+        style={{ color: INK }}
+      >
+        Address
+      </label>
+
+      <Input
+        value={custDetails.custAddress}
+        onChange={(e) =>
+          setCustDetails({
+            ...custDetails,
+            custAddress: e.target.value,
+          })
+        }
+        type="text"
+        placeholder="e.g: C-423, Block 1, Gulshan"
+        className="h-11 rounded-xl text-base"
+        style={{ borderColor: BORDER }}
+        required
+      />
+    </div>
+
+    <div className="flex flex-col gap-y-1.5">
+      <label
+        className="text-sm font-semibold"
+        style={{ color: INK }}
+      >
+        Delivery Area
+      </label>
+
+      <Select
+        value={custDetails.deliveryArea}
+        onValueChange={(value) =>
+          setCustDetails({
+            ...custDetails,
+            deliveryArea: value,
+          })
+        }
+      >
+        <SelectTrigger className="w-full h-11 rounded-xl">
+          <SelectValue placeholder="Select your delivery area" />
+        </SelectTrigger>
+
+        <SelectContent>
+          {deliveryList?.map((area) => (
+            <SelectItem
+              key={area.areaId}
+              value={area.areaId}
+            >
+              {area.areaName} ({area.cityName}) • Rs. {area.deliveryFee}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  </div>
+)}
  
               <Button
-                className="h-11 rounded-xl text-base font-semibold text-white mt-1"
+                type="submit"
+                disabled={deliveryAreaMissing || belowMinimumOrder}
+                className="h-11 rounded-xl text-base font-semibold text-white mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: ACCENT }}
               >
                 Place Order

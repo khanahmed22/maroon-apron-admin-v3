@@ -9,7 +9,7 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-import { TrendingUp, Package, DollarSign, ShoppingCart, RefreshCcw, CircleGauge } from "lucide-react";
+import { TrendingUp, Package, DollarSign, ShoppingCart, RefreshCcw } from "lucide-react";
 
 /* ---------------------- Types ---------------------- */
 interface AnalyticsProps {

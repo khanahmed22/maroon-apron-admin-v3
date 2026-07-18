@@ -45,6 +45,8 @@ export default function DeliveryZones({ restId }: RestProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const INK = "#171717"
+
 
   const fetchDeliveryZones = async (): Promise<AreaProps[]> => {
     const res = await fetch(
@@ -216,9 +218,11 @@ export default function DeliveryZones({ restId }: RestProps) {
   }
 
   return (
-    <div className="space-y-6 p-5">
+    <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold">Delivery Zones</h2>
+         <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>
+        Delivery Zones
+      </h1>
         <Button
           onClick={openAddDialog}
           className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90"

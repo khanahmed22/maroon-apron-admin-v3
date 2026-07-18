@@ -35,6 +35,7 @@ const MerchantApp = lazy(() => import("./pages/MerchantApp"));
 const DeliveryZones = lazy(()=>import("./pages/DeliveryZones"))
 const Analytics = lazy(()=>import("./pages/Analytics"))
 const Contact = lazy(()=>import("./pages/Contact"))
+const Coupon = lazy(()=>import("./pages/Coupon"))
 const DeliveryPolicy = lazy(
   () => import("./policyPages/DeliveryPolicy")
 );
@@ -222,6 +223,11 @@ function App() {
                     restId={restId}
                   />
                 }
+              />
+
+              <Route
+                path="/coupon"
+                element={<Coupon restId={restId} />}
               />
               <Route
                 path="/customers"

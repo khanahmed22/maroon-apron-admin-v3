@@ -5,7 +5,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "../components/ui/button.tsx";
 import { Input } from "../components/ui/input.tsx";
-import { Plus, Minus, Trash2, ShoppingBag, Store, Truck, Package ,Loader2} from "lucide-react"
+import { Plus, Minus, Trash2, ShoppingBag, Store, Truck, Package, Loader2, Tag, X } from "lucide-react"
 import { UserAuth } from "../context/AuthContext.tsx";
 import {
   Select,
@@ -62,6 +62,14 @@ interface AreaProps {
   minOrder: string;
 }
 
+// Result of a successful /coupons/validate call — read-only, nothing is
+// recorded server-side until the order is actually placed.
+interface AppliedCoupon {
+  code: string;
+  couponId: string;
+  discount: number;
+}
+
 export default function PlaceOrder({ restId ,restName}:RestResponse) {
   const { cart, addCart, clearCart, deleteCart } = useCart();
 const [selections, setSelections] = useState<Record<string, Selection>>({});
@@ -112,6 +120,59 @@ const setItemQuantity = (
     orderTotal: 0,
     
   });
+
+  // ================= COUPON =================
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    const trimmedCode = couponCode.trim().toUpperCase();
+    if (!trimmedCode) return;
+
+    if (!custDetails.custEmail) {
+      toast.error("Enter your email above before applying a coupon");
+      return;
+    }
+    if (!restId || subtotal <= 0) return;
+
+    setApplyingCoupon(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/coupons/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: trimmedCode,
+          cartTotal: subtotal,
+          userId: custDetails.custEmail,
+          restId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Invalid coupon");
+        return;
+      }
+
+      setAppliedCoupon({
+        code: trimmedCode,
+        couponId: data.couponId,
+        discount: data.discount,
+      });
+      toast.success(`"${trimmedCode}" applied`);
+    } catch {
+      toast.error("Failed to apply coupon");
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+  };
 
   const fetchInventory = async () => {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory/${subdomain}`, {
@@ -177,9 +238,22 @@ const setItemQuantity = (
           restName
         },
         cart,
+        // The order endpoint should redeem this (create a CouponUsage row
+        // + increment Coupon.usedCount) once the order is actually saved —
+        // see redeemCoupon() in couponController.ts. Nothing has been
+        // recorded for this coupon yet at this point.
+        coupon: appliedCoupon
+          ? {
+              couponId: appliedCoupon.couponId,
+              code: appliedCoupon.code,
+              discount: appliedCoupon.discount,
+            }
+          : null,
       }),
     });
     clearCart();
+    setAppliedCoupon(null);
+    setCouponCode("");
     return res.json();
   };
 
@@ -220,7 +294,8 @@ const setItemQuantity = (
 
   const deliveryFee = Number(selectedArea?.deliveryFee ?? 0);
   const minimumOrder = Number(selectedArea?.minOrder ?? 0);
-  const finalTotal = subtotal + deliveryFee;
+  const discountAmount = appliedCoupon?.discount ?? 0;
+  const finalTotal = Math.max(0, subtotal + deliveryFee - discountAmount);
 
   
   const belowMinimumOrder =
@@ -236,6 +311,7 @@ const INK = "#171717"
 const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
+const SUCCESS = "#16A34A"
 
  if (isPending) {
     return (
@@ -413,7 +489,10 @@ onChange={() => setItemVariant(f.id, v.id)}
             <button
               className="mb-4 text-base font-semibold px-4 py-2 rounded-full border"
               style={{ borderColor: BORDER, color: INK }}
-              onClick={() => clearCart()}
+              onClick={() => {
+                clearCart()
+                handleRemoveCoupon()
+              }}
             >
               Clear Cart
             </button>
@@ -452,6 +531,53 @@ onChange={() => setItemVariant(f.id, v.id)}
                 nothing in cart
               </p>
             )}
+
+            {/* ================= COUPON CODE ================= */}
+            {cart?.length > 0 && (
+              <div className="mt-4 pt-4 border-t" style={{ borderColor: BORDER }}>
+                <label className="text-sm font-semibold flex items-center gap-1.5" style={{ color: INK }}>
+                  <Tag className="w-4 h-4" style={{ color: MUTE }} />
+                  Coupon Code
+                </label>
+
+                {appliedCoupon ? (
+                  <div
+                    className="flex items-center justify-between mt-1.5 rounded-xl border px-3 py-2.5"
+                    style={{ borderColor: ACCENT, backgroundColor: SOFT }}
+                  >
+                    <span className="text-sm font-semibold" style={{ color: ACCENT }}>
+                      {appliedCoupon.code} · Rs. {appliedCoupon.discount} off
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      aria-label="Remove coupon"
+                    >
+                      <X className="w-4 h-4" style={{ color: MUTE }} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 mt-1.5">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="e.g. SAVE20"
+                      className="h-11 rounded-xl text-base uppercase"
+                      style={{ borderColor: BORDER }}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={applyingCoupon || !couponCode.trim()}
+                      className="h-11 rounded-xl text-white shrink-0 disabled:opacity-60"
+                      style={{ backgroundColor: ACCENT }}
+                    >
+                      {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
  
             <div
               className="flex items-center justify-between mt-4 pt-4 border-t text-base"
@@ -468,6 +594,16 @@ onChange={() => setItemVariant(f.id, v.id)}
               >
                 <span>Delivery Fee</span>
                 <span>Rs. {deliveryFee}</span>
+              </div>
+            )}
+
+            {appliedCoupon && (
+              <div
+                className="flex items-center justify-between mt-2 text-base font-medium"
+                style={{ color: SUCCESS }}
+              >
+                <span>Discount ({appliedCoupon.code})</span>
+                <span>- Rs. {appliedCoupon.discount}</span>
               </div>
             )}
 

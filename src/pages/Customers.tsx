@@ -59,9 +59,9 @@ export default function Customers({ restId }: RestResponse) {
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-2 mb-6">
-          <Users className="w-6 h-6" style={{ color: ACCENT }} />
+      <div className=" ">
+        <div className="flex items-start justify-start gap-2 mb-6">
+          
           <h1 className="text-3xl font-extrabold" style={{ color: INK }}>
             Your Customers
           </h1>

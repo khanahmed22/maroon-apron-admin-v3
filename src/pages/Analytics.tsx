@@ -334,7 +334,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
 
   /* ---------------------- UI ---------------------- */
   return (
-    <div className="min-h-screen bg-analytics-bg text-analytics-text p-2">
+    <div className="min-h-screen bg-analytics-bg text-analytics-text p-4 sm:p-6">
 
       <div className="border-b border-analytics-border bg-analytics-card/50 backdrop-blur">
         <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>

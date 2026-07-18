@@ -13,7 +13,8 @@ import {
   X,
   ShieldAlert,
   MotorbikeIcon,
-  TrendingUp
+  TrendingUp,
+  Ticket
 } from "lucide-react"
 
 const ACCENT = "#D6293F"
@@ -30,7 +31,7 @@ const navLinks = [
   { label: "Inventory", link: "/inventory", icon: Boxes },
    { label: "Delivery Zones", link: "/delivery-zones", icon: MotorbikeIcon },
    
-
+  { label: "Coupons", link: "/coupon", icon: Ticket },
   { label: "Customers", link: "/customers", icon: Users },
   { label: "Settings", link: "/settings", icon: Settings },
   { label: "Account", link: "/account", icon: User },

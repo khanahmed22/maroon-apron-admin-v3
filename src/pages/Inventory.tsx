@@ -379,7 +379,7 @@ if (isPending) {
               style={{ borderColor: BORDER }}
             >
               <img
-                src={inv?.imageUrl || "https://placehold.co/300x300"}
+                src={inv?.imageUrl || "/cc.jpg"}
                 alt={inv.name}
                 className="w-full h-44 object-cover"
               />

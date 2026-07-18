@@ -20,6 +20,7 @@ import {
   Globe,
   Lock,
   Palette,
+  PartyPopper,
 } from "lucide-react"
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
 import type { ThemeName } from "../lib/themes"
@@ -53,6 +54,7 @@ interface RestListProps {
   restName: string
   restPhone: string
   restEmail: string
+  restAnnouncement:string,
   restAddress: string
   restLogo: string
   restBanner: string
@@ -160,6 +162,7 @@ export default function Settings({ restId }: { restId: string | null }) {
     restName: "",
     restPhone: "",
     restEmail: "",
+    restAnnouncement:"",
     restAddress: "",
     restLogo: "",
     restBanner: "",
@@ -221,6 +224,7 @@ export default function Settings({ restId }: { restId: string | null }) {
       restName: restDetails.getRest.restName,
       restPhone: restDetails.getRest.restPhone ?? "",
       restEmail: restDetails.getRest.restEmail ?? "",
+      restAnnouncement: restDetails.getRest.restAnnouncement ?? "",
       restAddress: restDetails.getRest.restAddress ?? "",
       restLogo: restDetails.getRest.restLogo ?? "",
       restBanner: restDetails.getRest.restBanner ?? "",
@@ -393,7 +397,7 @@ export default function Settings({ restId }: { restId: string | null }) {
             <InfoRow icon={Tag} label="Meta Title" value={restDetails?.getRest?.metaTitle} />
             <InfoRow icon={FileText} label="Meta Description" value={restDetails?.getRest?.metaDesc} />
                         <InfoRow icon={Palette} label="Theme" value={restDetails?.getRest?.restTheme} />
-
+            <InfoRow icon={PartyPopper} label="Announcement" value={restDetails?.getRest?.restAnnouncement} />
             <InfoRow icon={Globe} label="Custom Domain" value={restDetails?.getRest?.customDomain} />
           </div>
         ) : (
@@ -418,7 +422,19 @@ export default function Settings({ restId }: { restId: string | null }) {
                   </div>
 
                   
-                  
+                  <div className="flex flex-col gap-y-1.5">
+                    <FieldLabel icon={PartyPopper}>Announcement</FieldLabel>
+                    <Input
+                      type="text"
+                      placeholder="Text here will show on top of store"
+                      value={updateRest.restAnnouncement}
+                      className="h-11 rounded-xl text-base"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) =>
+                        setUpdateRest({ ...updateRest, restAnnouncement:e.target.value })
+                      }
+                    />
+                  </div>
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon={Phone}>Phone</FieldLabel>
                     <Input

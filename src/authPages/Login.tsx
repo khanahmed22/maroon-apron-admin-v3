@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router"
 import { UserAuth } from "../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
-
+import { toast } from "sonner";
 
 export default function Login(){
   const {session,checkAuth} = UserAuth()
@@ -41,6 +41,7 @@ const SOFT = "#FBF7F6"
   } 
     
     catch(err){
+      toast.error('Invalid Email or address')
       console.log(err)
       
     }

@@ -62,8 +62,7 @@ interface AreaProps {
   minOrder: string;
 }
 
-// Result of a successful /coupons/validate call — read-only, nothing is
-// recorded server-side until the order is actually placed.
+
 interface AppliedCoupon {
   code: string;
   couponId: string;
@@ -121,7 +120,7 @@ const setItemQuantity = (
     
   });
 
-  // ================= COUPON =================
+
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
@@ -238,10 +237,6 @@ const setItemQuantity = (
           restName
         },
         cart,
-        // The order endpoint should redeem this (create a CouponUsage row
-        // + increment Coupon.usedCount) once the order is actually saved —
-        // see redeemCoupon() in couponController.ts. Nothing has been
-        // recorded for this coupon yet at this point.
         coupon: appliedCoupon
           ? {
               couponId: appliedCoupon.couponId,
@@ -343,7 +338,7 @@ const SUCCESS = "#16A34A"
                   style={{ borderColor: BORDER }}
                 >
                   <img
-                    src={f.imageUrl || "https://placehold.co/300x300"}
+                    src={f.imageUrl || "/cc.jpg"}
                     alt={f.name}
                     className="w-full h-40 object-cover"
                   />

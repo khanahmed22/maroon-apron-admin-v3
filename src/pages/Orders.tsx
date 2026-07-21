@@ -24,6 +24,7 @@ interface CartItem {
   variantId?: string;
   variantName?: string;
   variantPrice?: number;
+  quantity?:number
 }
 interface OrderProps{
   id: string ,
@@ -40,6 +41,15 @@ interface OrderProps{
   deliveryArea:string,
   deliveryFee:string
   
+}
+
+interface InvoiceItem {
+  name: string;
+  quantity?: number;
+  price?: number;
+  variantPrice?: number;
+  
+  variantName?: string;
 }
 
 export default function Orders({restId}:{restId:string | null}){
@@ -193,12 +203,12 @@ const handlePrint = async (orderNumber: string) => {
 
     y += 5;
 
-    const items =
+    const items:InvoiceItem[] =
       typeof receipt.orderDetails === "string"
         ? JSON.parse(receipt.orderDetails)
         : receipt.orderDetails ?? [];
 
-    items.forEach((item: any) => {
+    items.forEach((item) => {
       const quantity = item.quantity ?? 1;
       const unitPrice = item.variantPrice ?? item.price ?? 0;
       const total = unitPrice * quantity;
@@ -298,7 +308,7 @@ if (isPending) {
     )
   }
 
-  function OrderDetailsDialog({ o }: { o: any }) {
+  function OrderDetailsDialog({ o }: { o: OrderProps }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -306,7 +316,7 @@ if (isPending) {
           className="inline-flex items-center gap-1.5 text-base font-medium hover:underline"
           style={{ color: ACCENT }}
         >
-          <Eye className="w-[18px] h-[18px]" />
+          <Eye className="w-4.5 h-4.5" />
           View
         </button>
       </DialogTrigger>
@@ -322,7 +332,7 @@ if (isPending) {
         </DialogHeader>
  
         <div className="space-y-2.5">
-          {o.orderDetails.map((c: any, index: number) => (
+          {o.orderDetails.map((c: CartItem, index: number) => (
             <div
               key={index}
               className="flex items-center justify-between gap-3 rounded-xl border p-3.5"
@@ -342,8 +352,12 @@ if (isPending) {
                 )}
               </div>
               <span className="font-semibold text-base shrink-0" style={{ color: INK }}>
+                Qty. {c.quantity}
+              </span>
+              <span className="font-semibold text-base shrink-0" style={{ color: INK }}>
                 Rs. {c.price}
               </span>
+
             </div>
           ))}
         </div>
@@ -366,7 +380,7 @@ if (isPending) {
   )
 }
  
-function StatusSelect({ o }: { o: any }) {
+function StatusSelect({ o }: { o: OrderProps }) {
   const statusStyle = STATUS_STYLES[o.status] ?? { bg: SOFT, fg: MUTE }
   return (
     <select
@@ -417,7 +431,7 @@ function MethodBadge({ method }: { method: string }) {
   <div className="flex flex-col sm:flex-row gap-3">
     <div className="relative flex-1">
       <Search
-        className="w-[18px] h-[18px] absolute left-4 top-1/2 -translate-y-1/2"
+        className="w-4.5 h-4.5 absolute left-4 top-1/2 -translate-y-1/2"
         style={{ color: MUTE }}
       />
       <Input

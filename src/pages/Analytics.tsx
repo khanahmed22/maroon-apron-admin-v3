@@ -11,7 +11,6 @@ import {
 
 import { TrendingUp, Package, DollarSign, ShoppingCart, RefreshCcw } from "lucide-react";
 
-/* ---------------------- Types ---------------------- */
 interface AnalyticsProps {
   restId: string | null;
 }
@@ -75,7 +74,6 @@ interface InventoryStatus {
   price: number;
 }
 
-/* ---------------------- Helpers ---------------------- */
 function isoDayKey(d: Date): string {
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -111,7 +109,6 @@ function formatMoney(amount: number): string {
   })}`;
 }
 
-/* ---------------------- KPI Card ---------------------- */
 interface KPICardProps {
   title: string;
   value: string;
@@ -125,6 +122,13 @@ interface InventoryResponse {
   source: string;
   data: InventProps[];
 }
+
+const ACCENT = "#D6293F"
+const MUTE = "#6B7280"
+const BORDER = "#E7E5E4"
+const SOFT = "#FBF7F6"
+const KPI_TINTS = ["#D6293F", "#C2600A", "#2563EB", "#7C3AED", "#059669"]
+
 
 function KPICard({ title, value, icon, trend, bgColor }: KPICardProps) {
   return (
@@ -145,10 +149,10 @@ function KPICard({ title, value, icon, trend, bgColor }: KPICardProps) {
   );
 }
 
-/* ---------------------- Component ---------------------- */
+
 export default function Analytics({ restId }: AnalyticsProps) {
 
-  /* ---------------------- Date range state ---------------------- */
+
   const [rangePreset, setRangePreset] = useState<string>("7d");
   const [startDate, setStartDate] = useState<string>(() => {
     const d = new Date();
@@ -157,7 +161,7 @@ export default function Analytics({ restId }: AnalyticsProps) {
   });
   const [endDate, setEndDate] = useState<string>(() => isoDayKey(new Date()));
 
-  /* ---------------------- Data state ---------------------- */
+
   const [loading, setLoading] = useState<boolean>(false);
   const [orders, setOrders] = useState<OrderProps[]>([]);
   const [menuItems, setMenuItems] = useState<InventProps[]>([]);
@@ -165,7 +169,7 @@ export default function Analytics({ restId }: AnalyticsProps) {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  /* ---------------------- Fetch orders + inventory ---------------------- */
+
   const fetchOrdersAndMenu = async () => {
     if (!restId) {
       setError("Missing restaurant");
@@ -207,7 +211,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
     if (restId) fetchOrdersAndMenu();
   }, [restId, startDate, endDate]);
 
-  /* ---------------------- Presets ---------------------- */
+
   const applyPreset = (preset: string) => {
     setRangePreset(preset);
     const now = new Date();
@@ -239,7 +243,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
     }
   };
 
-  /* ---------------------- Analytics ---------------------- */
+  
   const analyticsData = useMemo(() => {
   
     const costByDbId: Record<string, number> = {};
@@ -332,155 +336,273 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
   const INK = "#171717"
 
 
-  /* ---------------------- UI ---------------------- */
+  
   return (
-    <div className="min-h-screen bg-analytics-bg text-analytics-text p-4 sm:p-6">
-
-      <div className="border-b border-analytics-border bg-analytics-card/50 backdrop-blur">
-        <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>
-        Analytics
-      </h1>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <Button variant="outline" onClick={fetchOrdersAndMenu} disabled={loading} className="gap-2 w-fit bg-transparent">
-            <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
+     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
+      <div className="max-w-7xl mx-auto">
+      
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h1 className="text-3xl font-extrabold" style={{ color: INK }}>
+            Analytics
+          </h1>
+          <Button
+            variant="outline"
+            onClick={fetchOrdersAndMenu}
+            disabled={loading}
+            className="gap-2 w-fit rounded-xl h-11 text-base bg-white"
+          >
+            <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} style={{ color: ACCENT }} />
+            Refresh
           </Button>
         </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Date Filters */}
-        <Card className="bg-analytics-card border-analytics-border rounded-2xl mb-8">
-          <CardContent className="p-4 sm:p-5">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-              <div className="lg:col-span-3">
-                <div className="text-xs text-analytics-muted mb-1">Range</div>
-                <Select value={rangePreset} onValueChange={applyPreset}>
-                  <SelectTrigger className="rounded-xl bg-analytics-bg border-analytics-border text-analytics-text">
-                    <SelectValue placeholder="Select range" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="7d">Last 7 days</SelectItem>
-                    <SelectItem value="30d">Last 30 days</SelectItem>
-                    <SelectItem value="month">This month</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="lg:col-span-3">
-                <div className="text-xs text-analytics-muted mb-1">Start Date</div>
-                <Input type="date" value={startDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)} className="rounded-xl bg-analytics-bg border-analytics-border text-analytics-text" />
-              </div>
-
-              <div className="lg:col-span-3">
-                <div className="text-xs text-analytics-muted mb-1">End Date</div>
-                <Input type="date" value={endDate} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)} className="rounded-xl bg-analytics-bg border-analytics-border text-analytics-text" />
-              </div>
-
-              <div className="lg:col-span-3 flex items-end">
-                <Button onClick={fetchOrdersAndMenu} disabled={loading} className="w-fit btn-accent">{loading ? "Loading..." : "Apply"}</Button>
-              </div>
+ 
+        <div className="bg-white rounded-2xl border p-4 sm:p-5 mb-8" style={{ borderColor: BORDER }}>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            <div className="lg:col-span-3">
+              <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>Range</div>
+              <Select value={rangePreset} onValueChange={applyPreset}>
+                <SelectTrigger className="rounded-xl h-11 text-base" style={{ borderColor: BORDER }}>
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="today">Today</SelectItem>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="month">This month</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
-          </CardContent>
-        </Card>
-
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-8">
-          <KPICard title="Total Revenue" value={formatMoney(totalRevenue)} icon={<DollarSign className="w-5 h-5 md:w-6 md:h-6" />} trend="" bgColor="#FF6B6B" />
-          <KPICard title="Total Orders" value={totalOrders.toString()} icon={<ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />} trend="Orders in selected range" bgColor="#4ECDC4" />
-          <KPICard title="Average Order Value" value={formatMoney(averageOrderValue)} icon={<TrendingUp className="w-5 h-5 md:w-6 md:h-6" />} trend="Revenue / Orders" bgColor="#45B7D1" />
-          <KPICard title="Profit Margin" value={`${profitMargin.toFixed(1)}%`} icon={<Package className="w-5 h-5 md:w-6 md:h-6" />} trend="Based on actual costs" bgColor="#FFA07A" />
-          <KPICard title="Actual Profit" value={formatMoney(profit)} icon={<DollarSign className="w-5 h-5 md:w-6 md:h-6" />} trend="Revenue - Cost of Making - Delivery Fees" bgColor="#4CAF50" />
+ 
+            <div className="lg:col-span-3">
+              <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>Start Date</div>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)}
+                className="rounded-xl h-11 text-base"
+                style={{ borderColor: BORDER }}
+              />
+            </div>
+ 
+            <div className="lg:col-span-3">
+              <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>End Date</div>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
+                className="rounded-xl h-11 text-base"
+                style={{ borderColor: BORDER }}
+              />
+            </div>
+ 
+            <div className="lg:col-span-3 flex items-end">
+              <Button
+                onClick={fetchOrdersAndMenu}
+                disabled={loading}
+                className="w-fit h-11 rounded-xl text-base text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {loading ? "Loading..." : "Apply"}
+              </Button>
+            </div>
+          </div>
+          {error && (
+            <p className="text-sm mt-3 font-medium" style={{ color: ACCENT }}>
+              {error}
+            </p>
+          )}
         </div>
-
-        {/* Tabs */}
+ 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-8">
+          <KPICard
+            title="Total Revenue"
+            value={formatMoney(totalRevenue)}
+            icon={<DollarSign className="w-5 h-5" />}
+            trend=""
+            bgColor={KPI_TINTS[0]}
+          />
+          <KPICard
+            title="Total Orders"
+            value={totalOrders.toString()}
+            icon={<ShoppingCart className="w-5 h-5" />}
+            trend="Orders in selected range"
+            bgColor={KPI_TINTS[1]}
+          />
+          <KPICard
+            title="Average Order Value"
+            value={formatMoney(averageOrderValue)}
+            icon={<TrendingUp className="w-5 h-5" />}
+            trend="Revenue / Orders"
+            bgColor={KPI_TINTS[2]}
+          />
+          <KPICard
+            title="Profit Margin"
+            value={`${profitMargin.toFixed(1)}%`}
+            icon={<Package className="w-5 h-5" />}
+            trend="Based on actual costs"
+            bgColor={KPI_TINTS[3]}
+          />
+          <KPICard
+            title="Actual Profit"
+            value={formatMoney(profit)}
+            icon={<DollarSign className="w-5 h-5" />}
+            trend="Revenue - Cost of Making - Delivery Fees"
+            bgColor={KPI_TINTS[4]}
+          />
+        </div>
+ 
         <Tabs defaultValue="revenue" className="space-y-6">
-          <TabsList className="grid grid-cols-3 w-full border border-zinc-800 rounded-lg">
-            <TabsTrigger value="revenue" className="rounded-md text-zinc-900 data-[state=active]:bg-red-500 data-[state=active]:text-white">Revenue</TabsTrigger>
-            <TabsTrigger value="items" className="rounded-md text-zinc-900 data-[state=active]:bg-red-500 data-[state=active]:text-white">Top Items</TabsTrigger>
-            <TabsTrigger value="inventory" className="rounded-md text-zinc-900 data-[state=active]:bg-red-500 data-[state=active]:text-white">Inventory</TabsTrigger>
+          <TabsList className="bg-white border p-1.5 rounded-xl h-auto gap-1 w-fit" style={{ borderColor: BORDER }}>
+            <TabsTrigger
+              value="revenue"
+              className="rounded-lg text-base font-medium px-5 py-2.5 data-[state=active]:text-white"
+              style={{ color: MUTE }}
+            >
+              Revenue
+            </TabsTrigger>
+            <TabsTrigger
+              value="items"
+              className="rounded-lg text-base font-medium px-5 py-2.5 data-[state=active]:text-white"
+              style={{ color: MUTE }}
+            >
+              Top Items
+            </TabsTrigger>
+            <TabsTrigger
+              value="inventory"
+              className="rounded-lg text-base font-medium px-5 py-2.5 data-[state=active]:text-white"
+              style={{ color: MUTE }}
+            >
+              Inventory
+            </TabsTrigger>
           </TabsList>
-
+ 
           <TabsContent value="revenue">
-            <Card className="bg-analytics-card border-analytics-border">
-              <CardHeader><CardTitle className="text-analytics-text">Revenue Over Time</CardTitle></CardHeader>
+            <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>
+              <CardHeader>
+                <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+                  Revenue Over Time
+                </CardTitle>
+              </CardHeader>
               <CardContent>
                 <div className="w-full h-80 sm:h-96">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueByDay}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--analytics-border)" />
-                      <XAxis dataKey="date" stroke="var(--analytics-muted)" style={{ fontSize: "12px" }} />
-                      <YAxis stroke="var(--analytics-muted)" style={{ fontSize: "12px" }} />
-                      <Tooltip contentStyle={{ backgroundColor: "var(--analytics-card)", border: "1px solid var(--analytics-border)", borderRadius: "8px" }} labelStyle={{ color: "var(--analytics-text)" }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
+                      <XAxis dataKey="date" stroke={MUTE} style={{ fontSize: "12px" }} />
+                      <YAxis stroke={MUTE} style={{ fontSize: "12px" }} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "12px" }}
+                        labelStyle={{ color: INK }}
+                      />
                       <Legend />
-                      <Line type="monotone" dataKey="revenue" stroke="#FF6B6B" strokeWidth={2} dot={false} isAnimationActive={false} />
+                      <Line type="monotone" dataKey="revenue" stroke={ACCENT} strokeWidth={2} dot={false} isAnimationActive={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-
+ 
           <TabsContent value="items">
-            <Card className="bg-analytics-card border-analytics-border">
-              <CardHeader><CardTitle className="text-analytics-text">Top Selling Items</CardTitle></CardHeader>
+            <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>
+              <CardHeader>
+                <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+                  Top Selling Items
+                </CardTitle>
+              </CardHeader>
               <CardContent>
                 <div className="w-full h-80 sm:h-96">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topItems}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--analytics-border)" />
-                      <XAxis dataKey="name" stroke="var(--analytics-muted)" angle={-45} textAnchor="end" height={80} style={{ fontSize: "12px" }} />
-                      <YAxis stroke="var(--analytics-muted)" style={{ fontSize: "12px" }} />
-                      <Tooltip contentStyle={{ backgroundColor: "var(--analytics-card)", border: "1px solid var(--analytics-border)", borderRadius: "8px" }} labelStyle={{ color: "var(--analytics-text)" }} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
+                      <XAxis dataKey="name" stroke={MUTE} angle={-45} textAnchor="end" height={80} style={{ fontSize: "12px" }} />
+                      <YAxis stroke={MUTE} style={{ fontSize: "12px" }} />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "12px" }}
+                        labelStyle={{ color: INK }}
+                      />
                       <Legend />
-                      <Bar dataKey="revenue" fill="#4ECDC4" isAnimationActive={false} />
+                      <Bar dataKey="revenue" fill={ACCENT} radius={[6, 6, 0, 0]} isAnimationActive={false} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-
+ 
           <TabsContent value="inventory">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">
-                <Card className="bg-analytics-card border-analytics-border h-full">
-                  <CardHeader><CardTitle className="text-analytics-text">Stock Distribution</CardTitle></CardHeader>
+                <Card className="bg-white rounded-2xl h-full" style={{ borderColor: BORDER }}>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+                      Stock Distribution
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent>
                     <div className="w-full h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
-                          <Pie data={inventoryStatus.slice(0, 5)} cx="50%" cy="50%" outerRadius={90} dataKey="stockAmount" nameKey="name"
-                            label={({ name, value }) => `${String(name).slice(0, 10)}: ${value}`}>
+                          <Pie
+                            data={inventoryStatus.slice(0, 5)}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={90}
+                            dataKey="stockAmount"
+                            nameKey="name"
+                            label={({ name, value }) => `${String(name).slice(0, 10)}: ${value}`}
+                          >
                             {inventoryStatus.slice(0, 5).map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                           </Pie>
-                          <Tooltip contentStyle={{ backgroundColor: "var(--analytics-card)", border: "1px solid var(--analytics-border)", borderRadius: "8px" }} labelStyle={{ color: "var(--analytics-text)" }} />
+                          <Tooltip
+                            contentStyle={{ backgroundColor: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "12px" }}
+                            labelStyle={{ color: INK }}
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
                   </CardContent>
                 </Card>
               </div>
+ 
               <div className="lg:col-span-2">
-                <Card className="bg-analytics-card border-analytics-border">
-                  <CardHeader><CardTitle className="text-analytics-text">Stock Levels</CardTitle></CardHeader>
+                <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+                      Stock Levels
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent>
-                    <div className="space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
+                    <div className="space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
                       {inventoryStatus.map((item, index) => (
-                        <div key={index} className="bg-analytics-bg rounded-lg p-4 border border-analytics-border">
+                        <div
+                          key={index}
+                          className="rounded-xl p-4 border"
+                          style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                        >
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <p className="text-analytics-text font-semibold text-sm sm:text-base">{item.name}</p>
-                              <p className="text-analytics-muted text-xs sm:text-sm">{item.category}</p>
+                              <p className="font-semibold text-sm sm:text-base" style={{ color: INK }}>
+                                {item.name}
+                              </p>
+                              <p className="text-xs sm:text-sm" style={{ color: MUTE }}>
+                                {item.category}
+                              </p>
                             </div>
-                            <span className="text-analytics-accent font-bold text-sm sm:text-base">{item.stockAmount} units</span>
+                            <span className="font-bold text-sm sm:text-base" style={{ color: ACCENT }}>
+                              {item.stockAmount} units
+                            </span>
                           </div>
-                          <div className="w-full bg-analytics-border rounded-full h-2">
-                            <div className="bg-gradient-to-r from-analytics-accent-1 to-analytics-accent-2 h-2 rounded-full"
-                              style={{ width: `${Math.min((item.stockAmount / 100) * 100, 100)}%` }} />
+                          <div className="w-full rounded-full h-1.5" style={{ backgroundColor: BORDER }}>
+                            <div
+                              className="h-1.5 rounded-full"
+                              style={{
+                                width: `${Math.min((item.stockAmount / 100) * 100, 100)}%`,
+                                backgroundColor: ACCENT,
+                              }}
+                            />
                           </div>
                         </div>
                       ))}

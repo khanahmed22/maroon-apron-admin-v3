@@ -15,13 +15,14 @@ import { toast, Toaster } from "sonner";
 import { socket } from "./lib/socket";
 import { useQueryClient } from "@tanstack/react-query";
 import ScrollToTop from "./lib/ScrollToTop";
-
-/* Lazy Loaded Pages */
+import useSound from "use-sound";
+import { notif } from "./zustand/notifStore";
 const Login = lazy(() => import("./authPages/Login"));
 const Register = lazy(() => import("./authPages/Register"));
 const VerifyEmail = lazy(() => import("./authPages/VerifyEmail"));
 const ForgotPassword = lazy(() => import("./authPages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./authPages/ResetPassword"));
+
 
 const Home = lazy(() => import("./pages/Home"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -36,6 +37,7 @@ const DeliveryZones = lazy(()=>import("./pages/DeliveryZones"))
 const Analytics = lazy(()=>import("./pages/Analytics"))
 const Contact = lazy(()=>import("./pages/Contact"))
 const Coupon = lazy(()=>import("./pages/Coupon"))
+const NotFound = lazy(()=>import("./pages/NotFound"))
 const DeliveryPolicy = lazy(
   () => import("./policyPages/DeliveryPolicy")
 );
@@ -70,7 +72,7 @@ function PageLoader() {
   );
 }
 
-/* 🔒 Auth Guard */
+
 function ProtectedRoute() {
   const { session, loading } = UserAuth();
 
@@ -85,7 +87,7 @@ function ProtectedRoute() {
   return <Outlet />;
 }
 
-/* 🧱 Layout */
+
 function AuthLayout() {
   return (
     <div className="flex max-md:flex-col">
@@ -103,6 +105,33 @@ function AuthLayout() {
 function App() {
   const { restId, restName } = UserAuth();
   const queryClient = useQueryClient();
+  const [playNewOrder] = useSound("/sound.wav", {
+  volume: 0.7,
+  interrupt: true,
+});
+
+useEffect(() => {
+  const unlock = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.AudioContext;
+      const ctx = new AudioCtx();
+
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    window.removeEventListener("click", unlock);
+  };
+
+  window.addEventListener("click", unlock);
+
+  return () => {
+    window.removeEventListener("click", unlock);
+  };
+}, []);
 
   useEffect(() => {
     if (!restId) return;
@@ -118,8 +147,12 @@ function App() {
   useEffect(() => {
     socket.on("newOrder", (order) => {
       console.log("New order:", order);
+       playNewOrder();
 
       toast.info(`New order #${order.orderNumber}`);
+      notif(`New order placed! #${order.orderNumber}`, {
+            
+          });
 
       queryClient.invalidateQueries({
         queryKey: ["orders"],
@@ -129,7 +162,7 @@ function App() {
     return () => {
       socket.off("newOrder");
     };
-  }, [queryClient]);
+  }, [queryClient,playNewOrder]);
 
   return (
     <>
@@ -141,6 +174,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          
           <Route
             path="/verify-email/:token"
             element={<VerifyEmail />}
@@ -242,6 +276,7 @@ function App() {
                 element={<MerchantApp />}
               />
             </Route>
+             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </Suspense>

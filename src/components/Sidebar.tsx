@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Ticket
 } from "lucide-react"
+import NotificationPanel from "./NotificationPanel"
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -106,7 +107,7 @@ export default function SideBar() {
 
   return (
     <>
-      {/* ================= MOBILE TOP BAR ================= */}
+      
       {/* ================= MOBILE TOP BAR ================= */}
 <div
   className="md:hidden flex items-center justify-between px-4 h-16 sticky top-0 z-40 border-b bg-white"
@@ -128,14 +129,21 @@ export default function SideBar() {
     </span>
   </div>
 
-  <button
-    onClick={() => setMobileOpen(true)}
-    className="p-2 -mr-2"
-    style={{ color: INK }}
-    aria-label="Open menu"
-  >
-    <Menu className="w-7 h-7" />
-  </button>
+  {/* Bell + menu grouped together and pinned to the right so they sit side by side, not overlapping */}
+  <div className="flex items-center gap-2 justify-between">
+    <div className="w-9 h-9 flex items-center justify-center">
+      <NotificationPanel />
+    </div>
+
+    <button
+      onClick={() => setMobileOpen(true)}
+      className="p-2 -mr-2"
+      style={{ color: INK }}
+      aria-label="Open menu"
+    >
+      <Menu className="w-7 h-7" />
+    </button>
+  </div>
 </div>
 
 {/* ================= MOBILE DRAWER ================= */}
@@ -221,7 +229,7 @@ export default function SideBar() {
   className="hidden md:flex flex-col w-72 h-screen sticky top-0 shrink-0 p-5 border-r bg-white"
   style={{ borderColor: BORDER }}
 >
-  <div className="flex items-center gap-3 mb-10">
+  <div className="relative flex items-center gap-3 mb-10 pr-9">
     <div
       className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: ACCENT }}
@@ -239,7 +247,12 @@ export default function SideBar() {
     >
       Crimson Castle
     </span>
+
+    <div className="absolute   right-0  -translate-y-1/2 w-9 h-9 flex items-center justify-center">
+      <NotificationPanel />
+    </div>
   </div>
+  
 
   <nav className="flex flex-col gap-2">
     {visibleLinks.map((n) => (

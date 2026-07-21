@@ -346,7 +346,7 @@ if (isPending) {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative w-full sm:w-72">
             <Search
-              className="w-[18px] h-[18px] absolute left-4 top-1/2 -translate-y-1/2"
+              className="w-4.5 h-4.5 absolute left-4 top-1/2 -translate-y-1/2"
               style={{ color: MUTE }}
             />
             <Input
@@ -363,7 +363,7 @@ if (isPending) {
             className="h-11 rounded-xl gap-2 text-base text-white"
             style={{ backgroundColor: ACCENT }}
           >
-            <Plus className="w-[18px] h-[18px]" />
+            <Plus className="w-4.5 h-4.5" />
             Add Item
           </Button>
         </div>

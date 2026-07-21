@@ -7,6 +7,8 @@ import { toast } from "sonner"
 import { Button } from "../components/ui/button"
 import { useQueryClient } from "@tanstack/react-query"
 import { Label } from "../components/ui/label"
+import { useNavigate } from "react-router"
+import type { LucideIcon } from "lucide-react";
 import {
   Pencil,
   Phone,
@@ -66,6 +68,7 @@ interface RestListProps {
   bannerId: string
   customDomain: string,
   restTheme: string
+  restSite?:string
 }
 interface RestResponse {
   getRest: RestListProps
@@ -75,7 +78,7 @@ function FieldLabel({
   icon,
   children,
 }: {
-  icon: any
+  icon: LucideIcon | string
   children: React.ReactNode
 }) {
   return (
@@ -99,7 +102,7 @@ function InfoRow({
   label,
   value,
 }: {
-  icon: any
+  icon: LucideIcon | string
   label: string
   value?: string | number
 }) {
@@ -140,6 +143,7 @@ function InfoRow({
 
 export default function Settings({ restId }: { restId: string | null }) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
 
   const getPaymentStatus = async () => {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/paddle/account`, {
@@ -383,6 +387,20 @@ export default function Settings({ restId }: { restId: string | null }) {
             <p className="text-2xl font-extrabold pb-1" style={{ color: INK }}>
               {restDetails?.getRest?.restName || "Your Restaurant"}
             </p>
+            {
+              restDetails?.getRest?.restSite && 
+              <div className="mb-2 ">
+<a
+  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg"
+  href={restDetails?.getRest?.restSite}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Visit Store
+</a>
+            </div>
+            }
+            
           </div>
         </div>
 

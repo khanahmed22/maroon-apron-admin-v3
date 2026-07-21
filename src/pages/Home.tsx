@@ -416,7 +416,7 @@ export default function Home() {
 
       {/* ================= NAVBAR ================= */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b" style={{ borderColor: BORDER }}>
-        <div className="max-w-6xl mx-auto px-6 h-[72px] flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white overflow-hidden" style={{ backgroundColor: ACCENT }}>
               <img src="/cc.jpg" alt="Crimson Castle logo" className="rounded-sm w-full h-full object-cover" />
@@ -467,7 +467,15 @@ export default function Home() {
               </a>
             ))}
             <div className="pt-2">
-              <SecondaryButton className="w-full justify-center">Sign In</SecondaryButton>
+               {session ? (
+            <a href="/dashboard" className="">
+              <SecondaryButton>Dashboard</SecondaryButton>
+            </a>
+          ) : (
+            <a href="/login" className="">
+              <SecondaryButton>Sign In</SecondaryButton>
+            </a>
+          )}
             </div>
           </div>
         )}
@@ -523,7 +531,7 @@ export default function Home() {
             loop
             autoplay
           
-            className="w-full max-w-[500px] h-[500px] relative z-10"
+            className="w-full max-w-125 h-125 relative z-10"
           />
         </div>
       </section>
@@ -780,7 +788,7 @@ export default function Home() {
                 href={DEMO_STORE_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="h-40 flex flex-col items-center justify-center gap-2 hover:bg-black/[0.02] transition-colors"
+                className="h-40 flex flex-col items-center justify-center gap-2 hover:bg-black/2 transition-colors"
                 style={{ color: MUTE }}
               >
                 <Store size={28} style={{ color: ACCENT }} />
@@ -816,7 +824,7 @@ export default function Home() {
                 </p>
                 <ul className="space-y-3 mb-8">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm leading-[1.5]">
+                    <li key={f} className="flex items-start gap-2.5 text-sm leading-normal">
                       <Check size={15} className="mt-0.5 shrink-0" style={{ color: ACCENT }} />
                       <span style={{ color: INK }}>{f}</span>
                     </li>

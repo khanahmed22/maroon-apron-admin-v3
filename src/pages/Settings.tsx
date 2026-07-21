@@ -7,7 +7,6 @@ import { toast } from "sonner"
 import { Button } from "../components/ui/button"
 import { useQueryClient } from "@tanstack/react-query"
 import { Label } from "../components/ui/label"
-import { useNavigate } from "react-router"
 import type { LucideIcon } from "lucide-react";
 import {
   Pencil,
@@ -143,7 +142,6 @@ function InfoRow({
 
 export default function Settings({ restId }: { restId: string | null }) {
   const queryClient = useQueryClient()
-  const navigate = useNavigate()
 
   const getPaymentStatus = async () => {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/paddle/account`, {

@@ -7,7 +7,10 @@ export const fetchRestId =async ()=>{
       },
       credentials:'include'
     })
-    return response.json()
+    const data = await response.json()
+    
+    console.log(data)
+    return data
   }
   catch(err){
     console.log(err)

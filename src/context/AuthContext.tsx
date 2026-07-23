@@ -15,6 +15,11 @@ interface AuthContextType {
   restId: string | null;
   restName: string | null,
   subdomain: string | undefined,
+  preOrdersEnabled?: boolean
+  preOrderMinHours?: number
+  preOrderMaxDays?: number
+  pickUpWindows?: string[]
+  deliveryWindows?: string[]
   setSession: React.Dispatch<React.SetStateAction<UserProps | null>>;
   checkAuth: () => Promise<void>;
 }
@@ -40,6 +45,11 @@ export const AuthContextProvider = ({children}:AuthProviderProps)=>{
 
   const restName = data?.getId?.restName ?? null
   const subdomain = data?.getId?.subdomain ?? null;
+  const deliveryWindows = data?.getId?.deliveryWindows ?? []
+  const pickUpWindows = data?.getId?.pickUpWindows ?? []
+  const preOrdersEnabled = data?.getId?.preOrdersEnabled ?? null
+  const preOrderMinHours = data?.getId?.preOrderMinHours ?? null
+  const preOrderMaxDays = data?.getId?.preOrderMaxDays ?? null
   
     async function checkAuth() {
   try {
@@ -68,7 +78,9 @@ export const AuthContextProvider = ({children}:AuthProviderProps)=>{
   
 
   return(
-    <AuthContext.Provider value={{session,setSession,checkAuth,loading,restId,restName,subdomain}}>
+    <AuthContext.Provider value={{session,setSession,checkAuth,loading,restId,restName,subdomain
+      ,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours
+    }}>
       {children}
     </AuthContext.Provider>
   )

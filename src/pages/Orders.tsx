@@ -39,7 +39,12 @@ interface OrderProps{
   createdAt: string,
   orderTotal:number,
   deliveryArea:string,
-  deliveryFee:string
+  deliveryFee:string,
+  discountAmount: String,
+  isPreOrder:boolean,
+  scheduledDate: string,
+  scheduledWindow: string,
+
   
 }
 
@@ -295,6 +300,15 @@ const STATUS_STYLES: Record<string, { bg: string; fg: string }> = {
   delivered: { bg:"#DCFCE7",fg:"#166534"},
   pickedup :{ bg: "#EDE9FE", fg: "#6D28D9" },
 }
+function formatPreorderDate(date: string | Date): string {
+  return new Date(date).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+
 
 if (isPending) {
     return (
@@ -330,6 +344,9 @@ if (isPending) {
             Placed {formatDate(o.createdAt)}
           </DialogDescription>
         </DialogHeader>
+        {o?.isPreOrder && <div>
+          <p>Scheduled Date: {formatPreorderDate(o?.scheduledDate)}</p>
+          <p>Scheduled Window: {o?.scheduledWindow}</p></div>}
  
         <div className="space-y-2.5">
           {o.orderDetails.map((c: CartItem, index: number) => (

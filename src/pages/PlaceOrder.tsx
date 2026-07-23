@@ -42,12 +42,17 @@ interface CustomerProps {
   orderTotal: number;
   deliveryArea:string
   deliveryFee:string
+  discountAmount: String,
+  isPreOrder:boolean,
+  scheduledDate: string,
+  scheduledWindow: string,
   
 }
 
 interface RestResponse{
   restId:string | null,
-  restName:string | null
+  restName:string | null,
+  
 }
 interface Selection {
   variantId?: string;
@@ -73,7 +78,7 @@ export default function PlaceOrder({ restId ,restName}:RestResponse) {
   const { cart, addCart, clearCart, deleteCart } = useCart();
 const [selections, setSelections] = useState<Record<string, Selection>>({});
 
-const {subdomain} = UserAuth()
+const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours} = UserAuth()
  
   function generateOrderNumber(): number {
     return Date.now();
@@ -115,8 +120,11 @@ const setItemQuantity = (
     createdAt: new Date(),
     deliveryArea: "",
     deliveryFee:"",
-
     orderTotal: 0,
+    discountAmount: "",
+    isPreOrder: false,
+    scheduledDate: "",
+    scheduledWindow: "",
     
   });
 
@@ -307,6 +315,8 @@ const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
 const SUCCESS = "#16A34A"
+
+console.log(deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours)
 
  if (isPending) {
     return (
@@ -810,7 +820,73 @@ onChange={() => setItemVariant(f.id, v.id)}
     </div>
   </div>
 )}
- 
+ {preOrdersEnabled &&
+  (custDetails.recieveMethod === "pickup" ||
+    custDetails.recieveMethod === "delivery") && (
+    <div className="space-y-4 rounded-xl border p-4" style={{ borderColor: BORDER }}>
+      <label className="flex items-center gap-2 text-sm font-medium">
+        <input
+          type="checkbox"
+          checked={custDetails.isPreOrder}
+          onChange={(e) =>
+            setCustDetails({
+              ...custDetails,
+              isPreOrder: e.target.checked,
+              scheduledDate: "",
+              scheduledWindow: "",
+            })
+          }
+        />
+        Schedule your Order
+      </label>
+
+      {custDetails.isPreOrder && (
+        <>
+          <Input
+            type="date"
+            value={custDetails.scheduledDate}
+            onChange={(e) =>
+              setCustDetails({
+                ...custDetails,
+                scheduledDate: e.target.value,
+              })
+            }
+          />
+
+          <Select
+            value={custDetails.scheduledWindow}
+            onValueChange={(value) =>
+              setCustDetails({
+                ...custDetails,
+                scheduledWindow: value,
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  custDetails.recieveMethod === "pickup"
+                    ? "Select Pickup Window"
+                    : "Select Delivery Window"
+                }
+              />
+            </SelectTrigger>
+
+            <SelectContent>
+              {(custDetails.recieveMethod === "pickup"
+                ? pickUpWindows
+                : deliveryWindows
+              )?.map((window) => (
+                <SelectItem key={window} value={window}>
+                  {window}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
+      )}
+    </div>
+  )}
               <Button
                 type="submit"
                 disabled={deliveryAreaMissing || belowMinimumOrder}

@@ -436,10 +436,12 @@ const handleCSVUpload = (file: File) => {
       setCSVPreviewItems(items);
       setCSVPreviewOpen(true);
       setIsImportingCSV(false);
+      console.log(isImportingCSV)
     },
 
     error: () => {
       toast.error("Failed to read CSV");
+      
       setIsImportingCSV(false);
     },
   });
@@ -638,6 +640,7 @@ if (isPending) {
     <input
       type="file"
       accept=".csv"
+      
       className="absolute inset-0 opacity-0 cursor-pointer"
       onChange={(e) => {
         const file = e.target.files?.[0];

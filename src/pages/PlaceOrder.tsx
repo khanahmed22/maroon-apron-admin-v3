@@ -358,9 +358,19 @@ console.log(deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOr
                       <span className="text-lg font-bold" style={{ color: INK }}>
                         {f.name}
                       </span>
-                      <span className="text-lg font-bold shrink-0" style={{ color: ACCENT }}>
-                        Rs. {f.price}
-                      </span>
+                      {f.variants?.length > 0 ? (
+  <div>
+    Starting from Rs.{" "}
+    {Math.min(...f.variants.map(v => v.variantPrice))}
+  </div>
+) : (
+  <span
+    className="text-lg font-bold shrink-0"
+    style={{ color: ACCENT }}
+  >
+    Rs: {f.price}
+  </span>
+)}
                       <p className="text-sm mt-2" style={{ color: MUTE }}>
   Stock: {f.stockAmount}
 </p>

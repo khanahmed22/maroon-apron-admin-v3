@@ -843,12 +843,20 @@ if (isPending) {
                   <span className="text-lg font-bold" style={{ color: INK }}>
                     {inv.name}
                   </span>
-                  <span
-                    className="text-lg font-bold shrink-0"
-                    style={{ color: ACCENT }}
-                  >
-                    Rs: {inv.price}
-                  </span>
+                 {inv.variants?.length > 0 ? (
+  <div>
+    Starting from Rs.{" "}
+    {Math.min(...inv.variants.map(v => v.variantPrice))}
+  </div>
+) : (
+  <span
+    className="text-lg font-bold shrink-0"
+    style={{ color: ACCENT }}
+  >
+    Rs: {inv.price}
+  </span>
+)}
+                  
                   <span
                     className="text-sm font-bold shrink-0"
                     style={{ color: ACCENT }}
@@ -972,7 +980,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Item Price</Label>
+              <Label>Item Price - Leave Blank if variants exists</Label>
               <Input
                 placeholder="Enter price"
                 type="number"
@@ -1336,7 +1344,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Item Price</Label>
+              <Label>Item Price - Leave Blank if variants exists</Label>
               <Input
                 placeholder="Enter price"
                 type="number"

@@ -481,6 +481,8 @@ export default function Home() {
         )}
       </header>
 
+      <main>
+
       {/* ================= HERO ================= */}
       <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12 overflow-hidden">
         <div
@@ -913,6 +915,8 @@ export default function Home() {
           </div>
         </Reveal>
       </section>
+
+      </main>
 
       {/* ================= FOOTER ================= */}
       <footer className="border-t" style={{ borderColor: BORDER }}>

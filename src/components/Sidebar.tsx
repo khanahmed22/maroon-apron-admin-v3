@@ -51,7 +51,7 @@ function NavItem({
     <Link
   to={n.link}
   onClick={onClick}
-  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
     active ? "text-white" : "text-black hover:bg-gray-100"
   }`}
   style={
@@ -130,20 +130,20 @@ export default function SideBar() {
   </div>
 
   {/* Bell + menu grouped together and pinned to the right so they sit side by side, not overlapping */}
-  <div className="flex items-center gap-2 justify-between">
-    <div className="w-9 h-9 flex items-center justify-center">
-      <NotificationPanel />
-    </div>
-
-    <button
-      onClick={() => setMobileOpen(true)}
-      className="p-2 -mr-2"
-      style={{ color: INK }}
-      aria-label="Open menu"
-    >
-      <Menu className="w-7 h-7" />
-    </button>
+  <div className="flex items-center justify-between gap-2">
+  <div className="flex h-9 w-9 items-center justify-center">
+    <NotificationPanel />
   </div>
+
+  <button
+    onClick={() => setMobileOpen(true)}
+    className="p-2"
+    style={{ color: INK }}
+    aria-label="Open menu"
+  >
+    <Menu className="h-7 w-7" />
+  </button>
+</div>
 </div>
 
 {/* ================= MOBILE DRAWER ================= */}

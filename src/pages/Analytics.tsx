@@ -35,6 +35,7 @@ interface CartItemSnapshot {
   name: string;
   price: number; 
   quantity: number;
+  variantId?: string;
   variantName?: string;
 }
 
@@ -42,6 +43,7 @@ interface InventVariantProps {
   id: string;
   variantName: string;
   variantPrice: number;
+  variantCostPrice: number | null;
 }
 
 interface InventProps {
@@ -107,6 +109,22 @@ function formatMoney(amount: number): string {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
+}
+
+
+function getUnitCost(cartItem: CartItemSnapshot, menuItem?: InventProps): number {
+  if (!menuItem) return 0;
+
+  const hasVariants = (menuItem.variants?.length ?? 0) > 0;
+
+  if (hasVariants) {
+    const matchedVariant = cartItem.variantId
+      ? menuItem.variants.find((v) => v.id === cartItem.variantId)
+      : menuItem.variants.find((v) => v.variantName === cartItem.variantName);
+    return toNumber(matchedVariant?.variantCostPrice);
+  }
+
+  return toNumber(menuItem.costPrice);
 }
 
 interface KPICardProps {
@@ -245,10 +263,11 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
 
   
   const analyticsData = useMemo(() => {
-  
-    const costByDbId: Record<string, number> = {};
+
+   
+    const menuById: Record<string, InventProps> = {};
     menuItems.forEach((item) => {
-      costByDbId[item.id] = toNumber(item.costPrice);
+      menuById[item.id] = item;
     });
 
     let totalRevenue = 0;
@@ -277,11 +296,13 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
       }
 
       details.forEach((item) => {
+        const menuItem = menuById[item.dbId];
         const name = item.variantName ? `${item.name} (${item.variantName})` : (item.name || "Unknown Item");
         const qty = Math.max(1, toNumber(item.quantity));
         const itemRevenue = toNumber(item.price);
 
-        const unitCost = costByDbId[item.dbId] ?? 0;
+       
+        const unitCost = getUnitCost(item, menuItem);
         const itemCost = unitCost * qty;
         totalCostMaking += itemCost;
 
@@ -452,29 +473,31 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
         </div>
  
         <Tabs defaultValue="revenue" className="space-y-6">
-          <TabsList className="bg-white border p-1.5 rounded-xl h-auto gap-1 w-fit" style={{ borderColor: BORDER }}>
-            <TabsTrigger
-              value="revenue"
-              className="rounded-lg text-base font-medium px-5 py-2.5 data-[state=active]:text-white"
-              style={{ color: MUTE }}
-            >
-              Revenue
-            </TabsTrigger>
-            <TabsTrigger
-              value="items"
-              className="rounded-lg text-base font-medium px-5 py-2.5 data-[state=active]:text-white"
-              style={{ color: MUTE }}
-            >
-              Top Items
-            </TabsTrigger>
-            <TabsTrigger
-              value="inventory"
-              className="rounded-lg text-base font-medium px-5 py-2.5 data-[state=active]:text-white"
-              style={{ color: MUTE }}
-            >
-              Inventory
-            </TabsTrigger>
-          </TabsList>
+          <TabsList
+  className="bg-white border p-1.5 rounded-xl h-auto gap-1 w-fit"
+  style={{ borderColor: BORDER }}
+>
+  <TabsTrigger
+    value="revenue"
+    className="rounded-lg px-5 py-2.5 text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+  >
+    Revenue
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="items"
+    className="rounded-lg px-5 py-2.5 text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+  >
+    Top Items
+  </TabsTrigger>
+
+  <TabsTrigger
+    value="inventory"
+    className="rounded-lg px-5 py-2.5 text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+  >
+    Inventory
+  </TabsTrigger>
+</TabsList>
  
           <TabsContent value="revenue">
             <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>

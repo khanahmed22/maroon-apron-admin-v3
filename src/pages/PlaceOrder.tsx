@@ -24,6 +24,7 @@ interface InventProps {
   id: string;
   name: string;
   price: number;
+  description?: string;
   variants: VariantProps[];
   imageUrl: string;
   stockAmount:number
@@ -72,6 +73,12 @@ interface AppliedCoupon {
   code: string;
   couponId: string;
   discount: number;
+}
+
+interface FixRate {
+  rate: number,
+  fixMode: boolean,
+  FixMinOrder: number
 }
 
 export default function PlaceOrder({ restId ,restName}:RestResponse) {
@@ -127,6 +134,49 @@ const setItemQuantity = (
     scheduledWindow: "",
     
   });
+
+  // ================= ADD TO CART MODAL =================
+  const [modalItem, setModalItem] = useState<InventProps | null>(null);
+  const [variantError, setVariantError] = useState(false);
+
+  const openItemModal = (item: InventProps) => {
+    setModalItem(item);
+    setVariantError(false);
+  };
+
+  const closeItemModal = () => {
+    setModalItem(null);
+    setVariantError(false);
+  };
+
+  const confirmAddToCart = (item: InventProps) => {
+    const selection = getSelection(item.id);
+
+    if (item.variants?.length > 0 && !selection.variantId) {
+      setVariantError(true);
+      return;
+    }
+
+    const selectedVariant = item.variants.find(
+      (v) => v.id === selection.variantId
+    );
+
+    addCart({
+      id: generateUUID(),
+      dbId: item.id,
+      name: item.name,
+      price:
+        (selectedVariant?.variantPrice ?? item.price) * selection.quantity,
+      quantity: selection.quantity,
+      variantId: selectedVariant?.id,
+      variantName: selectedVariant?.variantName,
+      variantPrice: selectedVariant?.variantPrice,
+    });
+
+    setItemQuantity(item.id, 1, item.stockAmount);
+    toast.success(`${item.name} added to cart`);
+    closeItemModal();
+  };
 
 
   const [couponCode, setCouponCode] = useState("");
@@ -218,7 +268,9 @@ const setItemQuantity = (
       }
       if (belowMinimumOrder) {
         return toast.error(
-          `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`
+          fixRateM?.fixMode
+            ? `Minimum order is Rs.${minimumOrder}`
+            : `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`
         );
       }
     }
@@ -266,6 +318,9 @@ const setItemQuantity = (
     onSuccess: () => {
       toast.success("Order Placed");
     },
+    onError:()=>{
+      toast.error('Order could not be placed')
+    }
   });
 
   function generateUUID(): string {
@@ -295,15 +350,49 @@ const setItemQuantity = (
     (area) => area.areaId === custDetails.deliveryArea
   );
 
-  const deliveryFee = Number(selectedArea?.deliveryFee ?? 0);
-  const minimumOrder = Number(selectedArea?.minOrder ?? 0);
+  const fetchFixRate = async()=>{
+   try{
+     const fixRate = await fetch(`${import.meta.env.VITE_BACKEND_URL}/fix-rate/${restId}/view`)
+     const data = await fixRate.json()
+     return data
+   }
+   catch(err){
+     console.log(err)
+   }
+  }
+
+  const {data:fixRateM} = useQuery<FixRate>({
+   queryKey:['fixRates', restId],
+   queryFn: fetchFixRate,
+   enabled:!!restId,
+   staleTime: 5 * 60 * 1000, //5min
+  })
+
+  // If fix rate mode is enabled, use the flat fixed rate for delivery.
+  // Otherwise fall back to the area-based delivery fee.
+  const deliveryFee =
+    custDetails.recieveMethod === "delivery"
+      ? fixRateM?.fixMode
+        ? Number(fixRateM?.rate ?? 0)
+        : Number(selectedArea?.deliveryFee ?? 0)
+      : 0;
+
+  // Same fix-mode-first logic for minimum order: fixed min order takes
+  // precedence over the area-based minimum when fix mode is enabled.
+  const minimumOrder =
+    custDetails.recieveMethod === "delivery"
+      ? fixRateM?.fixMode
+        ? Number(fixRateM?.FixMinOrder ?? 0)
+        : Number(selectedArea?.minOrder ?? 0)
+      : 0;
+
   const discountAmount = appliedCoupon?.discount ?? 0;
   const finalTotal = Math.max(0, subtotal + deliveryFee - discountAmount);
 
   
   const belowMinimumOrder =
     custDetails.recieveMethod === "delivery" &&
-    !!selectedArea &&
+    (fixRateM?.fixMode || !!selectedArea) &&
     subtotal < minimumOrder;
 
   const deliveryAreaMissing =
@@ -315,8 +404,6 @@ const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
 const SUCCESS = "#16A34A"
-
-console.log(deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours)
 
  if (isPending) {
     return (
@@ -376,94 +463,10 @@ console.log(deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOr
 </p>
                     </div>
  
-                    <div className="mb-3">
-                      {f.variants?.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {f.variants.map((v) => (
-                            <label
-                              key={v.id}
-                              className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full border cursor-pointer"
-                              style={
-  getSelection(f.id).variantId === v.id
-    ? { backgroundColor: SOFT, borderColor: ACCENT, color: ACCENT }
-    : { borderColor: BORDER, color: MUTE }
-}
-                            >
-                              <input
-                                type="radio"
-                                value={f.id}
-                                name={f.id}
-                               checked={getSelection(f.id).variantId === v.id}
-onChange={() => setItemVariant(f.id, v.id)}
-                                className="sr-only"
-                              />
-                              {v.variantName} · Rs. {v.variantPrice}
-                            </label>
-                          ))}
-                        </div>
-                      ) : (
-                        <div></div>
-                      )}
-                    </div>
- 
-                    <div className="flex items-center justify-center gap-4 mb-3">
-                      <button
-  onClick={() =>
-    setItemQuantity(
-      f.id,
-      getSelection(f.id).quantity - 1,
-      f.stockAmount
-    )
-  }
->
-                        <Minus className="w-4 h-4" />
-                      </button>
- 
-                      <span className="text-base font-semibold w-5 text-center" style={{ color: INK }}>
-                        {getSelection(f.id).quantity}
-                      </span>
- 
-                      <button
-  disabled={getSelection(f.id).quantity >= f.stockAmount}
-  onClick={() =>
-    setItemQuantity(
-      f.id,
-      getSelection(f.id).quantity + 1,
-      f.stockAmount
-    )
-  }
-  className="w-8 h-8 flex items-center justify-center rounded-full border disabled:opacity-40 disabled:cursor-not-allowed"
-  style={{ borderColor: BORDER, color: MUTE }}
->
-  <Plus className="w-4 h-4" />
-</button>
-                    </div>
- 
                     <button
   disabled={f.stockAmount === 0}
-  onClick={() => {
-    const selection = getSelection(f.id);
-
-    const selectedVariant = f.variants.find(
-      (v) => v.id === selection.variantId
-    );
-
-    addCart({
-      id: generateUUID(),
-      dbId: f.id,
-      name: f.name,
-      price:
-        (selectedVariant?.variantPrice ?? f.price) *
-        selection.quantity,
-      quantity: selection.quantity,
-      variantId: selectedVariant?.id,
-      variantName: selectedVariant?.variantName,
-      variantPrice: selectedVariant?.variantPrice,
-    });
-
-    setItemQuantity(f.id, 1, f.stockAmount);
-  }}
-  className="w-full text-base font-semibold text-white rounded-full py-2 px-4 disabled:bg-gray-400 disabled:cursor-not-allowed"
+  onClick={() => openItemModal(f)}
+  className="w-full text-base font-semibold text-white rounded-full py-2 px-4 mt-auto disabled:bg-gray-400 disabled:cursor-not-allowed"
   style={{
     backgroundColor: f.stockAmount === 0 ? "#9CA3AF" : ACCENT,
   }}
@@ -602,7 +605,7 @@ onChange={() => setItemVariant(f.id, v.id)}
               <span>Rs. {subtotal || 0}</span>
             </div>
 
-            {custDetails.recieveMethod === "delivery" && selectedArea && (
+            {custDetails.recieveMethod === "delivery" && (fixRateM?.fixMode || selectedArea) && (
               <div
                 className="flex items-center justify-between mt-2 text-base"
                 style={{ color: INK }}
@@ -632,7 +635,9 @@ onChange={() => setItemVariant(f.id, v.id)}
 
             {belowMinimumOrder && (
               <p className="mt-3 text-sm font-medium" style={{ color: ACCENT }}>
-                Minimum order for {selectedArea?.areaName} is Rs.{minimumOrder}
+                {fixRateM?.fixMode
+                  ? `Minimum order is Rs.${minimumOrder}`
+                  : `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`}
               </p>
             )}
           </div>
@@ -822,7 +827,7 @@ onChange={() => setItemVariant(f.id, v.id)}
               key={area.areaId}
               value={area.areaId}
             >
-              {area.areaName} ({area.cityName}) • Rs. {area.deliveryFee}
+              {area.areaName} ({area.cityName}) 
             </SelectItem>
           ))}
         </SelectContent>
@@ -909,6 +914,138 @@ onChange={() => setItemVariant(f.id, v.id)}
           </div>
         </section>
       </div>
+
+      {/* ================= ADD TO CART MODAL ================= */}
+      {modalItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={closeItemModal}
+        >
+          <div
+            className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              <img
+                src={modalItem.imageUrl || "/cc.jpg"}
+                alt={modalItem.name}
+                className="w-full h-48 object-cover rounded-t-2xl"
+              />
+              <button
+                onClick={closeItemModal}
+                aria-label="Close"
+                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white shadow"
+              >
+                <X className="w-4 h-4" style={{ color: INK }} />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <h3 className="text-xl font-bold" style={{ color: INK }}>
+                {modalItem.name}
+              </h3>
+
+              {modalItem.description && (
+                <p className="text-sm mt-1.5" style={{ color: MUTE }}>
+                  {modalItem.description}
+                </p>
+              )}
+
+              <p className="text-sm mt-2" style={{ color: MUTE }}>
+                Stock: {modalItem.stockAmount}
+              </p>
+
+              {modalItem.variants?.length > 0 ? (
+                <div className="mt-4">
+                  <p className="text-sm font-semibold mb-2" style={{ color: INK }}>
+                    Choose an option
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {modalItem.variants.map((v) => (
+                      <label
+                        key={v.id}
+                        className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full border cursor-pointer"
+                        style={
+                          getSelection(modalItem.id).variantId === v.id
+                            ? { backgroundColor: SOFT, borderColor: ACCENT, color: ACCENT }
+                            : { borderColor: BORDER, color: MUTE }
+                        }
+                      >
+                        <input
+                          type="radio"
+                          name={`modal-variant-${modalItem.id}`}
+                          checked={getSelection(modalItem.id).variantId === v.id}
+                          onChange={() => {
+                            setItemVariant(modalItem.id, v.id);
+                            setVariantError(false);
+                          }}
+                          className="sr-only"
+                        />
+                        {v.variantName} · Rs. {v.variantPrice}
+                      </label>
+                    ))}
+                  </div>
+                  {variantError && (
+                    <p className="text-xs mt-2 font-medium" style={{ color: ACCENT }}>
+                      Please select an option to continue
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-lg font-bold mt-3" style={{ color: ACCENT }}>
+                  Rs. {modalItem.price}
+                </p>
+              )}
+
+              <div className="flex items-center justify-center gap-4 mt-5">
+                <button
+                  onClick={() =>
+                    setItemQuantity(
+                      modalItem.id,
+                      getSelection(modalItem.id).quantity - 1,
+                      modalItem.stockAmount
+                    )
+                  }
+                  className="w-8 h-8 flex items-center justify-center rounded-full border"
+                  style={{ borderColor: BORDER, color: MUTE }}
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+
+                <span className="text-base font-semibold w-5 text-center" style={{ color: INK }}>
+                  {getSelection(modalItem.id).quantity}
+                </span>
+
+                <button
+                  disabled={getSelection(modalItem.id).quantity >= modalItem.stockAmount}
+                  onClick={() =>
+                    setItemQuantity(
+                      modalItem.id,
+                      getSelection(modalItem.id).quantity + 1,
+                      modalItem.stockAmount
+                    )
+                  }
+                  className="w-8 h-8 flex items-center justify-center rounded-full border disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ borderColor: BORDER, color: MUTE }}
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+
+              <button
+                disabled={modalItem.stockAmount === 0}
+                onClick={() => confirmAddToCart(modalItem)}
+                className="w-full text-base font-semibold text-white rounded-full py-2.5 px-4 mt-5 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: modalItem.stockAmount === 0 ? "#9CA3AF" : ACCENT,
+                }}
+              >
+                {modalItem.stockAmount === 0 ? "Out of Stock" : "Add to Cart"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

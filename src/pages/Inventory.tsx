@@ -31,6 +31,7 @@ interface VariantProps {
   id: string;
   variantName: string;
   variantPrice: number;
+  variantCostPrice:number;
 }
 
 interface InventProps {
@@ -77,7 +78,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     description:"",
     category:"",
     stockAmount:0,
-    variants: [] as { variantName: string; variantPrice: number }[],
+    variants: [] as { variantName: string; variantPrice: number; variantCostPrice:number }[],
   });
   
   const queryClient = useQueryClient()
@@ -95,7 +96,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     category:"",
     stockAmount:0,
 
-    variants: [] as { variantName: string; variantPrice: number }[],
+    variants: [] as { variantName: string; variantPrice: number,variantCostPrice:number }[],
   });
   
   const fetchInventory = async () => {
@@ -220,15 +221,15 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
       queryClient.invalidateQueries({queryKey:['inventory']})
       
     },
-    onError: (error: Error) => {
-    toast.error(error.message);
+    onError: () => {
+    toast.error('Item was not added');
   },
   })
 
   const addVariant = () => {
     setAddForm((prev) => ({
       ...prev,
-      variants: [...prev.variants, { variantName: "", variantPrice: 0 }],
+      variants: [...prev.variants, { variantName: "", variantPrice: 0,variantCostPrice:0 }],
     }));
   };
 
@@ -242,7 +243,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
   const addUpdateVariant = () => {
     setupdateForm((prev) => ({
       ...prev,
-      variants: [...prev.variants, { variantName: "", variantPrice: 0 }],
+      variants: [...prev.variants, { variantName: "", variantPrice: 0,variantCostPrice:0 }],
     }));
   };
 
@@ -277,6 +278,9 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     onSuccess:()=>{
       toast.success('Item deleted')
       queryClient.invalidateQueries({queryKey:['inventory']})
+    },
+    onError:()=>{
+      toast.error('Item was not deleted')
     }
   })
 
@@ -552,6 +556,9 @@ const saveCSVItems = async () => {
     onSuccess:()=>{
       toast.success('Item updated')
       queryClient.invalidateQueries({queryKey:['inventory']})
+    },
+    onError:()=>{
+      toast.error('Item was not updated')
     }
   })
 
@@ -894,7 +901,7 @@ if (isPending) {
                         className="text-sm font-medium px-2.5 py-1 rounded-full border"
                         style={{ borderColor: BORDER, color: MUTE }}
                       >
-                        {v.variantName} · Rs. {v.variantPrice}
+                        {v.variantName} · Rs. {v.variantPrice} · CostPrice:{v.variantCostPrice}
                       </span>
                     ))}
                   </div>
@@ -918,6 +925,7 @@ if (isPending) {
                         variants: inv.variants.map((v) => ({
                           variantName: v.variantName,
                           variantPrice: v.variantPrice,
+                          variantCostPrice:v.variantCostPrice
                         })),
                       });
                     }}
@@ -1105,13 +1113,26 @@ if (isPending) {
                     />
                     <Input
                       type="number"
-                      placeholder="Price"
+                      placeholder="Variant Price"
                       value={variant.variantPrice}
                       className="h-10 rounded-lg text-base w-28 shrink-0"
                       style={{ borderColor: BORDER }}
                       onChange={(e) => {
                         const updated = [...addForm.variants];
                         updated[index].variantPrice = Number(e.target.value);
+                        setAddForm({ ...addForm, variants: updated });
+                      }}
+                    />
+
+                    <Input
+                      type="number"
+                      placeholder="Variant Cost Price"
+                      value={variant.variantCostPrice}
+                      className="h-10 rounded-lg text-base w-28 shrink-0"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) => {
+                        const updated = [...addForm.variants];
+                        updated[index].variantCostPrice = Number(e.target.value);
                         setAddForm({ ...addForm, variants: updated });
                       }}
                     />
@@ -1469,13 +1490,26 @@ if (isPending) {
                     />
                     <Input
                       type="number"
-                      placeholder="Price"
+                      placeholder="Variant Price"
                       value={variant.variantPrice}
                       className="h-10 rounded-lg text-base w-28 shrink-0"
                       style={{ borderColor: BORDER }}
                       onChange={(e) => {
                         const updated = [...updateForm.variants];
                         updated[index].variantPrice = Number(e.target.value);
+                        setupdateForm({ ...updateForm, variants: updated });
+                      }}
+                    />
+
+                    <Input
+                      type="number"
+                      placeholder="Variant Cost Price"
+                      value={variant.variantCostPrice}
+                      className="h-10 rounded-lg text-base w-28 shrink-0"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) => {
+                        const updated = [...updateForm.variants];
+                        updated[index].variantCostPrice = Number(e.target.value);
                         setupdateForm({ ...updateForm, variants: updated });
                       }}
                     />

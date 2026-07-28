@@ -35,6 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select"
+import Map from "./Map"
+
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -76,6 +78,8 @@ interface RestListProps {
   preOrderMaxDays:number
   pickUpWindows:string[]
   deliveryWindows:string[]
+  lat:number,
+  long:number
 }
 interface RestResponse {
   getRest: RestListProps
@@ -131,7 +135,7 @@ function InfoRow({
         <img
           src={icon}
           alt={label}
-          className="w-[18px] h-[18px] mt-0.5 shrink-0"
+          className="w-4.5 h-4.5 mt-0.5 shrink-0"
         />
       ) : (
         (() => {
@@ -210,6 +214,8 @@ export default function Settings({ restId }: { restId: string | null }) {
     preOrderMaxDays: 7,
     pickUpWindows: [],
     deliveryWindows: [],
+    lat:0,
+    long:0
   })
   const { session, subdomain } = UserAuth()
 
@@ -262,6 +268,18 @@ export default function Settings({ restId }: { restId: string | null }) {
 }, [restDetails]);
 
   const [editMode, setEditMode] = useState(false)
+  const [preorderEditMode, setPreorderEditMode] = useState(false)
+
+  const cancelPreorderEdit = () => {
+    if (restDetails?.getRest) {
+      setPreOrderEnabled(restDetails.getRest.preOrdersEnabled ?? true)
+      setPreOrderMinHours(restDetails.getRest.preoOrderMinHours ?? 2)
+      setPreOrderMaxDays(restDetails.getRest.preOrderMaxDays ?? 7)
+      setDeliveryWindows(restDetails.getRest.deliveryWindows ?? [])
+      setPickupWindows(restDetails.getRest.pickUpWindows ?? [])
+    }
+    setPreorderEditMode(false)
+  }
 
   const openEdit = () => {
     if (!restDetails?.getRest) return
@@ -288,6 +306,8 @@ export default function Settings({ restId }: { restId: string | null }) {
       preOrderMaxDays: restDetails.getRest.preOrderMaxDays ?? 7,
       pickUpWindows: restDetails.getRest.pickUpWindows ?? [],
       deliveryWindows: restDetails.getRest.deliveryWindows ?? [],
+      lat:restDetails.getRest.lat ?? 0,
+      long:restDetails.getRest.long ?? 0
     })
 
     setEditMode(true)
@@ -330,14 +350,23 @@ export default function Settings({ restId }: { restId: string | null }) {
           ? restDetails?.getRest?.customDomain ?? ""
           : updateRest.customDomain
 
+      // Strip lat/long out of this payload — location has its own dedicated
+      // save flow (updateLocationM) driven from the map. If we included the
+      // lat/long snapshotted into `updateRest` here, saving profile info
+      // could silently overwrite a location the user just saved via the map,
+      // since `updateRest.lat/long` may be stale relative to the latest
+      // pickup-location update.
+      const { lat: _lat, long: _long, ...restFieldsWithoutLocation } = updateRest
+
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id,
-          ...updateRest,
+          ...restFieldsWithoutLocation,
           restLogo,
           restBanner,
           logoId,
@@ -397,6 +426,52 @@ export default function Settings({ restId }: { restId: string | null }) {
       toast.error("Failed to update preorder settings")
     },
   })
+
+  const lat = restDetails?.getRest?.lat || 0
+  const long = restDetails?.getRest?.long || 0
+
+  // ================= PICKUP LOCATION (VIEW MODE MAP EDIT) =================
+  const [pendingLocation, setPendingLocation] = useState<{ lat: number; long: number } | null>(null)
+  const [locationResetToken, setLocationResetToken] = useState(0)
+
+  const updateLocation = async ({ lat, long }: { lat: number; long: number }) => {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: restDetails?.getRest?.id,
+        lat,
+        long,
+      }),
+    })
+
+    if (!res.ok) {
+      throw new Error("Failed to update location")
+    }
+
+    return res.json()
+  }
+
+  const { mutate: updateLocationM, isPending: locationSaving } = useMutation({
+    mutationKey: ["updateLocationM"],
+    mutationFn: updateLocation,
+    onSuccess: () => {
+      toast.success("Pickup location updated")
+      queryClient.invalidateQueries({ queryKey: ["restDetails"] })
+      setPendingLocation(null)
+    },
+    onError: () => {
+      toast.error("Failed to update location")
+    },
+  })
+
+  const cancelLocationEdit = () => {
+    setPendingLocation(null)
+    setLocationResetToken((t) => t + 1)
+  }
 
   if (isPending) {
     return (
@@ -467,14 +542,14 @@ export default function Settings({ restId }: { restId: string | null }) {
                 </div>
               )}
             </div>
-            <p className="text-2xl font-extrabold pb-1" style={{ color: INK }}>
+            <p className="text-2xl max-md:text-lg font-extrabold pb-1" style={{ color: INK }}>
               {restDetails?.getRest?.restName || "Your Restaurant"}
             </p>
             {
               restDetails?.getRest?.restSite && 
               <div className="mb-2 ">
 <a
-  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg"
+  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs "
   href={restDetails?.getRest?.restSite}
   target="_blank"
   rel="noopener noreferrer"
@@ -497,7 +572,7 @@ export default function Settings({ restId }: { restId: string | null }) {
             <InfoRow icon='/facebook.svg' label="Facebook" value={restDetails?.getRest?.restFB} />
             <InfoRow icon={Tag} label="Meta Title" value={restDetails?.getRest?.metaTitle} />
             <InfoRow icon={FileText} label="Meta Description" value={restDetails?.getRest?.metaDesc} />
-                        <InfoRow icon={Palette} label="Theme" value={restDetails?.getRest?.restTheme} />
+            <InfoRow icon={Palette} label="Theme" value={restDetails?.getRest?.restTheme} />
             <InfoRow icon={PartyPopper} label="Announcement" value={restDetails?.getRest?.restAnnouncement} />
             <InfoRow icon={Globe} label="Custom Domain" value={restDetails?.getRest?.customDomain} />
           </div>
@@ -786,16 +861,75 @@ export default function Settings({ restId }: { restId: string | null }) {
           </div>
         )}
 
+        {/* ================= PICKUP LOCATION ================= */}
+        <div
+          className="bg-white rounded-2xl border p-6 mt-6"
+          style={{ borderColor: BORDER }}
+        >
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" style={{ color: ACCENT }} />
+              <h2 className="text-lg font-bold" style={{ color: INK }}>
+                Pickup Location
+              </h2>
+            </div>
+            {pendingLocation && (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="h-8 rounded-lg text-xs px-3"
+                  onClick={cancelLocationEdit}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={locationSaving}
+                  className="h-8 rounded-lg text-xs px-3 text-white disabled:opacity-60"
+                  style={{ backgroundColor: ACCENT }}
+                  onClick={() => updateLocationM(pendingLocation)}
+                >
+                  {locationSaving ? "Saving…" : "Save Location"}
+                </Button>
+              </div>
+            )}
+          </div>
+          <p className="text-xs mb-3" style={{ color: MUTE }}>
+            Click on the map, or drag the pin, to update your pickup location
+          </p>
+
+          <Map
+            latitude={pendingLocation?.lat ?? lat}
+            longitude={pendingLocation?.long ?? long}
+            editable
+            resetToken={locationResetToken}
+            onLocationChange={(newLat, newLong) =>
+              setPendingLocation({ lat: newLat, long: newLong })
+            }
+          />
+        </div>
+
         {/* ================= PREORDER SETTINGS ================= */}
         <div
           className="bg-white rounded-2xl border p-6 mt-6"
           style={{ borderColor: BORDER }}
         >
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-5 h-5" style={{ color: ACCENT }} />
-            <h2 className="text-lg font-bold" style={{ color: INK }}>
-              Preorder Settings
-            </h2>
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5" style={{ color: ACCENT }} />
+              <h2 className="text-lg font-bold" style={{ color: INK }}>
+                Preorder Settings
+              </h2>
+            </div>
+            {!preorderEditMode && (
+              <Button
+                onClick={() => setPreorderEditMode(true)}
+                className="rounded-xl gap-2 text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                <Pencil className="w-4 h-4" />
+                Edit
+              </Button>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -813,187 +947,186 @@ export default function Settings({ restId }: { restId: string | null }) {
                 </p>
               </div>
               <Button
-                disabled={preorderLoading}
-                className="rounded-xl text-white"
+                disabled={!preorderEditMode}
+                className="rounded-xl text-white disabled:opacity-60"
                 style={{ backgroundColor: preOrdersEnabled ? ACCENT : MUTE }}
-                onClick={() => {
-                  const newVal = !preOrdersEnabled
-                  setPreOrderEnabled(newVal)
-                  updatePreorderSettingsM({ preOrdersEnabled: newVal })
-                }}
+                onClick={() => setPreOrderEnabled(!preOrdersEnabled)}
               >
                 {preOrdersEnabled ? "Enabled" : "Disabled"}
               </Button>
             </div>
 
-            {/* Minimum notice */}
-            <div
-              className="rounded-xl border p-4 space-y-2"
-              style={{ borderColor: BORDER, backgroundColor: SOFT }}
-            >
-              <FieldLabel icon={Clock}>Minimum notice (hours)</FieldLabel>
-              <Input
-                type="number"
-                min={0}
-                value={preoOrderMinHours}
-                className="h-11 rounded-xl text-base bg-white"
-                style={{ borderColor: BORDER }}
-                onChange={(e) => setPreOrderMinHours(Number(e.target.value))}
-              />
-              <Button
-                disabled={preorderLoading}
-                className="rounded-xl text-white"
-                style={{ backgroundColor: ACCENT }}
-                onClick={() =>
-                  updatePreorderSettingsM({ preoOrderMinHours })
-                }
-              >
-                Save
-              </Button>
-            </div>
+            {preorderEditMode && preOrdersEnabled && (
+              <>
+                {/* Minimum notice */}
+                <div
+                  className="rounded-xl border p-4 space-y-2"
+                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                >
+                  <FieldLabel icon={Clock}>Minimum notice (hours)</FieldLabel>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={preoOrderMinHours}
+                    className="h-11 rounded-xl text-base bg-white"
+                    style={{ borderColor: BORDER }}
+                    onChange={(e) => setPreOrderMinHours(Number(e.target.value))}
+                  />
+                </div>
 
-            {/* Max days */}
-            <div
-              className="rounded-xl border p-4 space-y-2"
-              style={{ borderColor: BORDER, backgroundColor: SOFT }}
-            >
-              <FieldLabel icon={Clock}>Max days in advance</FieldLabel>
-              <Input
-                type="number"
-                min={1}
-                max={30}
-                value={preOrderMaxDays}
-                className="h-11 rounded-xl text-base bg-white"
-                style={{ borderColor: BORDER }}
-                onChange={(e) => setPreOrderMaxDays(Number(e.target.value))}
-              />
-              <Button
-                disabled={preorderLoading}
-                className="rounded-xl text-white"
-                style={{ backgroundColor: ACCENT }}
-                onClick={() =>
-                  updatePreorderSettingsM({ preOrderMaxDays })
-                }
-              >
-                Save
-              </Button>
-            </div>
+                {/* Max days */}
+                <div
+                  className="rounded-xl border p-4 space-y-2"
+                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                >
+                  <FieldLabel icon={Clock}>Max days in advance</FieldLabel>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={preOrderMaxDays}
+                    className="h-11 rounded-xl text-base bg-white"
+                    style={{ borderColor: BORDER }}
+                    onChange={(e) => setPreOrderMaxDays(Number(e.target.value))}
+                  />
+                </div>
 
-            {/* Delivery windows */}
-            <div
-              className="rounded-xl border p-4 space-y-3"
-              style={{ borderColor: BORDER, backgroundColor: SOFT }}
-            >
-              <FieldLabel icon={Clock}>Delivery time windows</FieldLabel>
-              <div className="flex gap-2">
-                <Input
-                  value={newWindow}
-                  placeholder="e.g. 7pm - 9pm"
-                  className="h-11 rounded-xl text-base bg-white"
-                  style={{ borderColor: BORDER }}
-                  onChange={(e) => setNewWindow(e.target.value)}
-                />
+                {/* Delivery windows */}
+                <div
+                  className="rounded-xl border p-4 space-y-3"
+                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                >
+                  <FieldLabel icon={Clock}>Delivery time windows</FieldLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newWindow}
+                      placeholder="e.g. 7pm - 9pm"
+                      className="h-11 rounded-xl text-base bg-white"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) => setNewWindow(e.target.value)}
+                    />
+                    <Button
+                      className="rounded-xl text-white shrink-0"
+                      style={{ backgroundColor: ACCENT }}
+                      onClick={() => {
+                        const w = newWindow.trim()
+                        if (!w) return
+                        setDeliveryWindows([...deliveryWindows, w])
+                        setNewWindow("")
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {deliveryWindows.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {deliveryWindows.map((w, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
+                          style={{ borderColor: BORDER }}
+                        >
+                          <span>{w}</span>
+                          <X
+                            className="w-4 h-4 cursor-pointer"
+                            style={{ color: ACCENT }}
+                            onClick={() => {
+                              setDeliveryWindows(deliveryWindows.filter((_, i) => i !== idx))
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: MUTE }}>
+                      No windows added yet
+                    </p>
+                  )}
+                </div>
+
+                {/* Pickup windows */}
+                <div
+                  className="rounded-xl border p-4 space-y-3"
+                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                >
+                  <FieldLabel icon={Clock}>Pickup time windows</FieldLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newPickupWindow}
+                      placeholder="e.g. 6pm - 8pm"
+                      className="h-11 rounded-xl text-base bg-white"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) => setNewPickupWindow(e.target.value)}
+                    />
+                    <Button
+                      className="rounded-xl text-white shrink-0"
+                      style={{ backgroundColor: ACCENT }}
+                      onClick={() => {
+                        const w = newPickupWindow.trim()
+                        if (!w) return
+                        setPickupWindows([...pickUpWindows, w])
+                        setNewPickupWindow("")
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  {pickUpWindows.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {pickUpWindows.map((w, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
+                          style={{ borderColor: BORDER }}
+                        >
+                          <span>{w}</span>
+                          <X
+                            className="w-4 h-4 cursor-pointer"
+                            style={{ color: ACCENT }}
+                            onClick={() => {
+                              setPickupWindows(pickUpWindows.filter((_, i) => i !== idx))
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs" style={{ color: MUTE }}>
+                      No windows added yet
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {preorderEditMode && (
+              <div className="flex gap-3 pt-2">
                 <Button
-                  className="rounded-xl text-white shrink-0"
-                  style={{ backgroundColor: ACCENT }}
+                  variant="outline"
+                  className="flex-1 h-11 rounded-xl text-base"
+                  onClick={cancelPreorderEdit}
+                >
+                  Cancel
+                </Button>
+                <Button
                   disabled={preorderLoading}
+                  className="flex-1 h-11 rounded-xl text-base text-white disabled:opacity-60"
+                  style={{ backgroundColor: ACCENT }}
                   onClick={() => {
-                    const w = newWindow.trim()
-                    if (!w) return
-                    const updated = [...deliveryWindows, w]
-                    setDeliveryWindows(updated)
-                    setNewWindow("")
-                    updatePreorderSettingsM({ deliveryWindows: updated })
+                    updatePreorderSettingsM({
+                      preOrdersEnabled,
+                      preoOrderMinHours,
+                      preOrderMaxDays,
+                      deliveryWindows,
+                      pickUpWindows,
+                    })
+                    setPreorderEditMode(false)
                   }}
                 >
-                  Add
+                  Save Preorder Settings
                 </Button>
               </div>
-              {deliveryWindows.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {deliveryWindows.map((w, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
-                      style={{ borderColor: BORDER }}
-                    >
-                      <span>{w}</span>
-                      <X
-                        className="w-4 h-4 cursor-pointer"
-                        style={{ color: ACCENT }}
-                        onClick={() => {
-                          const updated = deliveryWindows.filter((_, i) => i !== idx)
-                          setDeliveryWindows(updated)
-                          updatePreorderSettingsM({ deliveryWindows: updated })
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs" style={{ color: MUTE }}>
-                  No windows added yet
-                </p>
-              )}
-            </div>
-
-            {/* Pickup windows */}
-            <div
-              className="rounded-xl border p-4 space-y-3"
-              style={{ borderColor: BORDER, backgroundColor: SOFT }}
-            >
-              <FieldLabel icon={Clock}>Pickup time windows</FieldLabel>
-              <div className="flex gap-2">
-                <Input
-                  value={newPickupWindow}
-                  placeholder="e.g. 6pm - 8pm"
-                  className="h-11 rounded-xl text-base bg-white"
-                  style={{ borderColor: BORDER }}
-                  onChange={(e) => setNewPickupWindow(e.target.value)}
-                />
-                <Button
-                  className="rounded-xl text-white shrink-0"
-                  style={{ backgroundColor: ACCENT }}
-                  disabled={preorderLoading}
-                  onClick={() => {
-                    const w = newPickupWindow.trim()
-                    if (!w) return
-                    const updated = [...pickUpWindows, w]
-                    setPickupWindows(updated)
-                    setNewPickupWindow("")
-                    updatePreorderSettingsM({ pickUpWindows: updated })
-                  }}
-                >
-                  Add
-                </Button>
-              </div>
-              {pickUpWindows.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {pickUpWindows.map((w, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
-                      style={{ borderColor: BORDER }}
-                    >
-                      <span>{w}</span>
-                      <X
-                        className="w-4 h-4 cursor-pointer"
-                        style={{ color: ACCENT }}
-                        onClick={() => {
-                          const updated = pickUpWindows.filter((_, i) => i !== idx)
-                          setPickupWindows(updated)
-                          updatePreorderSettingsM({ pickUpWindows: updated })
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs" style={{ color: MUTE }}>
-                  No windows added yet
-                </p>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>

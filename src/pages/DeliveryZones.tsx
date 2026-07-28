@@ -248,8 +248,8 @@ export default function DeliveryZones({ restId }: RestProps) {
     const [fixRate,setFixRate]= useState(0)
     const [FixMinOrder,setFixMinOrder] = useState(0)
 
-  const updateFixRate = async(e)=>{
-    e.preventDefault()
+  const updateFixRate = async()=>{
+   
     try{
       const fixRateResponse = await fetch(`${import.meta.env.VITE_BACKEND_URL}/fix-rate/${restId}/update`,{
         method:'PUT',
@@ -277,7 +277,14 @@ export default function DeliveryZones({ restId }: RestProps) {
     onError:()=>toast.error('Could not update rate')
   })
 
-  // toggle between fixed-rate and area-based pricing
+  function handleFixRate(e:React.FormEvent<HTMLFormElement>){
+     e.preventDefault()
+     updateFixRateM()
+  }
+
+
+
+  
 
   const enableFixRate = async () => {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/fix-rate/enableFixRate`, {
@@ -369,7 +376,7 @@ export default function DeliveryZones({ restId }: RestProps) {
         </div>
 
         {FixQuery?.fixMode && (
-          <form onSubmit={updateFixRateM} className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5">
+          <form onSubmit={handleFixRate} className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5">
             <div className="flex-1 flex flex-col gap-y-1.5">
               <Label className="flex items-center gap-1.5">
                 <Wallet className="w-4 h-4 text-muted-foreground" />

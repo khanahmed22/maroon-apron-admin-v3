@@ -85,7 +85,7 @@ export default function PlaceOrder({ restId ,restName}:RestResponse) {
   const { cart, addCart, clearCart, deleteCart } = useCart();
 const [selections, setSelections] = useState<Record<string, Selection>>({});
 
-const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours} = UserAuth()
+const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled} = UserAuth()
  
   function generateOrderNumber(): number {
     return Date.now();

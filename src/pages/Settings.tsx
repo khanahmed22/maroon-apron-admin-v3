@@ -350,12 +350,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           ? restDetails?.getRest?.customDomain ?? ""
           : updateRest.customDomain
 
-      // Strip lat/long out of this payload — location has its own dedicated
-      // save flow (updateLocationM) driven from the map. If we included the
-      // lat/long snapshotted into `updateRest` here, saving profile info
-      // could silently overwrite a location the user just saved via the map,
-      // since `updateRest.lat/long` may be stale relative to the latest
-      // pickup-location update.
+      
       const { lat: _lat, long: _long, ...restFieldsWithoutLocation } = updateRest
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {

@@ -241,7 +241,7 @@ const setItemQuantity = (
   };
 
   const { data: InventQuery = [], isPending } = useQuery<InventProps[]>({
-    queryKey: ["inventoryforOrder"],
+    queryKey: ["inventory"],
     queryFn: fetchInventory,
     staleTime: 5 * 60 * 1000, //5min
     enabled:!!subdomain

@@ -106,7 +106,7 @@ export default function Dashboard() {
               style={{ borderColor: BORDER }}
             >
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+                className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 "
                 style={{ backgroundColor: SOFT, color: ACCENT }}
               >
                 <q.icon className="w-5 h-5" />

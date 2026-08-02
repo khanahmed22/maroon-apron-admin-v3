@@ -91,7 +91,7 @@ export default function MerchantApp() {
 
   if(appStatus?.status === 'submitted'){
     return (
-      <div>
+      <div className="flex items-center justify-center font-bold text-lg p-3 min-h-screen">
         <h1>Application Already submitted, wait for approval</h1>
       </div>
     )

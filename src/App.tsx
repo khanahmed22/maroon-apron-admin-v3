@@ -275,7 +275,7 @@ useEffect(() => {
                 element={<Settings restId={restId} />}
               />
               <Route
-                path="/merchant-app"
+                path="/verification"
                 element={<MerchantApp />}
               />
             </Route>

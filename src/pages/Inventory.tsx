@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -58,6 +58,8 @@ export default function Inventory({restId,restName}:restProps) {
   const [file, setFile] = useState<File | null>(null);
   const [search,setSearch] = useState<string>("")
 
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
 const [scanPreviewOpen, setScanPreviewOpen] = useState<boolean>(false);
 const [isUnderstandingMenu, setIsUnderstandingMenu] = useState<boolean>(false);
@@ -78,6 +80,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     description:"",
     category:"",
     stockAmount:0,
+    imageUrl:"",
     variants: [] as { variantName: string; variantPrice: number; variantCostPrice:number }[],
   });
   
@@ -95,9 +98,21 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     description:"",
     category:"",
     stockAmount:0,
+    imageUrl:"",
 
     variants: [] as { variantName: string; variantPrice: number,variantCostPrice:number }[],
   });
+
+  // generate/revoke a preview URL whenever a new local file is selected
+  useEffect(() => {
+    if (!file) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
   
   const fetchInventory = async () => {
     try {
@@ -109,6 +124,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
       return result?.data
     } catch (err) {
       console.log(err);
+      toast.error('Could not fetch Inventory, please try again later')
     }
   };
 
@@ -137,20 +153,26 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
   //add item
 
   const addItem = async (e: React.FormEvent<HTMLFormElement>) => {
-
-
     e.preventDefault();
     setLoading(true)
 
-      if (merchantStatus?.plan === "free" && inventQuery.length >= 5) {
-  throw new Error("Only 5 items are allowed in the free plan.");
-}
-      try {
-      let imageUrl = "";
-      let publicId = "";
-      
+    if (merchantStatus?.plan === "free" && inventQuery.length >= 5) {
+      toast.error("Only 5 items are allowed in the free plan.");
+      setLoading(false)
+      return
+    }
 
-  
+    if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
+      toast.error("Pro plan only allows 100 items");
+      setLoading(false)
+      return
+    }
+    try {
+      let imageUrl = addForm.imageUrl;
+      let publicId = "";
+
+
+
       if (file) {
         const formData = new FormData(); 
         formData.append("image", file);
@@ -164,7 +186,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
 
         const imageData = await uploadRes.json();
 
-        imageUrl = imageData.imageUrl,
+        imageUrl = imageData.imageUrl;
         publicId = imageData.publicId;
       
       }
@@ -203,6 +225,7 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     description:"",
     category:"",
     stockAmount:0,
+    imageUrl:"",
     variants: [],
   })
     } catch (err) {
@@ -223,8 +246,21 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     },
     onError: () => {
     toast.error('Item was not added');
+    setAddMode(false)
+    setLoading(false)
   },
   })
+
+  const itemCount = inventQuery.length;
+const maxItems =
+  merchantStatus?.plan === "free"
+    ? 5
+    : merchantStatus?.plan === "pro"
+    ? 100
+    : 0;
+
+const isLimitReached =
+  !!merchantStatus?.plan && itemCount >= maxItems;
 
   const addVariant = () => {
     setAddForm((prev) => ({
@@ -292,6 +328,10 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     toast.error("Only 5 items are allowed in the free plan.");
     return;
   }
+  if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
+  toast.error("Pro plan only allows 100 items");
+  return
+}
 
   const scanFile = e.target.files?.[0];
   if (!scanFile) return;
@@ -456,6 +496,10 @@ const saveCSVItems = async () => {
     toast.error("Only 5 items are allowed in the free plan.");
     return;
   }
+  if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
+  toast.error("Pro plan only allows 100 items")
+  return
+}
 
   setIsSavingCSV(true);
   setCSVProgress(0);
@@ -503,7 +547,7 @@ const saveCSVItems = async () => {
     setLoading(true)
 
     try {
-      let imageUrl = "";
+      let imageUrl = updateForm.imageUrl;
       let publicId = "";
 
       if (file) {
@@ -559,6 +603,9 @@ const saveCSVItems = async () => {
     },
     onError:()=>{
       toast.error('Item was not updated')
+     
+    setEditMode(false)
+    setLoading(false)
     }
   })
 
@@ -617,6 +664,7 @@ if (isPending) {
           </div>
           <div className="flex flex-col gap-y-3">
             <Button
+              disabled={isLimitReached}
               onClick={() => setAddMode(true)}
               className="h-11 rounded-xl gap-2 text-base text-white"
               style={{ backgroundColor: ACCENT }}
@@ -625,46 +673,45 @@ if (isPending) {
               Add Item
             </Button>
             <div className="flex flex-col sm:flex-row gap-3">
-  <div className="relative flex-1 sm:flex-none">
-    <input
-      type="file"
-      accept="image/*,.pdf"
-      onChange={handleScanUpload}
-      className="absolute inset-0 opacity-0 cursor-pointer"
-    />
+              <div className="relative flex-1 sm:flex-none">
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={handleScanUpload}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
 
-    <Button
-      variant="outline"
-      className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none"
-      style={{ borderColor: BORDER }}
-    >
-      <ScanIcon className="w-4.5 h-4.5" />
-      Scan Menu
-    </Button>
-  </div>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none"
+                  style={{ borderColor: BORDER }}
+                >
+                  <ScanIcon className="w-4.5 h-4.5" />
+                  Scan Menu
+                </Button>
+              </div>
 
-  <div className="relative flex-1 sm:flex-none">
-    <input
-      type="file"
-      accept=".csv"
-      
-      className="absolute inset-0 opacity-0 cursor-pointer"
-      onChange={(e) => {
-        const file = e.target.files?.[0];
-        if (file) handleCSVUpload(file);
-      }}
-    />
+              <div className="relative flex-1 sm:flex-none">
+                <input
+                  type="file"
+                  accept=".csv"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleCSVUpload(file);
+                  }}
+                />
 
-    <Button
-      variant="outline"
-      className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none"
-      style={{ borderColor: BORDER }}
-    >
-      <FileSpreadsheet className="w-4.5 h-4.5" />
-      <span>Import CSV</span>
-    </Button>
-  </div>
-</div>
+                <Button
+                  variant="outline"
+                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none"
+                  style={{ borderColor: BORDER }}
+                >
+                  <FileSpreadsheet className="w-4.5 h-4.5" />
+                  <span>Import CSV</span>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -850,25 +897,31 @@ if (isPending) {
                   <span className="text-lg font-bold" style={{ color: INK }}>
                     {inv.name}
                   </span>
-                 {inv.variants?.length > 0 ? (
-  <div>
-    Starting from Rs.{" "}
-    {Math.min(...inv.variants.map(v => v.variantPrice))}
-  </div>
-) : (
-  <span
-    className="text-lg font-bold shrink-0"
-    style={{ color: ACCENT }}
-  >
-    Rs: {inv.price}
-  </span>
-)}
-                  
                   <span
-                    className="text-sm font-bold shrink-0"
-                    style={{ color: ACCENT }}
+                    className="text-sm font-semibold shrink-0"
+                    style={{ color: MUTE }}
                   >
-                    Description: {inv.description || ""}
+                    In Stock: {inv.stockAmount || 0}
+                  </span>
+                  {inv.variants?.length > 0 ? (
+                    <div>
+                      Starting from Rs.{" "}
+                      {Math.min(...inv.variants.map((v) => v.variantPrice))}
+                    </div>
+                  ) : (
+                    <span
+                      className="text-lg font-bold shrink-0"
+                      style={{ color: ACCENT }}
+                    >
+                      Rs: {inv.price}
+                    </span>
+                  )}
+
+                  <span
+                    className="text-sm shrink-0"
+                    
+                  >
+                    <span className="font-bold">Description:</span> {inv.description || ""}
                   </span>
                   <span
                     className="text-sm font-bold shrink-0"
@@ -876,18 +929,12 @@ if (isPending) {
                   >
                     Cost Price Rs: {inv.costPrice || ""}
                   </span>
-                  <span
-                    className="text-sm font-semibold shrink-0"
-                    style={{ color: MUTE }}
-                  >
-                    In Stock: {inv.stockAmount || 0}
-                  </span>
                 </div>
 
                 {inv?.category && (
                   <span
-                    className="inline-block w-fit text-sm font-medium px-2.5 py-1 rounded-full mb-3"
-                    style={{ backgroundColor: SOFT, color: MUTE }}
+                    className="inline-block w-fit text-sm font-medium p-2 rounded-full mb-3 bg-red-500 text-white"
+                   
                   >
                     {inv.category}
                   </span>
@@ -901,7 +948,8 @@ if (isPending) {
                         className="text-sm font-medium px-2.5 py-1 rounded-full border"
                         style={{ borderColor: BORDER, color: MUTE }}
                       >
-                        {v.variantName} · Rs. {v.variantPrice} · CostPrice:{v.variantCostPrice}
+                        {v.variantName} · Rs. {v.variantPrice} · Cost Price:
+                        {v.variantCostPrice}
                       </span>
                     ))}
                   </div>
@@ -913,6 +961,7 @@ if (isPending) {
                     className="flex-1 rounded-xl gap-2 text-base"
                     onClick={() => {
                       setEditMode(true);
+                      setFile(null);
                       setupdateForm({
                         id: inv.id,
                         userId: session?.id,
@@ -922,10 +971,11 @@ if (isPending) {
                         description: inv.description,
                         category: inv.category,
                         stockAmount: inv.stockAmount,
+                        imageUrl: inv.imageUrl,
                         variants: inv.variants.map((v) => ({
                           variantName: v.variantName,
                           variantPrice: v.variantPrice,
-                          variantCostPrice:v.variantCostPrice
+                          variantCostPrice: v.variantCostPrice,
                         })),
                       });
                     }}
@@ -960,7 +1010,10 @@ if (isPending) {
       )}
 
       {/* ================= ADD ITEM ================= */}
-      <Dialog open={addMode} onOpenChange={setAddMode}>
+      <Dialog open={addMode} onOpenChange={(open) => {
+        setAddMode(open);
+        if (!open) setFile(null);
+      }}>
         <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Add an Item</DialogTitle>
@@ -988,7 +1041,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Item Price - Leave Blank if variants exists</Label>
+              <Label>Item Price - Leave 0 if variants exists</Label>
               <Input
                 placeholder="Enter price"
                 type="number"
@@ -1006,7 +1059,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Cost Price</Label>
+              <Label>Cost Price - Leave 0 if variants exists</Label>
               <Input
                 placeholder="Enter Cost Price"
                 type="number"
@@ -1077,6 +1130,14 @@ if (isPending) {
 
             <div className="flex flex-col gap-y-1.5">
               <Label>Image</Label>
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt="Preview"
+                  className="w-full h-40 object-cover rounded-xl border"
+                  style={{ borderColor: BORDER }}
+                />
+              )}
               <label
                 className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                 style={{ borderColor: BORDER, color: MUTE }}
@@ -1097,9 +1158,10 @@ if (isPending) {
                 {addForm.variants.map((variant, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 rounded-xl border p-3"
+                    className="flex flex-col items-center gap-2 rounded-xl border p-3"
                     style={{ borderColor: BORDER }}
                   >
+                    <Label>Variant Name</Label>
                     <Input
                       placeholder="Variant name"
                       value={variant.variantName}
@@ -1111,11 +1173,12 @@ if (isPending) {
                         setAddForm({ ...addForm, variants: updated });
                       }}
                     />
+                    <Label>Variant Price</Label>
                     <Input
                       type="number"
                       placeholder="Variant Price"
                       value={variant.variantPrice}
-                      className="h-10 rounded-lg text-base w-28 shrink-0"
+                      className="h-10 rounded-lg text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) => {
                         const updated = [...addForm.variants];
@@ -1123,16 +1186,18 @@ if (isPending) {
                         setAddForm({ ...addForm, variants: updated });
                       }}
                     />
-
+                    <Label>Variant Cost Price</Label>
                     <Input
                       type="number"
                       placeholder="Variant Cost Price"
                       value={variant.variantCostPrice}
-                      className="h-10 rounded-lg text-base w-28 shrink-0"
+                      className="h-10 rounded-lg text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) => {
                         const updated = [...addForm.variants];
-                        updated[index].variantCostPrice = Number(e.target.value);
+                        updated[index].variantCostPrice = Number(
+                          e.target.value,
+                        );
                         setAddForm({ ...addForm, variants: updated });
                       }}
                     />
@@ -1163,7 +1228,10 @@ if (isPending) {
             <div className="flex gap-3 mt-2">
               <button
                 type="button"
-                onClick={() => setAddMode(false)}
+                onClick={() => {
+                  setAddMode(false);
+                  setFile(null);
+                }}
                 className="flex-1 h-11 rounded-xl border text-base font-medium"
                 style={{ borderColor: BORDER, color: INK }}
               >
@@ -1337,7 +1405,10 @@ if (isPending) {
       </Dialog>
 
       {/* ================= UPDATE ITEM ================= */}
-      <Dialog open={editMode} onOpenChange={setEditMode}>
+      <Dialog open={editMode} onOpenChange={(open) => {
+        setEditMode(open);
+        if (!open) setFile(null);
+      }}>
         <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Update Item</DialogTitle>
@@ -1454,6 +1525,14 @@ if (isPending) {
 
             <div className="flex flex-col gap-y-1.5">
               <Label>Image</Label>
+              {(previewUrl || updateForm.imageUrl) && (
+                <img
+                  src={previewUrl || updateForm.imageUrl}
+                  alt="Preview"
+                  className="w-full h-40 object-cover rounded-xl border"
+                  style={{ borderColor: BORDER }}
+                />
+              )}
               <label
                 className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                 style={{ borderColor: BORDER, color: MUTE }}
@@ -1474,9 +1553,10 @@ if (isPending) {
                 {updateForm.variants.map((variant, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 rounded-xl border p-3"
+                    className="flex flex-col items-center gap-2 rounded-xl border p-3"
                     style={{ borderColor: BORDER }}
                   >
+                    <Label>Variant Name</Label>
                     <Input
                       placeholder="Variant name"
                       value={variant.variantName}
@@ -1488,11 +1568,12 @@ if (isPending) {
                         setupdateForm({ ...updateForm, variants: updated });
                       }}
                     />
+                    <Label>Variant Price</Label>
                     <Input
                       type="number"
                       placeholder="Variant Price"
                       value={variant.variantPrice}
-                      className="h-10 rounded-lg text-base w-28 shrink-0"
+                      className="h-10 rounded-lg text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) => {
                         const updated = [...updateForm.variants];
@@ -1500,16 +1581,18 @@ if (isPending) {
                         setupdateForm({ ...updateForm, variants: updated });
                       }}
                     />
-
+                    <Label>Variant Cost Price</Label>
                     <Input
                       type="number"
                       placeholder="Variant Cost Price"
                       value={variant.variantCostPrice}
-                      className="h-10 rounded-lg text-base w-28 shrink-0"
+                      className="h-10 rounded-lg text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) => {
                         const updated = [...updateForm.variants];
-                        updated[index].variantCostPrice = Number(e.target.value);
+                        updated[index].variantCostPrice = Number(
+                          e.target.value,
+                        );
                         setupdateForm({ ...updateForm, variants: updated });
                       }}
                     />
@@ -1540,7 +1623,10 @@ if (isPending) {
             <div className="flex gap-3 mt-2">
               <button
                 type="button"
-                onClick={() => setEditMode(false)}
+                onClick={() => {
+                  setEditMode(false);
+                  setFile(null);
+                }}
                 className="flex-1 h-11 rounded-xl border text-base font-medium"
                 style={{ borderColor: BORDER, color: INK }}
               >

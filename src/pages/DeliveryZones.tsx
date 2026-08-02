@@ -109,6 +109,11 @@ export default function DeliveryZones({ restId }: RestProps) {
 
       setForm(EMPTY_FORM);
     },
+    onError:()=>{
+      toast.error('Invalid Input')
+      setDialogOpen(false)
+      
+    }
   });
 
   const deleteArea = useMutation({

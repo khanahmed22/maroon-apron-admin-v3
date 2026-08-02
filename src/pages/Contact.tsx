@@ -143,8 +143,8 @@ export default function ContactUs() {
 
             <Card className="border-0 shadow-lg">
               <CardHeader className="text-center">
-                <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Phone className="w-6 h-6 text-secondary" />
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Phone className="w-6 h-6 text-primary" />
                 </div>
                 <CardTitle className="font-heading">Phone</CardTitle>
               </CardHeader>

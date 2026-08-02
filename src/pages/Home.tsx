@@ -59,7 +59,7 @@ interface Feature {
   icon: LucideIcon;
   title: string;
   body: string;
-  videoId: string;
+  imageId: string;
 }
 
 interface Plan {
@@ -99,7 +99,7 @@ interface ButtonProps extends HTMLMotionProps<"button"> {
 }
 
 interface FeaturePreviewProps {
-  videoId: string;
+  imageId: string;
   title: string;
 }
 
@@ -115,13 +115,8 @@ const SOFT = "#FBF7F6";
 const DEMO_STORE_URL = "https://pizzatown.crimsoncastle.shop";
 
 
-const CLOUD_NAME = "dkkvyxpdc";
-const cldVideo = (
-  id: string,
-  w: number = 900,
-  h: number = 560
-): string =>
-  `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/q_auto,c_fill,w_${w},h_${h}/${id}.webm`;
+const CLOUD_NAME = "dgmfm08s8";
+
 
 const cldImage = (
   id: string,
@@ -192,37 +187,37 @@ const FEATURES :Feature[]= [
     icon: LayoutDashboard,
     title: "Order management",
     body: "Orders come in as they're placed. Move each one from received to preparing to dispatched.",
-    videoId: "Live_Orders_lt53hy",
+    imageId: "Orders_od5unj",
   },
   {
     icon: Boxes,
     title: "Inventory tracking",
     body: "Stock levels update as orders come in, so you know what's running low.",
-    videoId: "Inventory_htfojx",
+    imageId: "Inventory_o0yda9",
   },
   {
     icon: ShoppingBag,
     title: "Place an order",
     body: "Add an order yourself from the dashboard when a customer orders by phone.",
-    videoId: "Place_Order_amjwki",
+    imageId: "PlaceOrder_zm6b17",
   },
   {
     icon: MapPin,
     title: "Delivery zones",
     body: "Set the areas you deliver to and the charge for each one.",
-    videoId: "Delivery_Charges_bvj6ae",
+    imageId: "DeliveryZones_qxutne",
   },
   {
     icon: Ticket,
     title: "Coupons",
     body: "Create discount codes for promotions without doing the math by hand.",
-    videoId: "Coupon_b4kkvo",
+    imageId: "Coupon_llt3ya",
   },
   {
     icon: Palette,
     title: "Store styling",
     body: "Set your store's colors and logo so it looks like your business, not a template.",
-    videoId: "Settings_njbvmq",
+    imageId: "Settings_i6fe8e",
   },
 ];
 
@@ -247,7 +242,7 @@ const PLANS:Plan[] = [
     features: [
       "100 products",
       "Advanced order management",
-      "Low-stock alerts",
+      
       "Custom domain",
       "Priority support",
       "No Crimson Castle branding",
@@ -369,20 +364,15 @@ function SecondaryButton({ children, className = "", ...props }:ButtonProps) {
   );
 }
 
-/** A muted, autoplaying loop of the real product screen for a feature card. */
-function FeaturePreview({ videoId, title }:FeaturePreviewProps) {
+
+function FeaturePreview({ imageId, title }:FeaturePreviewProps) {
   return (
-    <video
-      src={cldVideo(videoId)}
-      className="mt-auto pt-2 w-full rounded-xl border object-cover aspect-video"
-      style={{ borderColor: BORDER }}
-      autoPlay
-      loop
-      muted
-      playsInline
-      preload="metadata"
-      aria-label={`${title} preview`}
-    />
+    <img
+                src={cldImage(imageId)}
+                alt={title}
+                className="w-full h-72 object-contain"
+                loading="eager"
+              />
   );
 }
 
@@ -419,7 +409,12 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 h-18 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white overflow-hidden" style={{ backgroundColor: ACCENT }}>
-              <img src="/cc.jpg" alt="Crimson Castle logo" className="rounded-sm w-full h-full object-cover" />
+              <img
+                src={cldImage("cc_p878bp")}
+                alt="Crimson Castle logo"
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
             </div>
             <span className="font-bold text-[15px]">Crimson Castle</span>
           </div>
@@ -678,15 +673,12 @@ export default function Home() {
                 A customer-facing store where people browse your menu and place
                 orders directly, without going through a chat.
               </p>
-              <video
-                src={cldVideo("Place_Order_amjwki")}
-                className="mt-auto w-full rounded-xl border object-cover aspect-video"
+              <img
+                src={cldImage("Storefront_kwawka")}
+                className="mt-auto w-full rounded-xl border object-contain h-72"
                 style={{ borderColor: BORDER }}
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="metadata"
+                
+                
               />
             </div>
           </Reveal>
@@ -701,9 +693,9 @@ export default function Home() {
                 day-to-day operations of the business, in one screen.
               </p>
               <img
-                src={cldImage("dashboard_h9ikdc")}
+                src={cldImage("dashboard_nsmx8x")}
                 alt="Crimson Castle admin dashboard"
-                className="mt-auto w-full rounded-xl border object-cover aspect-video"
+                className="mt-auto w-full h-72 rounded-xl border object-contain "
                 style={{ borderColor: BORDER }}
                 loading="lazy"
               />
@@ -740,7 +732,7 @@ export default function Home() {
         <Reveal>
           <SectionHeading eyebrow="Features" title="What you get" subtitle="The tools needed to run a food business, without the extra clutter." />
         </Reveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
           {FEATURES.map((f, i) => (
             <Reveal key={f.title} delay={(i % 3) * 0.05}>
               <div className="p-6 rounded-2xl border h-full flex flex-col" style={{ borderColor: BORDER }}>
@@ -749,7 +741,7 @@ export default function Home() {
                 </div>
                 <h3 className="font-semibold text-[15px] mb-2">{f.title}</h3>
                 <p className="text-sm leading-[1.7] mb-4" style={{ color: MUTE }}>{f.body}</p>
-                <FeaturePreview videoId={f.videoId} title={f.title} />
+                <FeaturePreview imageId={f.imageId} title={f.title} />
               </div>
             </Reveal>
           ))}
@@ -786,16 +778,12 @@ export default function Home() {
                 <span className="text-xs ml-2" style={{ color: MUTE }}>{DEMO_STORE_URL.replace("https://", "")}</span>
               </div>
               {/* Swap this for a real storefront screenshot once you have one */}
-              <a
-                href={DEMO_STORE_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="h-40 flex flex-col items-center justify-center gap-2 hover:bg-black/2 transition-colors"
-                style={{ color: MUTE }}
-              >
-                <Store size={28} style={{ color: ACCENT }} />
-                <p className="text-sm">Opens in a new tab</p>
-              </a>
+              <img
+                src={cldImage('Storefront_kwawka')}
+                alt='demo store'
+                className="w-full h-full object-fit"
+                loading="eager"
+              />
             </div>
           </div>
         </Reveal>
@@ -924,7 +912,12 @@ export default function Home() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden" style={{ backgroundColor: ACCENT }}>
-                <img src="/cc.jpg" alt="Crimson Castle logo" className="w-full h-full object-cover" />
+                <img
+                src={cldImage("cc_p878bp")}
+                alt="Crimson Castle logo"
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
               </div>
               <span className="font-bold text-[15px]">Crimson Castle</span>
             </div>
@@ -971,6 +964,7 @@ export default function Home() {
           <div>
             <h4 className="font-semibold text-sm mb-4">Contact</h4>
             <ul className="space-y-2.5 text-sm" style={{ color: MUTE }}>
+              <li><a href="/contact" className="hover:underline hover:text-red-500">Contact Us</a></li>
               <li>Mon–Fri, 9am–6pm PKT</li>
               <li className="flex items-center gap-2"><Mail size={14} /> info@crimsoncastle.biz</li>
               <li className="flex items-center gap-2"><Phone size={14} /> 0334-8204806</li>

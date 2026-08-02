@@ -25,6 +25,7 @@ import {
   PartyPopper,
   Clock,
   X,
+  BadgeCheck
 } from "lucide-react"
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
 import type { ThemeName } from "../lib/themes"
@@ -79,7 +80,8 @@ interface RestListProps {
   pickUpWindows:string[]
   deliveryWindows:string[]
   lat:number,
-  long:number
+  long:number,
+  crimsonBranding:boolean
 }
 interface RestResponse {
   getRest: RestListProps
@@ -172,7 +174,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   const [newWindow, setNewWindow] = useState("");
 
   const [newPickupWindow, setNewPickupWindow] = useState("");
-
+  const [crimsonBranding,setCrimsonBranding] = useState(true)
   
   const queryClient = useQueryClient()
 
@@ -215,7 +217,8 @@ export default function Settings({ restId }: { restId: string | null }) {
     pickUpWindows: [],
     deliveryWindows: [],
     lat:0,
-    long:0
+    long:0,
+    crimsonBranding:true
   })
   const { session, subdomain } = UserAuth()
 
@@ -307,7 +310,8 @@ export default function Settings({ restId }: { restId: string | null }) {
       pickUpWindows: restDetails.getRest.pickUpWindows ?? [],
       deliveryWindows: restDetails.getRest.deliveryWindows ?? [],
       lat:restDetails.getRest.lat ?? 0,
-      long:restDetails.getRest.long ?? 0
+      long:restDetails.getRest.long ?? 0,
+      crimsonBranding:restDetails.getRest.crimsonBranding ?? true
     })
 
     setEditMode(true)
@@ -421,6 +425,46 @@ export default function Settings({ restId }: { restId: string | null }) {
       toast.error("Failed to update preorder settings")
     },
   })
+
+  //enable disable branding
+  
+  const enableBranding = async (enabled: boolean) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: restId,
+      crimsonBranding: enabled,
+    }),
+  });
+
+  return res.json();
+};
+
+ const { mutate: enableBrandM } = useMutation({
+  mutationKey: ["enableBranding"],
+  mutationFn: enableBranding,
+  onSuccess: () => {
+    toast.success("Branding updated");
+
+    queryClient.invalidateQueries({
+      queryKey: ["restDetails"],
+    });
+  },
+  onError: () => {
+    toast.error("Branding not updated");
+  },
+});
+
+ function handleBranding() {
+  const newValue = !crimsonBranding;
+
+  setCrimsonBranding(newValue);
+  enableBrandM(newValue);
+}
 
   const lat = restDetails?.getRest?.lat || 0
   const long = restDetails?.getRest?.long || 0
@@ -856,6 +900,46 @@ export default function Settings({ restId }: { restId: string | null }) {
           </div>
         )}
 
+        
+
+<div className="bg-white rounded-2xl border p-6 mt-6">
+  <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <BadgeCheck className="w-5 h-5 text-red-500" />
+        <h2 className="text-lg font-bold text-gray-900">
+          Crimson Castle Branding
+        </h2>
+      </div>
+
+      <p className="text-sm text-gray-500">
+        {isFreePlan
+          ? "Upgrade to Pro to remove the 'Powered by Crimson Castle' footer from your storefront."
+          : crimsonBranding
+          ? "Your storefront currently displays the 'Powered by Crimson Castle' footer."
+          : "The 'Powered by Crimson Castle' footer has been removed from your storefront."}
+      </p>
+    </div>
+
+    {isFreePlan ? (
+      <Button
+        disabled
+        variant="outline"
+        className="rounded-xl"
+      >
+        Pro Required
+      </Button>
+    ) : (
+      <Button
+        onClick={handleBranding}
+        className="rounded-xl min-w-40"
+        variant={crimsonBranding ? "destructive" : "destructive"}
+      >
+        {crimsonBranding ? "Remove Branding" : "Enable Branding"}
+      </Button>
+    )}
+  </div>
+</div>
         {/* ================= PICKUP LOCATION ================= */}
         <div
           className="bg-white rounded-2xl border p-6 mt-6"

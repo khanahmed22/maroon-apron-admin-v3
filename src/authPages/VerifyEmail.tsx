@@ -10,12 +10,17 @@ export default function VerifyEmail() {
     const verify = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/auth/verify-email/${role}/${token}`
+          `${import.meta.env.VITE_BACKEND_URL}/auth/verify-email/${role}/${token}`,
         );
-
         const data = await res.json();
-        console.log(data);
-        navigate('/login')
+        console.log(res.status, data);
+
+        if (!res.ok) {
+          console.error("Verification failed:", data);
+
+          return;
+        }
+        navigate("/login");
       } catch (err) {
         console.error(err);
       }

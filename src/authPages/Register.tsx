@@ -32,7 +32,7 @@ const SOFT = "#FBF7F6"
     return;
   }
     const role ='merchant'
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, 
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register-merchant`, 
       {
         method:'POST',
         credentials: "include",

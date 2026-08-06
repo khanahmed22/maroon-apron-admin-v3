@@ -3,7 +3,6 @@ import { useNavigate } from "react-router"
 import { UserAuth } from "../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner";
-import { Button } from "../components/ui/button";
 
 export default function Login(){
   const {session,checkAuth} = UserAuth()

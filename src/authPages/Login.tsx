@@ -3,6 +3,7 @@ import { useNavigate } from "react-router"
 import { UserAuth } from "../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner";
+import { Button } from "../components/ui/button";
 
 export default function Login(){
   const {session,checkAuth} = UserAuth()
@@ -49,7 +50,9 @@ const SOFT = "#FBF7F6"
   }
   if(session){
     return(
-      <div className="flex font-bold text-lg min-h-screen items-center justify-center"><p>You are already Signed In</p></div>
+      <div className="flex font-bold flex-col gap-y-4 text-lg min-h-screen items-center justify-center"><p>You are already Signed In</p>
+      <button  className="text-white p-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity mt-1"
+          style={{ backgroundColor: ACCENT }} onClick={()=>navigate('/dashboard')}>Go to Dashboard</button></div>
     )
   }
   return(

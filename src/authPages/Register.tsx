@@ -2,12 +2,14 @@ import { useState } from "react"
 import { UserAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
+import { useNavigate } from "react-router";
 
 export default function Register(){
   const [name,setName] = useState<string>("")
   const [email,setEmail] = useState<string>("")
   const [password,setPassword] = useState<string>("")
   const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
 
   const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -53,7 +55,9 @@ const SOFT = "#FBF7F6"
 
   if(session){
     return(
-      <div className="flex font-bold text-lg min-h-screen items-center justify-center"><p>You are already Signed In</p></div>
+      <div className="flex font-bold flex-col gap-y-4 text-lg min-h-screen items-center justify-center"><p>You are already Signed In</p>
+      <button  className="text-white p-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity mt-1"
+          style={{ backgroundColor: ACCENT }} onClick={()=>navigate('/dashboard')}>Go to Dashboard</button></div>
     )
   }
   return(

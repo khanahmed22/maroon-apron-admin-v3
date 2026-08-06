@@ -24,7 +24,7 @@ export default function VerifyEmail() {
     if (token) verify();
   }, [token]);
 
-  return <div className="flex items-center justify-center font-bold text-2xl">
+  return <div className="flex items-center justify-center font-bold text-2xl min-h-screen">
     <h1>Verifying Email....</h1>
   </div>;
 }

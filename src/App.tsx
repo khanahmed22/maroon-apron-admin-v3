@@ -176,7 +176,7 @@ useEffect(() => {
           <Route path="/register" element={<Register />} />
           
           <Route
-            path="/verify-email/:token"
+            path="/verify-email/merchant/:token"
             element={<VerifyEmail />}
           />
 

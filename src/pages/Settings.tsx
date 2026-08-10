@@ -37,6 +37,8 @@ import {
   SelectValue,
 } from "../components/ui/select"
 import Map from "./Map"
+import * as Sentry from "@sentry/react";
+
 
 
 const ACCENT = "#D6293F"
@@ -378,7 +380,9 @@ export default function Settings({ restId }: { restId: string | null }) {
       setEditMode(false)
       return await res.json()
     } catch (err) {
-      console.log(err)
+      Sentry.captureException(err);
+      throw err;
+
     }
   }
 

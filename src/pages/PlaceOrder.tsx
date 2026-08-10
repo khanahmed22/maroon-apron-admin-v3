@@ -43,9 +43,9 @@ interface CustomerProps {
   orderTotal: number;
   deliveryArea:string
   deliveryFee:string
-  discountAmount: String,
+  discountAmount: string,
   isPreOrder:boolean,
-  scheduledDate: string,
+  scheduledDate: string | null,
   scheduledWindow: string,
   
 }
@@ -130,7 +130,7 @@ const setItemQuantity = (
     orderTotal: 0,
     discountAmount: "",
     isPreOrder: false,
-    scheduledDate: "",
+    scheduledDate: null,
     scheduledWindow: "",
     
   });
@@ -847,7 +847,7 @@ const SUCCESS = "#16A34A"
             setCustDetails({
               ...custDetails,
               isPreOrder: e.target.checked,
-              scheduledDate: "",
+              scheduledDate: null,
               scheduledWindow: "",
             })
           }
@@ -859,7 +859,7 @@ const SUCCESS = "#16A34A"
         <>
           <Input
             type="date"
-            value={custDetails.scheduledDate}
+            value={custDetails.scheduledDate ?? ""}
             onChange={(e) =>
               setCustDetails({
                 ...custDetails,

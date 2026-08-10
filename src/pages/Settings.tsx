@@ -37,9 +37,8 @@ import {
   SelectValue,
 } from "../components/ui/select"
 import Map from "./Map"
+
 import * as Sentry from "@sentry/react";
-
-
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -380,9 +379,7 @@ export default function Settings({ restId }: { restId: string | null }) {
       setEditMode(false)
       return await res.json()
     } catch (err) {
-      Sentry.captureException(err);
-      throw err;
-
+      console.log(err)
     }
   }
 
@@ -1213,6 +1210,13 @@ export default function Settings({ restId }: { restId: string | null }) {
           </div>
         </div>
       </div>
+      <button
+      onClick={() => {
+        throw new Error('This is your first error!');
+      }}
+    >
+      Break the world
+    </button>
     </div>
   )
 }

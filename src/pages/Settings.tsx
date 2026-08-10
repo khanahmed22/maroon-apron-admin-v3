@@ -1211,9 +1211,13 @@ export default function Settings({ restId }: { restId: string | null }) {
         </div>
       </div>
       <button
-      onClick={() => {
-        throw new Error('This is your first error!');
-      }}
+     onClick={() => {
+  const error = new Error("Test Sentry error");
+
+  Sentry.captureException(error);
+
+  throw error;
+}}
     >
       Break the world
     </button>

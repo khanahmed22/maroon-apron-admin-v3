@@ -363,7 +363,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
       <div className="max-w-7xl mx-auto">
       
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-3xl font-extrabold" style={{ color: INK }}>
+          <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
             Analytics
           </h1>
           <Button

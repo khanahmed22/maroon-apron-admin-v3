@@ -640,9 +640,9 @@ if (isPending) {
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-3xl font-extrabold" style={{ color: INK }}>
+        <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
           Inventory{" "}
-          <span className="text-lg font-medium bg-slate-200 p-2 rounded-lg">
+          <span className="text-lg max-md:text-sm font-medium bg-slate-200 p-2 rounded-lg">
             {inventQuery?.length || 0} items
           </span>
         </h1>

@@ -417,7 +417,7 @@ export default function DeliveryZones({ restId }: RestProps) {
       {!FixQuery?.fixMode && (
         <>
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>
+            <h1 className="text-3xl max-md:text-xl font-extrabold mb-6" style={{ color: INK }}>
               Delivery Zones
             </h1>
             <Button

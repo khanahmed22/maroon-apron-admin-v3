@@ -55,14 +55,14 @@ export default function Customers({ restId }: RestResponse) {
     )
   }
 
-  console.log(subdomain)
+
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
       <div className=" ">
         <div className="flex items-start justify-start gap-2 mb-6">
           
-          <h1 className="text-3xl font-extrabold" style={{ color: INK }}>
+          <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
             Your Customers
           </h1>
         </div>

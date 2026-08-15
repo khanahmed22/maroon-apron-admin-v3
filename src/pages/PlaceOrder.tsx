@@ -419,7 +419,7 @@ const SUCCESS = "#16A34A"
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
-      <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>
+      <h1 className="text-3xl max-md:text-xl font-extrabold mb-6" style={{ color: INK }}>
         Place Order
       </h1>
  

@@ -4,7 +4,13 @@ import { useQuery } from "@tanstack/react-query"
 import { initPaddle } from "../lib/paddle"
 import { toast } from "sonner"
 import { useState } from "react"
-import { Mail, LogOut, ShieldCheck, ShieldAlert, Crown, Loader2, CreditCard } from "lucide-react"
+import {
+  Mail,
+  LogOut,
+  Crown,
+  Loader2,
+  CreditCard,
+} from "lucide-react"
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -19,15 +25,20 @@ export default function Account() {
 
   const fetchLogout = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/logout`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+
       const data = await res.json()
       console.log(data)
+
       await checkAuth()
       navigate("/login")
     } catch (err) {
@@ -36,12 +47,17 @@ export default function Account() {
   }
 
   const getPaymentStatus = async () => {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/paddle/account`, {
-      credentials: "include",
-    })
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/paddle/account`,
+      {
+        credentials: "include",
+      }
+    )
+
     if (!res.ok) {
       throw new Error("Failed to fetch account")
     }
+
     return res.json()
   }
 
@@ -56,15 +72,22 @@ export default function Account() {
       toast.error("No active subscription")
       return
     }
+
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/paddle/create-paddle-link`, {
-        method: "POST",
-        credentials: "include",
-      })
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/paddle/create-paddle-link`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      )
+
       if (!res.ok) {
         throw new Error("Failed to create portal")
       }
+
       const { url } = await res.json()
+
       window.location.href = url
     } catch (err) {
       console.error(err)
@@ -75,15 +98,19 @@ export default function Account() {
   const handlePaddleCheckout = async () => {
     try {
       setLoading(true)
+
       const paddle = await initPaddle()
+
       if (!paddle) {
-  toast.error("Failed to initialize Paddle");
-  return;
-}
-if (!session?.email || !session?.id) {
-  toast.error("Please sign in again.");
-  return;
-}
+        toast.error("Failed to initialize Paddle")
+        return
+      }
+
+      if (!session?.email || !session?.id) {
+        toast.error("Please sign in again.")
+        return
+      }
+
       paddle.Checkout.open({
         items: [
           {
@@ -92,10 +119,10 @@ if (!session?.email || !session?.id) {
           },
         ],
         customer: {
-          email: session?.email,
+          email: session.email,
         },
         customData: {
-          userId: session?.id,
+          userId: session.id,
         },
       })
     } catch (err) {
@@ -111,161 +138,175 @@ if (!session?.email || !session?.id) {
       handlePaddleCheckout()
       return
     }
+
     handleManageSubscription()
   }
 
   const isPro = merchantStatus?.plan === "pro"
-  const isVerified = !!merchantStatus?.merchant_verify
 
   if (isPending) {
-      return (
-        <div
-          className="min-h-screen flex flex-col items-center justify-center gap-3"
-          style={{ color: MUTE }}
-        >
-          <Loader2 className="w-8 h-8 animate-spin" style={{ color: ACCENT }} />
-          <p className="text-sm font-medium">Loading Account…</p>
-        </div>
-      )
-    }
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-3"
+        style={{ color: MUTE }}
+      >
+        <Loader2
+          className="w-8 h-8 animate-spin"
+          style={{ color: ACCENT }}
+        />
+
+        <p className="text-sm font-medium">
+          Loading Account…
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen px-4 py-6 sm:p-6" style={{ backgroundColor: SOFT }}>
-  <div className="max-w-md w-full mx-auto">
-    {/* ================= HEADER ================= */}
     <div
-      className="bg-white rounded-2xl border p-5 sm:p-6 mb-6"
-      style={{ borderColor: BORDER }}
+      className="min-h-screen px-4 py-6 sm:p-6"
+      style={{ backgroundColor: SOFT }}
     >
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: SOFT, color: ACCENT }}
-          >
-            <Mail className="w-5 h-5" />
-          </div>
+      <div className="max-w-md w-full mx-auto">
 
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium" style={{ color: MUTE }}>
-              Signed in as
-            </p>
-            <p
-              className="font-bold text-sm sm:text-base truncate"
-              style={{ color: INK }}
+        {/* ================= HEADER ================= */}
+        <div
+          className="bg-white rounded-2xl border p-5 sm:p-6 mb-6"
+          style={{ borderColor: BORDER }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  backgroundColor: SOFT,
+                  color: ACCENT,
+                }}
+              >
+                <Mail className="w-5 h-5" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p
+                  className="text-xs font-medium"
+                  style={{ color: MUTE }}
+                >
+                  Signed in as
+                </p>
+
+                <p
+                  className="font-bold text-sm sm:text-base truncate"
+                  style={{ color: INK }}
+                >
+                  {session?.email}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={fetchLogout}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border hover:bg-black/5 transition-colors"
+              style={{
+                borderColor: BORDER,
+                color: INK,
+              }}
             >
-              {session?.email}
-            </p>
+              <LogOut className="w-4 h-4" />
+              Log Out
+            </button>
           </div>
         </div>
 
-        <button
-          onClick={() => fetchLogout()}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border hover:bg-black/5 transition-colors"
-          style={{ borderColor: BORDER, color: INK }}
+        {/* ================= ACCOUNT DETAILS ================= */}
+        <div
+          className="bg-white rounded-2xl border p-5 sm:p-6 mb-6"
+          style={{ borderColor: BORDER }}
         >
-          <LogOut className="w-4 h-4" />
-          Log Out
-        </button>
-      </div>
-    </div>
-
-    {/* ================= ACCOUNT DETAILS ================= */}
-    <div
-      className="bg-white rounded-2xl border p-5 sm:p-6 mb-6"
-      style={{ borderColor: BORDER }}
-    >
-      <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
-        Account
-      </h2>
-
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-          <span className="text-sm font-medium" style={{ color: MUTE }}>
-            Email
-          </span>
-          <span
-            className="text-sm font-semibold break-all sm:text-right"
+          <h2
+            className="text-lg font-bold mb-4"
             style={{ color: INK }}
           >
-            {session?.email}
-          </span>
+            Account
+          </h2>
+
+          <div className="space-y-4">
+
+            {/* Email */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+              <span
+                className="text-sm font-medium"
+                style={{ color: MUTE }}
+              >
+                Email
+              </span>
+
+              <span
+                className="text-sm font-semibold break-all sm:text-right"
+                style={{ color: INK }}
+              >
+                {session?.email}
+              </span>
+            </div>
+
+            {/* Plan */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <span
+                className="text-sm font-medium"
+                style={{ color: MUTE }}
+              >
+                Plan
+              </span>
+
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full capitalize w-fit"
+                style={
+                  isPro
+                    ? {
+                        backgroundColor: "#FEF3C7",
+                        color: "#92400E",
+                      }
+                    : {
+                        backgroundColor: SOFT,
+                        color: MUTE,
+                      }
+                }
+              >
+                {isPro && (
+                  <Crown className="w-3.5 h-3.5" />
+                )}
+
+                {merchantStatus?.plan ?? "free"}
+              </span>
+            </div>
+
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <span className="text-sm font-medium" style={{ color: MUTE }}>
-            Plan
-          </span>
-          <span
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full capitalize w-fit"
-            style={
-              isPro
-                ? { backgroundColor: "#FEF3C7", color: "#92400E" }
-                : { backgroundColor: SOFT, color: MUTE }
-            }
+        {/* ================= ACTIONS ================= */}
+        <div className="space-y-3">
+          <button
+            onClick={handleChangePlan}
+            disabled={loading || isPending}
+            className="w-full flex items-center justify-center gap-2 text-base font-semibold text-white rounded-xl py-3 hover:opacity-90 transition-opacity disabled:opacity-60"
+            style={{ backgroundColor: ACCENT }}
           >
-            {isPro && <Crown className="w-3.5 h-3.5" />}
-            {merchantStatus?.plan ?? "free"}
-          </span>
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <span className="text-sm font-medium" style={{ color: MUTE }}>
-            Merchant Verification
-          </span>
-
-          <span
-            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full w-fit"
-            style={
-              isVerified
-                ? { backgroundColor: "#DCFCE7", color: "#166534" }
-                : { backgroundColor: "#FEF3C7", color: "#92400E" }
-            }
-          >
-            {isVerified ? (
-              <ShieldCheck className="w-3.5 h-3.5" />
+            {loading ? (
+              <>
+                <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                Loading...
+              </>
             ) : (
-              <ShieldAlert className="w-3.5 h-3.5" />
+              <>
+                <CreditCard className="w-4.5 h-4.5" />
+                {isPro
+                  ? "Manage Subscription"
+                  : "Upgrade to Pro"}
+              </>
             )}
-            {isVerified ? "Verified" : "Pending"}
-          </span>
+          </button>
         </div>
+
       </div>
     </div>
-
-    {/* ================= ACTIONS ================= */}
-    <div className="space-y-3">
-      {!isVerified ? (
-        <button
-          onClick={() => navigate("/merchant-app")}
-          className="w-full flex items-center justify-center gap-2 text-base font-semibold text-white rounded-xl py-3 hover:opacity-90 transition-opacity"
-          style={{ backgroundColor: ACCENT }}
-        >
-          <ShieldAlert className="w-[18px] h-[18px]" />
-          Complete Verification
-        </button>
-      ) : (
-        <button
-          onClick={handleChangePlan}
-          disabled={loading || isPending}
-          className="w-full flex items-center justify-center gap-2 text-base font-semibold text-white rounded-xl py-3 hover:opacity-90 transition-opacity disabled:opacity-60"
-          style={{ backgroundColor: ACCENT }}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-[18px] h-[18px] animate-spin" />
-              Loading...
-            </>
-          ) : (
-            <>
-              <CreditCard className="w-[18px] h-[18px]" />
-              {isPro ? "Manage Subscription" : "Upgrade to Pro"}
-            </>
-          )}
-        </button>
-      )}
-    </div>
-  </div>
-</div>
   )
 }

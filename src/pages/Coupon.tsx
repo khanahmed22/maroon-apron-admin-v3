@@ -167,7 +167,7 @@ export default function Coupon({ restId }: RestProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-5  sm:p-6">
       <div className="max-w-7xl mx-auto">
-         <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>
+         <h1 className="text-3xl max-md:text-xl font-extrabold mb-6" style={{ color: INK }}>
         Coupons
       </h1>
         <div className="grid lg:grid-cols-3 gap-8 max-md:gap-4">
@@ -177,7 +177,7 @@ export default function Coupon({ restId }: RestProps) {
               onSubmit={handleSubmit}
               className="bg-white rounded-lg shadow-md p-6 border border-slate-200 sticky top-6"
             >
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <h2 className="text-2xl max-md:text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                 <Plus className="w-6 h-6 text-red-600" />
                 Create Coupon
               </h2>
@@ -266,7 +266,7 @@ export default function Coupon({ restId }: RestProps) {
                 <Button
                   type="submit"
                   disabled={saving}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-colors"
+                  className="w-full bg-red-600  hover:bg-red-700 text-white font-semibold py-3 rounded-lg transition-colors"
                 >
                   {saving ? "Saving..." : "Create Coupon"}
                 </Button>
@@ -276,7 +276,7 @@ export default function Coupon({ restId }: RestProps) {
 
           {/* Coupons Grid */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">
+            <h2 className="text-2xl max-md:text-lg font-bold text-slate-900 mb-6">
               Active Coupons
             </h2>
 

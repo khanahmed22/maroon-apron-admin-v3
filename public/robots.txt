@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Allow: /sign-in
+Allow: /login
 Allow: /privacy-policy
 Allow: /refund-policy
 Allow: /terms-conditions

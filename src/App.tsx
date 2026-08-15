@@ -32,7 +32,6 @@ const PlaceOrder = lazy(() => import("./pages/PlaceOrder"));
 const Inventory = lazy(() => import("./pages/Inventory"));
 const Customers = lazy(() => import("./pages/Customers"));
 const Settings = lazy(() => import("./pages/Settings"));
-const MerchantApp = lazy(() => import("./pages/MerchantApp"));
 const DeliveryZones = lazy(()=>import("./pages/DeliveryZones"))
 const Analytics = lazy(()=>import("./pages/Analytics"))
 const Contact = lazy(()=>import("./pages/Contact"))
@@ -176,7 +175,7 @@ useEffect(() => {
           <Route path="/register" element={<Register />} />
           
           <Route
-            path="/verify-email/merchant/:token"
+            path="/verify-email/:role/:token"
             element={<VerifyEmail />}
           />
 
@@ -274,10 +273,7 @@ useEffect(() => {
                 path="/settings"
                 element={<Settings restId={restId} />}
               />
-              <Route
-                path="/verification"
-                element={<MerchantApp />}
-              />
+             
             </Route>
              <Route path="*" element={<NotFound />} />
           </Route>

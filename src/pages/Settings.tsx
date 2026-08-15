@@ -10,6 +10,13 @@ import { Label } from "../components/ui/label"
 import { useEffect } from "react"
 import type { LucideIcon } from "lucide-react";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "../components/ui/dialog"
+import {
   Pencil,
   Phone,
   Mail,
@@ -38,7 +45,8 @@ import {
 } from "../components/ui/select"
 import Map from "./Map"
 
-import * as Sentry from "@sentry/react";
+
+const CRIMSON_BASE_DOMAIN = "crimsoncastle.shop"
 
 const ACCENT = "#D6293F"
 const INK = "#171717"
@@ -82,7 +90,8 @@ interface RestListProps {
   deliveryWindows:string[]
   lat:number,
   long:number,
-  crimsonBranding:boolean
+  crimsonBranding:boolean,
+  subdomain:string
 }
 interface RestResponse {
   getRest: RestListProps
@@ -145,7 +154,7 @@ function InfoRow({
           const Icon = icon
           return (
             <Icon
-              className="w-[18px] h-[18px] mt-0.5 shrink-0"
+              className="w-4.5 h-4.5 mt-0.5 shrink-0"
               style={{ color: ACCENT }}
             />
           )
@@ -156,7 +165,7 @@ function InfoRow({
         <p className="text-sm font-medium" style={{ color: MUTE }}>
           {label}
         </p>
-        <p className="text-base" style={{ color: value ? INK : MUTE }}>
+        <p className="text-base max-md:text-xs" style={{ color: value ? INK : MUTE }}>
           {value || "Not set"}
         </p>
       </div>
@@ -219,14 +228,23 @@ export default function Settings({ restId }: { restId: string | null }) {
     deliveryWindows: [],
     lat:0,
     long:0,
-    crimsonBranding:true
+    crimsonBranding:true,
+    subdomain:""
   })
-  const { session, subdomain } = UserAuth()
+  const { session } = UserAuth()
 
  
   const isFreePlan = !merchantStatus?.plan || merchantStatus.plan === "free"
 
-  
+  // Derives a URL-safe subdomain slug from the restaurant name,
+  // e.g. "Pizza Town" -> "pizzatown"
+  const slugify = (name: string) =>
+    name
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "") // strip accents
+      .replace(/[^a-z0-9]/g, "")       // drop spaces/punctuation
+
   const isValidCustomDomain = (domain: string, sub?: string) => {
     if (!domain || !sub) return false
     const value = domain.trim().toLowerCase()
@@ -236,11 +254,6 @@ export default function Settings({ restId }: { restId: string | null }) {
    
     return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/.test(suffix)
   }
-
-  const customDomainError =
-    !isFreePlan && updateRest.customDomain && !isValidCustomDomain(updateRest.customDomain, subdomain)
-      ? `Must be your subdomain (${subdomain}) followed by a domain ending, e.g. ${subdomain}.com`
-      : null
 
   const fetchRestDetails = async () => {
     try {
@@ -259,6 +272,14 @@ export default function Settings({ restId }: { restId: string | null }) {
     enabled: !!session?.id,
     staleTime: 5 * 60 * 1000,
   })
+
+  
+  const lockedSubdomain = restDetails?.getRest?.subdomain
+
+  const customDomainError =
+    !isFreePlan && updateRest.customDomain && !isValidCustomDomain(updateRest.customDomain, lockedSubdomain)
+      ? `Must be your subdomain (${lockedSubdomain}) followed by a domain ending, e.g. ${lockedSubdomain}.com`
+      : null
 
    useEffect(() => {
   if (!restDetails?.getRest) return;
@@ -312,7 +333,8 @@ export default function Settings({ restId }: { restId: string | null }) {
       deliveryWindows: restDetails.getRest.deliveryWindows ?? [],
       lat:restDetails.getRest.lat ?? 0,
       long:restDetails.getRest.long ?? 0,
-      crimsonBranding:restDetails.getRest.crimsonBranding ?? true
+      crimsonBranding:restDetails.getRest.crimsonBranding ?? true,
+      subdomain: restDetails.getRest.subdomain ?? ""
     })
 
     setEditMode(true)
@@ -351,12 +373,12 @@ export default function Settings({ restId }: { restId: string | null }) {
 
      
       const customDomain =
-        isFreePlan || !isValidCustomDomain(updateRest.customDomain, subdomain)
+        isFreePlan || !isValidCustomDomain(updateRest.customDomain, lockedSubdomain)
           ? restDetails?.getRest?.customDomain ?? ""
-          : updateRest.customDomain
+          : updateRest.customDomain.trim().toLowerCase()
 
-      
-      const { lat: _lat, long: _long, ...restFieldsWithoutLocation } = updateRest
+     
+      const { lat: _lat, long: _long, restName: _restName, subdomain: _subdomain, ...restFieldsWithoutLocked } = updateRest
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
         method: "PUT",
@@ -366,7 +388,7 @@ export default function Settings({ restId }: { restId: string | null }) {
         },
         body: JSON.stringify({
           id,
-          ...restFieldsWithoutLocation,
+          ...restFieldsWithoutLocked,
           restLogo,
           restBanner,
           logoId,
@@ -390,6 +412,80 @@ export default function Settings({ restId }: { restId: string | null }) {
       toast.success("Details Updated")
       queryClient.invalidateQueries({ queryKey: ["restDetails"] })
     },
+  })
+
+  
+  const updateNetlifyAlias = async ({
+    oldDomain,
+    newDomain,
+  }: {
+    oldDomain?: string
+    newDomain: string
+  }) => {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/netlify/domain-alias`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        oldDomain,
+        newDomain,
+      }),
+    })
+
+    if (!res.ok) {
+      throw new Error("Failed to update domain alias")
+    }
+
+    return res.json()
+  }
+
+  const { mutate: updateNetlifyAliasM } = useMutation({
+    mutationKey: ["updateNetlifyAliasM"],
+    mutationFn: updateNetlifyAlias,
+    onError: () => {
+      toast.error("Saved, but the live domain link couldn't be updated - contact support")
+    },
+  })
+
+  // ================= FIRST-TIME SETUP =================
+  const [setupName, setSetupName] = useState("")
+  const [setupSubdomain, setSetupSubdomain] = useState("")
+
+  const isFirstTimeSetup = !!restDetails?.getRest && !restDetails.getRest.subdomain
+
+  const completeSetup = async ({
+    restName,
+    subdomain,
+  }: {
+    restName: string
+    subdomain: string
+  }) => {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: restId, restName, subdomain }),
+    })
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}))
+      throw new Error(err?.error || "Failed to complete setup")
+    }
+
+    return res.json()
+  }
+
+  const { mutate: completeSetupM, isPending: setupSaving } = useMutation({
+    mutationKey: ["completeSetup"],
+    mutationFn: completeSetup,
+    onSuccess: () => {
+      toast.success("Store set up!")
+      queryClient.invalidateQueries({ queryKey: ["restDetails"] })
+      updateNetlifyAliasM({ newDomain: `${setupSubdomain}.${CRIMSON_BASE_DOMAIN}` })
+    },
+    onError: (err: Error) => toast.error(err.message),
   })
 
  
@@ -530,9 +626,59 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
+      {/* ================= FIRST-TIME SETUP MODAL ================= */}
+      {isFirstTimeSetup && (
+        <Dialog open={true}>
+          <DialogContent
+            className="sm:max-w-md"
+            onInteractOutside={(e) => e.preventDefault()}
+            onEscapeKeyDown={(e) => e.preventDefault()}
+          >
+            <DialogHeader>
+              <DialogTitle>Set up your store</DialogTitle>
+              <DialogDescription>
+                Choose your restaurant name and store URL. These can't be changed later - contact support if you need to.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="flex flex-col gap-y-1.5">
+                <FieldLabel icon={Store}>Restaurant Name</FieldLabel>
+                <Input
+                  value={setupName}
+                  className="h-11 rounded-xl text-base"
+                  style={{ borderColor: BORDER }}
+                  onChange={(e) => {
+                    setSetupName(e.target.value)
+                    setSetupSubdomain(slugify(e.target.value))
+                  }}
+                />
+              </div>
+              {setupSubdomain && (
+                <p className="text-xs" style={{ color: MUTE }}>
+                  Your store URL will be{" "}
+                  <span className="font-semibold" style={{ color: INK }}>
+                    {setupSubdomain}.{CRIMSON_BASE_DOMAIN}
+                  </span>
+                </p>
+              )}
+            </div>
+            <Button
+              className="w-full h-11 rounded-xl text-white disabled:opacity-60"
+              style={{ backgroundColor: ACCENT }}
+              disabled={!setupName.trim() || setupSaving}
+              onClick={() =>
+                completeSetupM({ restName: setupName.trim(), subdomain: setupSubdomain })
+              }
+            >
+              {setupSaving ? "Setting up…" : "Continue"}
+            </Button>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between gap-4 mb-6">
-          <h1 className="text-3xl font-extrabold" style={{ color: INK }}>
+          <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
             Settings
           </h1>
           {!editMode && (
@@ -594,7 +740,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   target="_blank"
   rel="noopener noreferrer"
 >
-  Visit Store
+  <span className="max-md:hidden">Visit Store</span> Store 
 </a>
             </div>
             }
@@ -605,10 +751,19 @@ export default function Settings({ restId }: { restId: string | null }) {
         {!editMode ? (
           /* ================= VIEW MODE ================= */
           <div className="bg-white rounded-2xl border p-6" style={{ borderColor: BORDER }}>
+            <InfoRow
+              icon={Globe}
+              label="Store URL"
+              value={
+                restDetails?.getRest?.subdomain
+                  ? `${restDetails.getRest.subdomain}.${CRIMSON_BASE_DOMAIN}`
+                  : undefined
+              }
+            />
             <InfoRow icon={Phone} label="Phone" value={restDetails?.getRest?.restPhone} />
             <InfoRow icon={Mail} label="Email" value={restDetails?.getRest?.restEmail} />
             <InfoRow icon={MapPin} label="Address" value={restDetails?.getRest?.restAddress} />
-            <InfoRow icon='/instagram.svg' label="Instagram" value={restDetails?.getRest?.restInstagram} />
+            <InfoRow  icon='/instagram.svg' label="Instagram" value={restDetails?.getRest?.restInstagram} />
             <InfoRow icon='/facebook.svg' label="Facebook" value={restDetails?.getRest?.restFB} />
             <InfoRow icon={Tag} label="Meta Title" value={restDetails?.getRest?.metaTitle} />
             <InfoRow icon={FileText} label="Meta Description" value={restDetails?.getRest?.metaDesc} />
@@ -628,13 +783,18 @@ export default function Settings({ restId }: { restId: string | null }) {
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon={Store}>Name</FieldLabel>
                     <Input
-                      value={updateRest.restName}
-                      className="h-11 rounded-xl text-base"
+                      value={restDetails?.getRest?.restName ?? ""}
+                      disabled
+                      className="h-11 rounded-xl text-base disabled:cursor-not-allowed disabled:opacity-60"
                       style={{ borderColor: BORDER }}
-                      onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restName: e.target.value })
-                      }
                     />
+                    <p className="text-xs" style={{ color: MUTE }}>
+                      Store URL:{" "}
+                      <span className="font-semibold" style={{ color: INK }}>
+                        {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
+                      </span>{" "}
+                      - locked, <a href="">contact support</a> to change
+                    </p>
                   </div>
 
                   
@@ -705,8 +865,8 @@ export default function Settings({ restId }: { restId: string | null }) {
                       placeholder={
                         isFreePlan
                           ? "Upgrade to Pro to set a custom domain"
-                          : subdomain
-                          ? `${subdomain}.com`
+                          : lockedSubdomain
+                          ? `${lockedSubdomain}.com`
                           : "yoursubdomain.com"
                       }
                       value={updateRest.customDomain}
@@ -720,7 +880,15 @@ export default function Settings({ restId }: { restId: string | null }) {
                     {!isFreePlan && (
                       <p className="text-xs" style={{ color: customDomainError ? "#DC2626" : MUTE }}>
                         {customDomainError ??
-                          `Must start with your subdomain - e.g. ${subdomain}.com, ${subdomain}.lol`}
+                          `Must start with your subdomain - e.g. ${lockedSubdomain}.com, ${lockedSubdomain}.lol`}
+                      </p>
+                    )}
+                    {!isFreePlan && updateRest.customDomain && !customDomainError && (
+                      <p className="text-xs" style={{ color: MUTE }}>
+                        In your domain provider, add a CNAME record pointing to{" "}
+                        <span className="font-semibold" style={{ color: INK }}>
+                          {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
+                        </span>
                       </p>
                     )}
                   </div>
@@ -828,7 +996,7 @@ export default function Settings({ restId }: { restId: string | null }) {
                       className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                       style={{ borderColor: BORDER, color: MUTE }}
                     >
-                      <ImagePlus className="w-[18px] h-[18px]" />
+                      <ImagePlus className="w-4.5 h-4.5" />
                       Choose a logo
                       <input
                         type="file"
@@ -853,7 +1021,7 @@ export default function Settings({ restId }: { restId: string | null }) {
                       className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                       style={{ borderColor: BORDER, color: MUTE }}
                     >
-                      <ImagePlus className="w-[18px] h-[18px]" />
+                      <ImagePlus className="w-4.5 h-4.5" />
                       Choose a banner
                       <input
                         type="file"
@@ -891,7 +1059,26 @@ export default function Settings({ restId }: { restId: string | null }) {
                       toast.error(customDomainError)
                       return
                     }
-                    changeNameM({ id: restDetails?.getRest?.id })
+
+                    const previousCustomDomain = restDetails?.getRest?.customDomain ?? ""
+                    const nextCustomDomain =
+                      !isFreePlan && isValidCustomDomain(updateRest.customDomain, lockedSubdomain)
+                        ? updateRest.customDomain.trim().toLowerCase()
+                        : previousCustomDomain
+
+                    changeNameM(
+                      { id: restDetails?.getRest?.id },
+                      {
+                        onSuccess: () => {
+                          if (nextCustomDomain && nextCustomDomain !== previousCustomDomain) {
+                            updateNetlifyAliasM({
+                              oldDomain: previousCustomDomain || undefined,
+                              newDomain: nextCustomDomain,
+                            })
+                          }
+                        },
+                      },
+                    )
                   }}
                 >
                   Save
@@ -1210,17 +1397,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           </div>
         </div>
       </div>
-      <button
-     onClick={() => {
-  const error = new Error("Test Sentry error");
-
-  Sentry.captureException(error);
-
-  throw error;
-}}
-    >
-      Break the world
-    </button>
+      
     </div>
   )
 }

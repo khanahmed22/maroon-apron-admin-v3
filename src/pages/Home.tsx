@@ -479,7 +479,7 @@ export default function Home() {
       <main>
 
       {/* ================= HERO ================= */}
-      <section className="relative max-w-6xl mx-auto px-6 pt-20 pb-24 flex flex-col lg:flex-row items-center gap-12 overflow-hidden">
+      <section className="relative max-w-6xl mx-auto px-6 pt-20 max-md:pt-0 pb-24 flex flex-col max-md:flex-col-reverse lg:flex-row items-center gap-12 overflow-hidden">
         <div
           aria-hidden
           className="absolute -top-10 -left-16 w-72 h-72 rounded-full blur-3xl opacity-40 pointer-events-none"
@@ -501,7 +501,7 @@ export default function Home() {
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl font-extrabold leading-[1.15]" style={{ color: INK }}>
+          <h1 className="text-4xl max-md:text-2xl sm:text-5xl font-extrabold leading-[1.15]" style={{ color: INK }}>
             Run your food business from one place, not three chat apps
           </h1>
 
@@ -528,7 +528,7 @@ export default function Home() {
             loop
             autoplay
           
-            className="w-full max-w-125 h-125 relative z-10"
+            className="w-full max-w-125 h-125 max-md:w-80 max-md:h-80 relative z-10"
           />
         </div>
       </section>

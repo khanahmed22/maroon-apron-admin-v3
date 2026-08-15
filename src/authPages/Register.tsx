@@ -21,10 +21,10 @@ const SOFT = "#FBF7F6"
 
   const {session} = UserAuth()
 
-  const registerUser =async(e:any)=>{
-    e.preventDefault()
+  const registerUser = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const passwordRegex =
+  const passwordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   if (!passwordRegex.test(password)) {
@@ -33,26 +33,41 @@ const SOFT = "#FBF7F6"
     );
     return;
   }
-    const role ='merchant'
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register-merchant`, 
+
+  
+
+  try {
+    const role = "merchant";
+
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/auth/register-merchant`,
       {
-        method:'POST',
+        method: "POST",
         credentials: "include",
         headers: {
-          'Content-Type': 'application/json'
-
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({name,email,password,role})
-
-        
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+        }),
       }
-    
-    )
-    const data = await res.json()
-    console.log(data)
-    toast.success('Check your Email for Verification Link')
-  } 
+    );
 
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      toast.error(data?.message || "Registration failed");
+      return;
+    }
+
+    toast.success("Check your email for the verification link");
+  } catch {
+    toast.error("Unable to connect to the server");
+  } 
+};
   if(session){
     return(
       <div className="flex font-bold flex-col gap-y-4 text-lg min-h-screen items-center justify-center"><p>You are already Signed In</p>

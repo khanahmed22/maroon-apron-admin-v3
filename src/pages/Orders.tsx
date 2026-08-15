@@ -438,7 +438,7 @@ function MethodBadge({ method }: { method: string }) {
   
   return (
     <div className="p-4 sm:p-6" style={{ backgroundColor: SOFT, minHeight: "100vh" }}>
-      <h1 className="text-3xl font-extrabold mb-6" style={{ color: INK }}>
+      <h1 className="text-3xl max-md:text-xl font-extrabold mb-6" style={{ color: INK }}>
         Orders
       </h1>
  
@@ -474,10 +474,10 @@ function MethodBadge({ method }: { method: string }) {
   <Tabs
     value={statusTab}
     onValueChange={setStatusTab}
-    className="w-full"
+    className="w-full "
   >
     <TabsList
-      className="bg-white border p-1.5 rounded-xl h-auto gap-2 flex w-full overflow-x-auto whitespace-nowrap justify-start"
+      className="  w-fit gap-2 grid grid-cols-6 max-md:grid-cols-3 justify-start mb-11"
       style={{ borderColor: BORDER }}
     >
       {["all", "pending", "confirmed", "cancelled", "delivered", "pickedup"].map(

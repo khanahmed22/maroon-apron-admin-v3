@@ -8,6 +8,7 @@ import { Button } from "../components/ui/button"
 import { useQueryClient } from "@tanstack/react-query"
 import { Label } from "../components/ui/label"
 import { useEffect } from "react"
+import { useNavigate } from "react-router"
 import type { LucideIcon } from "lucide-react";
 import {
   Dialog,
@@ -32,7 +33,8 @@ import {
   PartyPopper,
   Clock,
   X,
-  BadgeCheck
+  BadgeCheck,
+  HelpCircle
 } from "lucide-react"
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
 import type { ThemeName } from "../lib/themes"
@@ -187,6 +189,8 @@ export default function Settings({ restId }: { restId: string | null }) {
   const [crimsonBranding,setCrimsonBranding] = useState(true)
   
   const queryClient = useQueryClient()
+
+  const navigate = useNavigate()
 
   const getPaymentStatus = async () => {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/paddle/account`, {
@@ -793,7 +797,7 @@ export default function Settings({ restId }: { restId: string | null }) {
                       <span className="font-semibold" style={{ color: INK }}>
                         {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
                       </span>{" "}
-                      - locked, <a href="">contact support</a> to change
+                      - locked, <a href="/support">contact support</a> to change
                     </p>
                   </div>
 
@@ -1395,6 +1399,23 @@ export default function Settings({ restId }: { restId: string | null }) {
               </div>
             )}
           </div>
+        </div>
+        <div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5"
+          style={{ borderColor: BORDER }}>
+          <div className="flex items-center gap-2 ">
+              <HelpCircle className="w-5 h-5" style={{ color: ACCENT }} />
+              <h2 className="text-lg font-bold" style={{ color: INK }}>
+                Have a question?
+              </h2>
+            </div>
+            <Button
+                onClick={() => navigate("/support")}
+                className="rounded-xl gap-2 text-white w-fit p-4 font-bold"
+                style={{ backgroundColor: ACCENT }}
+              >
+               
+                Contact Support
+              </Button>
         </div>
       </div>
       

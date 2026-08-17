@@ -30,7 +30,9 @@ const navLinks = [
   { label: "Coupons", link: "/coupon", icon: Ticket },
   { label: "Customers", link: "/customers", icon: Users },
   { label: "Settings", link: "/settings", icon: Settings },
+  
   { label: "Account", link: "/account", icon: User },
+  
 ]
 
 function NavItem({

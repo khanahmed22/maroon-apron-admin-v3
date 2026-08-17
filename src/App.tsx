@@ -36,6 +36,7 @@ const DeliveryZones = lazy(()=>import("./pages/DeliveryZones"))
 const Analytics = lazy(()=>import("./pages/Analytics"))
 const Contact = lazy(()=>import("./pages/Contact"))
 const Coupon = lazy(()=>import("./pages/Coupon"))
+const Support  = lazy(()=>import("./pages/Support"))
 const NotFound = lazy(()=>import("./pages/NotFound"))
 const DeliveryPolicy = lazy(
   () => import("./policyPages/DeliveryPolicy")
@@ -225,6 +226,11 @@ useEffect(() => {
               <Route
                 path="/account"
                 element={<Account />}
+              />
+
+              <Route
+                path="/support"
+                element={<Support />}
               />
 
               

@@ -413,6 +413,8 @@ const saveScannedItems = async () => {
       success++;
     } catch (err) {
       console.log(err);
+      setScanPreviewOpen(false)
+      toast.error('Something went wrong, try again later')
     }
     setScanProgress(Math.round(((i + 1) / total) * 100));
   }

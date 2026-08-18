@@ -9,6 +9,7 @@ export default function Register(){
   const [email,setEmail] = useState<string>("")
   const [password,setPassword] = useState<string>("")
   const [showPassword, setShowPassword] = useState(false)
+  const [agree,setAgree] = useState(false)
   const navigate = useNavigate()
 
   const ACCENT = "#D6293F"
@@ -33,6 +34,11 @@ const SOFT = "#FBF7F6"
     );
     return;
   }
+
+  if (!agree) {
+  toast.error("Please agree to the Privacy Policy and Terms & Conditions to continue");
+  return;
+}
 
   
 
@@ -169,14 +175,50 @@ const SOFT = "#FBF7F6"
         <p className="text-xs mt-1" style={{ color: MUTE }}>
   Minimum 8 characters with uppercase, lowercase, number and special character.
 </p>
- 
-        <button
-          type="submit"
-          className="text-white p-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity mt-1"
-          style={{ backgroundColor: ACCENT }}
-        >
-          Sign Up
-        </button>
+
+     <div className="flex items-start gap-x-2">
+  <input
+    id="terms"
+    type="checkbox"
+    checked={agree}
+    onChange={(e) => setAgree(e.target.checked)}
+    className="mt-0.5"
+    required
+  />
+
+  <label htmlFor="terms" className="text-xs" style={{ color: INK }}>
+    I agree to the{" "}
+    <a
+      href="/privacy-policy"
+      className="hover:underline"
+      style={{ color: ACCENT }}
+    >
+      Privacy Policy
+    </a>{" "}
+    and{" "}
+    <a
+      href="/terms-and-conditions"
+      className="hover:underline"
+      style={{ color: ACCENT }}
+    >
+      Terms & Conditions
+    </a>
+  </label>
+</div>
+ <button
+  disabled={!agree}
+  type="submit"
+  className={`p-3 rounded-xl font-semibold text-sm transition-all mt-1 ${
+    agree
+      ? "text-white hover:opacity-90 cursor-pointer"
+      : "text-gray-400 cursor-not-allowed"
+  }`}
+  style={{
+    backgroundColor: agree ? ACCENT : "#E5E5E5",
+  }}
+>
+  Sign Up
+</button>
  
         <p className="text-sm text-center" style={{ color: MUTE }}>
           Already have an account? {" "}

@@ -38,6 +38,7 @@ const Contact = lazy(()=>import("./pages/Contact"))
 const Coupon = lazy(()=>import("./pages/Coupon"))
 const Support  = lazy(()=>import("./pages/Support"))
 const NotFound = lazy(()=>import("./pages/NotFound"))
+const KnowledgeBase = lazy(()=>import("./policyPages/KnowledgeBase"))
 const DeliveryPolicy = lazy(
   () => import("./policyPages/DeliveryPolicy")
 );
@@ -214,6 +215,11 @@ useEffect(() => {
           <Route
             path="/terms-and-conditions"
             element={<MerchantTermsAndConditions />}
+          />
+
+           <Route
+            path="/knowledge-base"
+            element={<KnowledgeBase />}
           />
 
           {/* Protected */}

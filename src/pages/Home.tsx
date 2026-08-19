@@ -25,6 +25,7 @@ import {
   StickyNote,
   Package,
   Wallet,
+  HeartPulse,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
@@ -677,6 +678,7 @@ export default function Home() {
                 src={cldImage("Storefront_kwawka")}
                 className="mt-auto w-full rounded-xl border object-contain h-72"
                 style={{ borderColor: BORDER }}
+                alt="demo store"
                 
                 
               />
@@ -958,7 +960,14 @@ export default function Home() {
     Delivery Policy
   </a>
 </li>
+
+<li>
+  <a href="/knowledge-base" className="hover:underline">
+    Knowledge Base
+  </a>
+</li>
             </ul>
+            
           </div>
 
           <div>
@@ -968,10 +977,13 @@ export default function Home() {
               <li>Mon–Fri, 9am–6pm PKT</li>
               <li className="flex items-center gap-2"><Mail size={14} /> info@crimsoncastle.biz</li>
               <li className="flex items-center gap-2"><Phone size={14} /> 0334-8204806</li>
+              <li className="flex items-center gap-2"><HeartPulse size={15} /><a href="https://stats.uptimerobot.com/8JRK0mdcG0" target="_blank" className="hover:underline hover:text-red-500">System Status</a></li>
             </ul>
           </div>
+          
 
           <ul className="flex items-center gap-x-3 sm:gap-x-5 text-muted-foreground">
+            
   <li>
     <a
       href="https://www.instagram.com/crimsoncastle.biz"

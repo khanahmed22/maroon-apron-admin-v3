@@ -21,8 +21,8 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
     id: 'getting-started',
     title: 'Getting Started',
     icon: HelpCircle,
-    description: 'Submit the Merchant Registration form and your Online Store will be online within 24 hours.',
-    content: 'Submit the Merchant Registration form and our team will process your application. If everything you provided is valid, your Online Store provided by Crimson Castle will be online within 24 hours.',
+    description: 'Pick your Restaurant name',
+    content: 'On first setup go to settings, a dialog will appear where you can enter your Restaurant Name. Note: Pick name wisely as it also sets up your subdomain and it cannot be changed unless you contact support.',
   },
   {
     id: 'settings',
@@ -34,14 +34,14 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
       'Change Restaurant Cover Photo/Banner',
       'Change Theme (Pink, Blue, Green, Purple, Orange)',
       'Add Announcement (e.g: 20% OFF Ramadan Offer)',
-      'Enable Push Notifications for order alerts',
-      'Add Store info (Phone, Email, Address, Intro, Pickup location)',
+      
+      'Add Store info (Phone, Email, Address, Pickup location)',
       'Attach Instagram and Facebook links',
-      'Configure Open/Close Timings',
+      
       'Use .crimsoncastle.shop domain or custom domain (Pro Plan)',
       'Add Meta Title and Meta Description for SEO',
-      'Set Store Currency',
-      'Enable or disable Pre orders and time slots',
+     
+      'Enable or disable Pre orders',
       
     ],
   },
@@ -51,17 +51,16 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
     icon: ShoppingCart,
     description: 'Manage customer orders with different statuses',
     content: [
-      'New Orders are marked "Pending" by default in the New Tab',
-      'Mark orders as "Confirmed"  show in Processing Tab',
-      'Orders marked "Dispatched" show in Dispatched Tab',
-      'Orders marked "Pick Up" show in Pick Up Tab',
-      'Completed orders show in Completed Tab',
+      'New Orders are marked "Pending" by default in the Pending Tab',
+      'Mark orders as "Confirmed"  show in Confirmed Tab',
+     
+      'Orders marked "Pickedup" show in PickedUp Tab',
+      'Delivered orders show in Delivered Tab',
       'Cancelled Tab shows Cancelled Orders',
       'All Orders Tab shows all orders list',
       'Search through Orders by Order No',
-      'Disable Ordering when needed',
       '',
-      'Note: The quantity of items in orders marked as Delivered or Picked Up (these statuses represent order completion) will be automatically deducted from inventory. For example, if 1 Zinger Burger is marked as Picked Up or Delivered, then 1 unit of Zinger Burger will be subtracted from the inventory of Zinger Burgers.',
+      'Note: The quantity of items in orders marked as Confirmed will be automatically deducted from inventory. For example, if 1 Zinger Burger is marked as Confirmed, then 1 unit of Zinger Burger will be subtracted from the inventory of Zinger Burgers.',
     ],
   },
   {
@@ -86,12 +85,12 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
       '  • Name',
       '  • Description',
       '  • Price (selling price)',
-      '  • Base Cost Price (ingredient cost)',
+      '  • Cost Price (ingredient cost)',
       '  • Category',
       '  • Stock Amount',
       '  • Food Image',
       '',
-      'Note: Price and Base Cost Price can be left blank if the item has variants (for e.g: Small, Medium, Large) as each variant has its own Price and Base Cost Price.',
+      'Note: Price and Cost Price can be left blank if the item has variants (for e.g: Small, Medium, Large) as each variant has its own Price and Cost Price.',
     ],
   },
   {
@@ -120,13 +119,7 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
     description: 'Create coupons to drive sales',
     content: 'Create coupons with 10%, 20%, and other discounts to drive sales and build your customer base. Coupons are a great marketing tool to increase order frequency.',
   },
-  {
-    id: 'riders',
-    title: 'Riders',
-    icon: Users,
-    description: 'Manage your delivery riders',
-    content: 'Create and manage rider profiles if your restaurant has delivery riders. Assign orders to them directly from the Orders tab.',
-  },
+  
   {
     id: 'customers',
     title: 'Customers',
@@ -134,13 +127,7 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
     description: 'View all registered customers',
     content: 'View all customers who have signed up to your restaurant. Access their information, and contact details.',
   },
-  {
-    id: 'category-manager',
-    title: 'Category Manager',
-    icon: Folder,
-    description: 'Organize your menu items',
-    content: 'Create categories to organize your menu items (e.g., Continental, Chinese, Desi, Desserts, Beverages). Categories help customers browse items easily.',
-  },
+  
   {
     id: 'account',
     title: 'Account',

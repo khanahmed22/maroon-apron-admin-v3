@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, ChevronDown, Settings, ShoppingCart, Package, BarChart3, Truck, Tag, Users, Folder, User, HelpCircle } from 'lucide-react'
+import { Search, ChevronDown, Settings, ShoppingCart, Package, BarChart3, Truck, Tag, Users, User, HelpCircle } from 'lucide-react'
 import { Input } from '../components/ui/input'
 import type { LucideIcon } from "lucide-react";
 

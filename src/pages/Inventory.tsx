@@ -211,7 +211,9 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
       });
 
       const data = await res.json();
-      console.log(data);
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to add item");
+      }
    
 
       setAddMode(false);
@@ -229,7 +231,8 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     variants: [],
   })
     } catch (err) {
-      console.log(err);
+      
+      throw err;
     }
   };
 
@@ -302,9 +305,11 @@ const isLimitReached =
       });
 
       const data = await res.json();
-      console.log(data);
+      if (!res.ok) {
+  throw new Error(data?.message || "Failed to delete item");
+}
     } catch (err) {
-      console.log(err);
+      throw err;
     }
   };
 
@@ -585,14 +590,16 @@ const saveCSVItems = async () => {
       });
 
       const data = await res.json();
-      console.log(data);
+      if (!res.ok) {
+  throw new Error(data?.message || "Failed to update item");
+}
 
       setEditMode(false);
       setLoading(false)
       setFile(null);
       fetchInventory();
     } catch (err) {
-      console.log(err);
+      throw err
     }
   };
 

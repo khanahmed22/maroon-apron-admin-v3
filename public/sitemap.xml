@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://crimsoncastle.biz/</loc>
+    <loc>https://crimsoncastle.biz</loc>
   </url>
   <url>
-    <loc>https://crimsoncastle.biz/sign-in</loc>
+    <loc>https://crimsoncastle.biz/login</loc>
   </url>
    <url>
     <loc>https://crimsoncastle.biz/privacy-policy</loc>

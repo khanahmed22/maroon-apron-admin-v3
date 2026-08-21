@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "biz.crimsoncastle.twa",
+        "sha256_cert_fingerprints": ["2E:F7:C6:B9:5B:EA:2C:21:B7:00:2E:A2:4D:4D:26:2A:59:55:89:34:10:89:ED:5C:9B:08:6B:DE:5B:25:1A:10"]
+      }
+    }]

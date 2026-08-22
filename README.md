@@ -145,6 +145,8 @@ View and manage customers who sign up through your store.
 - Neon Postgres
 - Firebase Cloud Messaging (Push Notifications)
 
+Backend Repository: [Crimson Castle Backend](https://github.com/khanahmed22/crimson-backend-v3)
+
 ## Payments
 - Paddle
 

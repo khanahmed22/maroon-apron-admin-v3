@@ -82,6 +82,7 @@ export const enableNotifications = async (
 
     // ✅ Wait until YOUR SW is active
     const registration = await navigator.serviceWorker.ready;
+    console.log(user_id)
 
     const messagingInstance = await getMessagingSafe();
 
@@ -128,6 +129,7 @@ export const listenForMessages = async (): Promise<void> => {
     const messagingInstance = await getMessagingSafe();
     onMessage(messagingInstance, (payload) => {
       // handle foreground message
+      console.log(payload)
     });
   } catch {
     // silently ignore unsupported browsers

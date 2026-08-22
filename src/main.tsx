@@ -32,6 +32,25 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// src/serviceWorkerRegistration.ts
+// Call this once from main.tsx: registerServiceWorker();
+
+function registerServiceWorker(): void {
+ 
+
+  window.addEventListener("load", async () => {
+    try {
+      await navigator.serviceWorker.register("/firebase-messaging-sw.js", {
+        scope: "/",
+      });
+    } catch (err) {
+      console.error("❌ Service Worker registration failed", err);
+    }
+  });
+}
+
+registerServiceWorker()
+
 const container = document.getElementById("root");
 
 if (!container) {

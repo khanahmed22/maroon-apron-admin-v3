@@ -46,6 +46,8 @@ import {
   SelectValue,
 } from "../components/ui/select"
 import Map from "./Map"
+import { Bell } from "lucide-react"
+import { enableNotifications, fetchNotificationStatus } from "../lib/firebase" // adjust path to wherever you save firebase.ts
 
 
 const CRIMSON_BASE_DOMAIN = "crimsoncastle.shop"
@@ -565,6 +567,33 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   setCrimsonBranding(newValue);
   enableBrandM(newValue);
+}
+
+const { data: notificationsEnabled, isLoading: notifLoading } = useQuery({
+  queryKey: ["notificationStatus"],
+  queryFn: fetchNotificationStatus,
+  enabled: !!session?.id,
+  refetchOnWindowFocus: false,
+})
+
+const [enablingNotifs, setEnablingNotifs] = useState(false)
+
+const handleEnableNotifications = async () => {
+  setEnablingNotifs(true)
+  try {
+    const token = await enableNotifications()
+    if (token) {
+      toast.success("Notifications enabled")
+      queryClient.invalidateQueries({ queryKey: ["notificationStatus"] })
+    } else {
+      toast.error("Notification permission was denied")
+    }
+  } catch (err) {
+    console.error(err)
+    toast.error("Failed to enable notifications")
+  } finally {
+    setEnablingNotifs(false)
+  }
 }
 
   const lat = restDetails?.getRest?.lat || 0
@@ -1128,6 +1157,41 @@ export default function Settings({ restId }: { restId: string | null }) {
         variant={crimsonBranding ? "destructive" : "destructive"}
       >
         {crimsonBranding ? "Remove Branding" : "Enable Branding"}
+      </Button>
+    )}
+  </div>
+</div>
+
+<div className="bg-white rounded-2xl border p-6 mt-6" style={{ borderColor: BORDER }}>
+  <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <Bell className="w-5 h-5" style={{ color: ACCENT }} />
+        <h2 className="text-lg font-bold" style={{ color: INK }}>
+          Push Notifications
+        </h2>
+      </div>
+      <p className="text-sm" style={{ color: MUTE }}>
+        Get notified when orders or events happen
+      </p>
+    </div>
+
+    {notifLoading ? (
+      <Button disabled variant="outline" className="rounded-xl min-w-40">
+        <Loader2 className="w-4 h-4 animate-spin" />
+      </Button>
+    ) : notificationsEnabled ? (
+      <Button disabled variant="outline" className="rounded-xl min-w-40 text-green-600 border-green-300">
+        ✓ Enabled
+      </Button>
+    ) : (
+      <Button
+        onClick={handleEnableNotifications}
+        disabled={enablingNotifs}
+        className="rounded-xl min-w-40 text-white disabled:opacity-60"
+        style={{ backgroundColor: ACCENT }}
+      >
+        {enablingNotifs ? "Enabling…" : "Enable Notifications"}
       </Button>
     )}
   </div>

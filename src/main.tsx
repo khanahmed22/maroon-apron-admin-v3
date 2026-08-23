@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { BrowserRouter } from "react-router";
 import { AuthContextProvider } from "./context/AuthContext.tsx";
-
+import { listenForMessages } from "./lib/firebase.ts";
 import {
   QueryClient,
   QueryClientProvider,
@@ -50,6 +50,8 @@ function registerServiceWorker(): void {
 }
 
 registerServiceWorker()
+
+listenForMessages()
 
 const container = document.getElementById("root");
 

@@ -82,7 +82,6 @@ export const enableNotifications = async (
 
     // ✅ Wait until YOUR SW is active
     const registration = await navigator.serviceWorker.ready;
-    console.log(user_id)
 
     const messagingInstance = await getMessagingSafe();
 
@@ -124,12 +123,27 @@ export const fetchNotificationStatus = async (): Promise<boolean> => {
 };
 
 // 🔹 Foreground listener (call once AFTER app load)
+// When the tab is open and focused, FCM does NOT go through the service
+// worker's auto-display — it delivers here instead. Without this, orders
+// placed while the dashboard tab is open produce no notification tray
+// entry at all, even though the backend send succeeds.
 export const listenForMessages = async (): Promise<void> => {
   try {
     const messagingInstance = await getMessagingSafe();
     onMessage(messagingInstance, (payload) => {
-      // handle foreground message
-      console.log(payload)
+      if (Notification.permission !== "granted") return;
+
+      const title = payload.notification?.title ?? "New notification";
+      const body = payload.notification?.body ?? "";
+      const link = payload.data?.link;
+
+      const notification = new Notification(title, { body });
+      if (link) {
+        notification.onclick = () => {
+          window.focus();
+          window.location.href = link;
+        };
+      }
     });
   } catch {
     // silently ignore unsupported browsers

@@ -66,9 +66,7 @@ async function getMessagingSafe(): Promise<Messaging> {
  * kept here as an optional param only in case a call site wants it for
  * logging/analytics.
  */
-export const enableNotifications = async (
-  user_id?: string,
-): Promise<string | undefined> => {
+export const enableNotifications = async (): Promise<string | undefined> => {
   try {
     if (!("serviceWorker" in navigator)) {
       throw new Error("Service workers not supported");

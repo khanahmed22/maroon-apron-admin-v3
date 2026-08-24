@@ -859,6 +859,7 @@ const SUCCESS = "#16A34A"
         <>
           <Input
             type="date"
+            min={new Date().toISOString().split("T")[0]}
             value={custDetails.scheduledDate ?? ""}
             onChange={(e) =>
               setCustDetails({

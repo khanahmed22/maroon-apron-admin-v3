@@ -34,7 +34,8 @@ import {
   Clock,
   X,
   BadgeCheck,
-  HelpCircle
+  HelpCircle,
+  ReceiptTextIcon
 } from "lucide-react"
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
 import type { ThemeName } from "../lib/themes"
@@ -88,14 +89,15 @@ interface RestListProps {
   restTheme: string
   restSite?:string
   preOrdersEnabled:boolean
-  preoOrderMinHours:number
+  preOrderMinHours:number
   preOrderMaxDays:number
   pickUpWindows:string[]
   deliveryWindows:string[]
   lat:number,
   long:number,
   crimsonBranding:boolean,
-  subdomain:string
+  subdomain:string,
+  orderingDisabled:boolean
 }
 interface RestResponse {
   getRest: RestListProps
@@ -104,7 +106,7 @@ interface RestResponse {
 
 interface PreorderPayload {
   preOrdersEnabled?: boolean
-  preoOrderMinHours?: number
+  preOrderMinHours?: number
   preOrderMaxDays?: number
   pickUpWindows?: string[]
   deliveryWindows?: string[]
@@ -179,7 +181,7 @@ function InfoRow({
 
 export default function Settings({ restId }: { restId: string | null }) {
    const [preOrdersEnabled, setPreOrderEnabled] = useState<boolean>(true);
-   const [preoOrderMinHours, setPreOrderMinHours] = useState<number>(2);
+   const [preOrderMinHours, setPreOrderMinHours] = useState<number>(2);
    const [preOrderMaxDays, setPreOrderMaxDays] = useState<number>(7);
 
   const [deliveryWindows, setDeliveryWindows] = useState<string[]>([]);
@@ -189,6 +191,7 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   const [newPickupWindow, setNewPickupWindow] = useState("");
   const [crimsonBranding,setCrimsonBranding] = useState(true)
+  const [orderingDisabled,setOrderingDisabled] = useState(false)
   
   const queryClient = useQueryClient()
 
@@ -228,14 +231,15 @@ export default function Settings({ restId }: { restId: string | null }) {
     customDomain: "",
     restTheme:"",
     preOrdersEnabled: true,
-    preoOrderMinHours: 2,
+    preOrderMinHours: 2,
     preOrderMaxDays: 7,
     pickUpWindows: [],
     deliveryWindows: [],
     lat:0,
     long:0,
     crimsonBranding:true,
-    subdomain:""
+    subdomain:"",
+    orderingDisabled:false,
   })
   const { session } = UserAuth()
 
@@ -291,7 +295,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   if (!restDetails?.getRest) return;
 
   setPreOrderEnabled(restDetails.getRest.preOrdersEnabled ?? true);
-  setPreOrderMinHours(restDetails.getRest.preoOrderMinHours ?? 2);
+  setPreOrderMinHours(restDetails.getRest.preOrderMinHours ?? 2);
   setPreOrderMaxDays(restDetails.getRest.preOrderMaxDays ?? 7);
 
   setDeliveryWindows(restDetails.getRest.deliveryWindows ?? []);
@@ -304,7 +308,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   const cancelPreorderEdit = () => {
     if (restDetails?.getRest) {
       setPreOrderEnabled(restDetails.getRest.preOrdersEnabled ?? true)
-      setPreOrderMinHours(restDetails.getRest.preoOrderMinHours ?? 2)
+      setPreOrderMinHours(restDetails.getRest.preOrderMinHours ?? 2)
       setPreOrderMaxDays(restDetails.getRest.preOrderMaxDays ?? 7)
       setDeliveryWindows(restDetails.getRest.deliveryWindows ?? [])
       setPickupWindows(restDetails.getRest.pickUpWindows ?? [])
@@ -333,14 +337,15 @@ export default function Settings({ restId }: { restId: string | null }) {
       customDomain: restDetails.getRest.customDomain ?? "",
       restTheme: restDetails.getRest.restTheme ?? "",
       preOrdersEnabled: restDetails.getRest.preOrdersEnabled ?? true,
-      preoOrderMinHours: restDetails.getRest.preoOrderMinHours ?? 2,
+      preOrderMinHours: restDetails.getRest.preOrderMinHours ?? 2,
       preOrderMaxDays: restDetails.getRest.preOrderMaxDays ?? 7,
       pickUpWindows: restDetails.getRest.pickUpWindows ?? [],
       deliveryWindows: restDetails.getRest.deliveryWindows ?? [],
       lat:restDetails.getRest.lat ?? 0,
       long:restDetails.getRest.long ?? 0,
       crimsonBranding:restDetails.getRest.crimsonBranding ?? true,
-      subdomain: restDetails.getRest.subdomain ?? ""
+      subdomain: restDetails.getRest.subdomain ?? "",
+      orderingDisabled:restDetails.getRest.orderingDisabled ?? false
     })
 
     setEditMode(true)
@@ -355,7 +360,14 @@ export default function Settings({ restId }: { restId: string | null }) {
       method: "POST",
       body: formData,
     })
-    return res.json()
+    const data = await res.json()
+    if(!res.ok){
+    
+    const error = data?.message
+    toast.error(`Error: ${error}`)
+    throw new Error(error)
+    }
+    return data
   }
 
   const updateRestDetails = async ({ id }: { id: string | undefined }) => {
@@ -403,21 +415,28 @@ export default function Settings({ restId }: { restId: string | null }) {
           
         }),
       })
+      if(!res.ok){
+        throw new Error("Failed to update settings");
+        
+      }
 
       setEditMode(false)
       return await res.json()
     } catch (err) {
-      console.log(err)
+      throw err
     }
   }
 
-  const { mutate: changeNameM } = useMutation({
-    mutationKey: ["changeNameM"],
+  const { mutate: changeSettings } = useMutation({
+    mutationKey: ["changeSettingsM"],
     mutationFn: updateRestDetails,
     onSuccess: () => {
       toast.success("Details Updated")
       queryClient.invalidateQueries({ queryKey: ["restDetails"] })
     },
+    onError:()=>{
+      toast.error('Something went wrong')
+    }
   })
 
   
@@ -567,6 +586,46 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   setCrimsonBranding(newValue);
   enableBrandM(newValue);
+}
+
+//disable ordering 
+
+const disableOrdering = async (disabled: boolean) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: restId,
+      orderingDisabled:disabled ,
+    }),
+  });
+
+  return res.json();
+};
+
+ const { mutate: disableOrderingM } = useMutation({
+  mutationKey: ["disableOrderingM"],
+  mutationFn: disableOrdering,
+  onSuccess: () => {
+    toast.success("Ordering Disabled");
+
+    queryClient.invalidateQueries({
+      queryKey: ["restDetails"],
+    });
+  },
+  onError: () => {
+    toast.error("Ordering was not disabled");
+  },
+});
+
+ function handleDisableOrdering() {
+  const newValue = !orderingDisabled;
+
+  setOrderingDisabled(newValue);
+  disableOrderingM(newValue);
 }
 
 const { data: notificationsEnabled, isLoading: notifLoading } = useQuery({
@@ -1020,11 +1079,11 @@ const handleEnableNotifications = async () => {
 
               <div>
                 <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
-                  Images
-                </h2>
+                  Images - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only
+                </h2> 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-2">
-                    <FieldLabel icon={ImagePlus}>Restaurant Logo</FieldLabel>
+                    <FieldLabel icon={ImagePlus}>Restaurant Logo </FieldLabel>
                     <label
                       className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
                       style={{ borderColor: BORDER, color: MUTE }}
@@ -1099,7 +1158,7 @@ const handleEnableNotifications = async () => {
                         ? updateRest.customDomain.trim().toLowerCase()
                         : previousCustomDomain
 
-                    changeNameM(
+                    changeSettings(
                       { id: restDetails?.getRest?.id },
                       {
                         onSuccess: () => {
@@ -1196,6 +1255,24 @@ const handleEnableNotifications = async () => {
     )}
   </div>
 </div>
+
+<div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5" style={{ borderColor: BORDER }}>
+  <div className="flex items-center gap-2 mb-2">
+
+        <ReceiptTextIcon className="w-5 h-5" style={{ color: ACCENT }} />
+        <h2 className="text-lg font-bold" style={{ color: INK }}>
+          Enable or Disable Ordering
+        </h2>
+      </div>
+    <Button
+        onClick={handleDisableOrdering}
+        className="rounded-xl min-w-40 w-fit"
+        variant={crimsonBranding ? "destructive" : "destructive"}
+      >
+        {orderingDisabled ? "Enable Ordering" : "Disable Ordering"}
+      </Button>
+</div>
+
         {/* ================= PICKUP LOCATION ================= */}
         <div
           className="bg-white rounded-2xl border p-6 mt-6"
@@ -1302,7 +1379,7 @@ const handleEnableNotifications = async () => {
                   <Input
                     type="number"
                     min={0}
-                    value={preoOrderMinHours}
+                    value={preOrderMinHours}
                     className="h-11 rounded-xl text-base bg-white"
                     style={{ borderColor: BORDER }}
                     onChange={(e) => setPreOrderMinHours(Number(e.target.value))}
@@ -1450,7 +1527,7 @@ const handleEnableNotifications = async () => {
                   onClick={() => {
                     updatePreorderSettingsM({
                       preOrdersEnabled,
-                      preoOrderMinHours,
+                      preOrderMinHours,
                       preOrderMaxDays,
                       deliveryWindows,
                       pickUpWindows,

@@ -103,7 +103,7 @@ export default function SideBar() {
         </div>
 
         {/* Bell + menu */}
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 -ml-8">
           <div className="flex h-9 w-9 items-center justify-center">
             <NotificationPanel />
           </div>
@@ -114,7 +114,7 @@ export default function SideBar() {
             style={{ color: INK }}
             aria-label="Open menu"
           >
-            <Menu className="h-7 w-7" />
+            <Menu className="h-6 w-6" />
           </button>
         </div>
       </div>

@@ -338,9 +338,18 @@ const isLimitReached =
   return
 }
 
-  const scanFile = e.target.files?.[0];
-  if (!scanFile) return;
 
+
+  const scanFile = e.target.files?.[0];
+   if (!scanFile) return;
+
+    const maxSize = 5 * 1024 * 1024; // 5 MB
+  if (scanFile.size > maxSize) {
+    toast.error("File must be smaller than 5 MB.");
+    e.target.value = "";
+    return;
+  }
+ 
   setIsUnderstandingMenu(true);
 
   try {
@@ -685,7 +694,8 @@ if (isPending) {
               <div className="relative flex-1 sm:flex-none">
                 <input
                   type="file"
-                  accept="image/*,.pdf"
+                    accept="image/png,image/jpeg,image/webp,application/pdf"
+
                   onChange={handleScanUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
@@ -1138,7 +1148,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Image</Label>
+              <Label>Image - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only</Label>
               {previewUrl && (
                 <img
                   src={previewUrl}
@@ -1533,7 +1543,7 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Image</Label>
+              <Label>Image - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only</Label>
               {(previewUrl || updateForm.imageUrl) && (
                 <img
                   src={previewUrl || updateForm.imageUrl}

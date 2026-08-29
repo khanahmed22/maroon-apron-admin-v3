@@ -53,6 +53,7 @@ interface CustomerProps {
 interface RestResponse{
   restId:string | null,
   restName:string | null,
+ 
   
 }
 interface Selection {
@@ -85,7 +86,7 @@ export default function PlaceOrder({ restId ,restName}:RestResponse) {
   const { cart, addCart, clearCart, deleteCart } = useCart();
 const [selections, setSelections] = useState<Record<string, Selection>>({});
 
-const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled} = UserAuth()
+const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours} = UserAuth()
  
   function generateOrderNumber(): number {
     return Date.now();
@@ -416,6 +417,21 @@ const SUCCESS = "#16A34A"
       </div>
     )
   }
+
+  const today = new Date();
+
+const minDate = today.toISOString().split("T")[0];
+
+const maxDate =
+  preOrderMaxDays !== null &&
+  preOrderMaxDays !== undefined 
+  
+    ? (() => {
+        const date = new Date(today);
+        date.setDate(date.getDate() + Number(preOrderMaxDays));
+        return date.toISOString().split("T")[0];
+      })()
+    : undefined;
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
@@ -855,11 +871,13 @@ const SUCCESS = "#16A34A"
         Schedule your Order
       </label>
 
+
       {custDetails.isPreOrder && (
         <>
           <Input
             type="date"
-            min={new Date().toISOString().split("T")[0]}
+            min={minDate}
+            max={maxDate}
             value={custDetails.scheduledDate ?? ""}
             onChange={(e) =>
               setCustDetails({

@@ -77,10 +77,10 @@ export default function Dashboard() {
             <p className="text-sm font-semibold uppercase tracking-wide text-white/70 mb-2">
               Dashboard
             </p>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h1 className="text-2xl sm:text-3xl max-md:text-xl font-extrabold text-white">
               Welcome back{session?.name ? `, ${session.name}` : ""}
             </h1>
-            <p className="text-white/80 text-base mt-2 max-w-md">
+            <p className="text-white/80 text-base mt-2 max-w-md max-md:text-sm">
               Here's a quick way to get to everything you manage day to day.
             </p>
           </div>
@@ -97,7 +97,7 @@ export default function Dashboard() {
         <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
           Quick Links
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-md:grid-cols-2">
           {quickLinks.map((q) => (
             <Link
               key={q.link}

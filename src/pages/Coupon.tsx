@@ -229,12 +229,13 @@ export default function Coupon({ restId }: RestProps) {
                     Expiry Date & Time
                   </label>
                   <Input
-                    name="expiry"
-                    type="datetime-local"
-                    value={form.expiry}
-                    onChange={handleChange}
-                    required
-                  />
+  name="expiry"
+  type="datetime-local"
+  value={form.expiry}
+  min={new Date().toISOString().slice(0, 16)}
+  onChange={handleChange}
+  required
+/>
                 </div>
 
                 <div>

@@ -307,6 +307,11 @@ const setItemQuantity = (
           : null,
       }),
     });
+    if(!res.ok){
+      
+      throw new Error('Failed to place order')
+      
+    }
     clearCart();
     setAppliedCoupon(null);
     setCouponCode("");

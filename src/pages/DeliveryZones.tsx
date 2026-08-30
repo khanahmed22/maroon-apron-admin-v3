@@ -110,7 +110,7 @@ export default function DeliveryZones({ restId }: RestProps) {
       setForm(EMPTY_FORM);
     },
     onError:()=>{
-      toast.error('Invalid Input')
+      toast.error('Failed to add area')
       setDialogOpen(false)
       
     }
@@ -146,6 +146,7 @@ export default function DeliveryZones({ restId }: RestProps) {
         queryKey: ["deliveryZone", restId],
       });
     },
+    onError:()=>toast.error("Failed to delete area"),
 
     onSettled: () => {
       setDeletingId(null);
@@ -187,6 +188,7 @@ export default function DeliveryZones({ restId }: RestProps) {
       setEditingAreaId(null);
       setForm(EMPTY_FORM);
     },
+    onError:()=>toast.error("Failed to update area")
   });
 
  
@@ -265,6 +267,9 @@ export default function DeliveryZones({ restId }: RestProps) {
         credentials:'include',
         body:JSON.stringify({fixRate,FixMinOrder})
       })
+      if(!fixRateResponse.ok){
+        return
+      }
     const data = await fixRateResponse.json()
     return data
     }

@@ -17,7 +17,7 @@ export default function NotFound() {
 
    
       <p className="mt-4 text-lg sm:text-xl text-gray-300 max-w-md">
-        Uh-oh! The page you’re looking for has gone up in flames  
+        Uh-oh! The page you are looking for has gone up in flames  
       </p>
 
      

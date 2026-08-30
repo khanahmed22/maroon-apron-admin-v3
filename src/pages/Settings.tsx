@@ -563,6 +563,10 @@ export default function Settings({ restId }: { restId: string | null }) {
     }),
   });
 
+  if(!res.ok){
+    throw new Error("Branding not updated")
+  }
+
   return res.json();
 };
 
@@ -602,6 +606,10 @@ const disableOrdering = async (disabled: boolean) => {
       orderingDisabled:disabled ,
     }),
   });
+
+  if(!res.ok){
+    throw new Error("Failed to disable Ordering")
+  }
 
   return res.json();
 };

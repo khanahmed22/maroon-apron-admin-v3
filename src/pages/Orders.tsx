@@ -111,6 +111,7 @@ export default function Orders({restId}:{restId:string | null}){
     toast.success(`Order ${variables.status}`);
     queryClient.invalidateQueries({queryKey:['orderData',restId]})
   },
+  onError: ()=>toast.error('Failed to update Order Status')
 });
 
 function formatDate(date: Date | string): string {

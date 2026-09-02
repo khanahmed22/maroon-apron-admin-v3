@@ -51,6 +51,7 @@ import {
 import Map from "./Map"
 import { Bell } from "lucide-react"
 import { enableNotifications, fetchNotificationStatus } from "../lib/firebase" // adjust path to wherever you save firebase.ts
+import { Switch } from "../components/ui/switch"
 
 
 const CRIMSON_BASE_DOMAIN = "crimsoncastle.shop"
@@ -601,11 +602,9 @@ export default function Settings({ restId }: { restId: string | null }) {
   },
 });
 
- function handleBranding() {
-  const newValue = !crimsonBranding;
-
-  setCrimsonBranding(newValue);
-  enableBrandM(newValue);
+ function handleBranding(checked: boolean) {
+  setCrimsonBranding(checked);
+  enableBrandM(checked);
 }
 
 //disable ordering 
@@ -645,12 +644,12 @@ const disableOrdering = async (disabled: boolean) => {
   },
 });
 
- function handleDisableOrdering() {
-  const newValue = !orderingDisabled;
-
-  setOrderingDisabled(newValue);
-  disableOrderingM(newValue);
+ function handleDisableOrdering(checked:boolean) {
+  setOrderingDisabled(checked)
+  disableOrderingM(checked)
 }
+
+
 
 // enable pickup 
 
@@ -689,11 +688,11 @@ const enablePickup = async (enabled: boolean) => {
   },
 });
 
- function handlePickupEnable() {
-  const newValue = !pickupEnabled;
+ function handlePickupEnable(checked:boolean) {
+  
 
-  setPickupEnabled(newValue);
-  enablePickupM(newValue);
+  setPickupEnabled(checked);
+  enablePickupM(checked);
 }
 
 
@@ -735,11 +734,11 @@ const { mutate: enableDeliveryM } = useMutation({
   },
 });
 
-function handleDeliveryEnable() {
-  const newValue = !deliveryEnabled;
+function handleDeliveryEnable(checked:boolean) {
+  
 
-  setSetDeliveryEnabled(newValue);
-  enableDeliveryM(newValue);
+  setSetDeliveryEnabled(checked);
+  enableDeliveryM(checked);
 }
 
 //enable notification
@@ -859,7 +858,8 @@ function isValidTimeWindow(value: string): boolean {
             <DialogHeader>
               <DialogTitle>Set up your store</DialogTitle>
               <DialogDescription>
-                Choose your restaurant name and store URL. These can't be changed later - contact support if you need to.
+                Choose your restaurant name and store URL. These can't be
+                changed later - contact support if you need to.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
@@ -870,8 +870,8 @@ function isValidTimeWindow(value: string): boolean {
                   className="h-11 rounded-xl text-base"
                   style={{ borderColor: BORDER }}
                   onChange={(e) => {
-                    setSetupName(e.target.value)
-                    setSetupSubdomain(slugify(e.target.value))
+                    setSetupName(e.target.value);
+                    setSetupSubdomain(slugify(e.target.value));
                   }}
                 />
               </div>
@@ -889,7 +889,10 @@ function isValidTimeWindow(value: string): boolean {
               style={{ backgroundColor: ACCENT }}
               disabled={!setupName.trim() || setupSaving}
               onClick={() =>
-                completeSetupM({ restName: setupName.trim(), subdomain: setupSubdomain })
+                completeSetupM({
+                  restName: setupName.trim(),
+                  subdomain: setupSubdomain,
+                })
               }
             >
               {setupSaving ? "Setting up…" : "Continue"}
@@ -900,7 +903,10 @@ function isValidTimeWindow(value: string): boolean {
 
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between gap-4 mb-6">
-          <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
+          <h1
+            className="text-3xl max-md:text-xl font-extrabold"
+            style={{ color: INK }}
+          >
             Settings
           </h1>
           {!editMode && (
@@ -928,7 +934,10 @@ function isValidTimeWindow(value: string): boolean {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center" style={{ color: MUTE }}>
+              <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ color: MUTE }}
+              >
                 <Store className="w-8 h-8" />
               </div>
             )}
@@ -945,34 +954,41 @@ function isValidTimeWindow(value: string): boolean {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center" style={{ color: MUTE, backgroundColor: SOFT }}>
+                <div
+                  className="w-full h-full flex items-center justify-center"
+                  style={{ color: MUTE, backgroundColor: SOFT }}
+                >
                   <Store className="w-8 h-8" />
                 </div>
               )}
             </div>
-            <p className="text-2xl max-md:text-lg font-extrabold pb-1" style={{ color: INK }}>
+            <p
+              className="text-2xl max-md:text-lg font-extrabold pb-1"
+              style={{ color: INK }}
+            >
               {restDetails?.getRest?.restName || "Your Restaurant"}
             </p>
-            {
-              restDetails?.getRest?.restSite && 
+            {restDetails?.getRest?.restSite && (
               <div className="mb-2 ">
-<a
-  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs "
-  href={restDetails?.getRest?.restSite}
-  target="_blank"
-  rel="noopener noreferrer"
->
-  <span className="max-md:hidden">Visit Store</span> Store 
-</a>
-            </div>
-            }
-            
+                <a
+                  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs "
+                  href={restDetails?.getRest?.restSite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="max-md:hidden">Visit Store</span> Store
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
         {!editMode ? (
           /* ================= VIEW MODE ================= */
-          <div className="bg-white rounded-2xl border p-6" style={{ borderColor: BORDER }}>
+          <div
+            className="bg-white rounded-2xl border p-6"
+            style={{ borderColor: BORDER }}
+          >
             <InfoRow
               icon={Globe}
               label="Store URL"
@@ -982,20 +998,63 @@ function isValidTimeWindow(value: string): boolean {
                   : undefined
               }
             />
-            <InfoRow icon={Phone} label="Phone" value={restDetails?.getRest?.restPhone} />
-            <InfoRow icon={Mail} label="Email" value={restDetails?.getRest?.restEmail} />
-            <InfoRow icon={MapPin} label="Address" value={restDetails?.getRest?.restAddress} />
-            <InfoRow  icon='/instagram.svg' label="Instagram" value={restDetails?.getRest?.restInstagram} />
-            <InfoRow icon='/facebook.svg' label="Facebook" value={restDetails?.getRest?.restFB} />
-            <InfoRow icon={Tag} label="Meta Title" value={restDetails?.getRest?.metaTitle} />
-            <InfoRow icon={FileText} label="Meta Description" value={restDetails?.getRest?.metaDesc} />
-            <InfoRow icon={Palette} label="Theme" value={restDetails?.getRest?.restTheme} />
-            <InfoRow icon={PartyPopper} label="Announcement" value={restDetails?.getRest?.restAnnouncement} />
-            <InfoRow icon={Globe} label="Custom Domain" value={restDetails?.getRest?.customDomain} />
+            <InfoRow
+              icon={Phone}
+              label="Phone"
+              value={restDetails?.getRest?.restPhone}
+            />
+            <InfoRow
+              icon={Mail}
+              label="Email"
+              value={restDetails?.getRest?.restEmail}
+            />
+            <InfoRow
+              icon={MapPin}
+              label="Address"
+              value={restDetails?.getRest?.restAddress}
+            />
+            <InfoRow
+              icon="/instagram.svg"
+              label="Instagram"
+              value={restDetails?.getRest?.restInstagram}
+            />
+            <InfoRow
+              icon="/facebook.svg"
+              label="Facebook"
+              value={restDetails?.getRest?.restFB}
+            />
+            <InfoRow
+              icon={Tag}
+              label="Meta Title"
+              value={restDetails?.getRest?.metaTitle}
+            />
+            <InfoRow
+              icon={FileText}
+              label="Meta Description"
+              value={restDetails?.getRest?.metaDesc}
+            />
+            <InfoRow
+              icon={Palette}
+              label="Theme"
+              value={restDetails?.getRest?.restTheme}
+            />
+            <InfoRow
+              icon={PartyPopper}
+              label="Announcement"
+              value={restDetails?.getRest?.restAnnouncement}
+            />
+            <InfoRow
+              icon={Globe}
+              label="Custom Domain"
+              value={restDetails?.getRest?.customDomain}
+            />
           </div>
         ) : (
           /* ================= EDIT MODE ================= */
-          <div className="bg-white rounded-2xl border p-6" style={{ borderColor: BORDER }}>
+          <div
+            className="bg-white rounded-2xl border p-6"
+            style={{ borderColor: BORDER }}
+          >
             <div className="space-y-5">
               <div>
                 <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
@@ -1019,7 +1078,6 @@ function isValidTimeWindow(value: string): boolean {
                     </p>
                   </div>
 
-                  
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon={PartyPopper}>Announcement</FieldLabel>
                     <Input
@@ -1029,7 +1087,10 @@ function isValidTimeWindow(value: string): boolean {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restAnnouncement:e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          restAnnouncement: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -1042,7 +1103,10 @@ function isValidTimeWindow(value: string): boolean {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restPhone:e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          restPhone: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -1054,7 +1118,10 @@ function isValidTimeWindow(value: string): boolean {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restEmail: e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          restEmail: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -1066,14 +1133,19 @@ function isValidTimeWindow(value: string): boolean {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restAddress: e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          restAddress: e.target.value,
+                        })
                       }
                     />
                   </div>
 
                   <div className="flex flex-col gap-y-1.5 sm:col-span-2">
                     <div className="flex items-center justify-between">
-                      <FieldLabel icon={isFreePlan ? Lock : Globe}>Custom Domain</FieldLabel>
+                      <FieldLabel icon={isFreePlan ? Lock : Globe}>
+                        Custom Domain
+                      </FieldLabel>
                       {isFreePlan && (
                         <span
                           className="text-xs font-semibold px-2.5 py-1 rounded-full"
@@ -1088,31 +1160,45 @@ function isValidTimeWindow(value: string): boolean {
                         isFreePlan
                           ? "Upgrade to Pro to set a custom domain"
                           : lockedSubdomain
-                          ? `${lockedSubdomain}.com`
-                          : "yoursubdomain.com"
+                            ? `${lockedSubdomain}.com`
+                            : "yoursubdomain.com"
                       }
                       value={updateRest.customDomain}
                       disabled={isFreePlan}
                       className="h-11 rounded-xl text-base disabled:cursor-not-allowed disabled:opacity-60"
-                      style={{ borderColor: customDomainError ? "#DC2626" : BORDER }}
+                      style={{
+                        borderColor: customDomainError ? "#DC2626" : BORDER,
+                      }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, customDomain: e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          customDomain: e.target.value,
+                        })
                       }
                     />
                     {!isFreePlan && (
-                      <p className="text-xs" style={{ color: customDomainError ? "#DC2626" : MUTE }}>
+                      <p
+                        className="text-xs"
+                        style={{ color: customDomainError ? "#DC2626" : MUTE }}
+                      >
                         {customDomainError ??
                           `Must start with your subdomain - e.g. ${lockedSubdomain}.com, ${lockedSubdomain}.lol`}
                       </p>
                     )}
-                    {!isFreePlan && updateRest.customDomain && !customDomainError && (
-                      <p className="text-xs" style={{ color: MUTE }}>
-                        In your domain provider, add a CNAME record pointing to{" "}
-                        <span className="font-semibold" style={{ color: INK }}>
-                          {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
-                        </span>
-                      </p>
-                    )}
+                    {!isFreePlan &&
+                      updateRest.customDomain &&
+                      !customDomainError && (
+                        <p className="text-xs" style={{ color: MUTE }}>
+                          In your domain provider, add a CNAME record pointing
+                          to{" "}
+                          <span
+                            className="font-semibold"
+                            style={{ color: INK }}
+                          >
+                            {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
+                          </span>
+                        </p>
+                      )}
                   </div>
                 </div>
               </div>
@@ -1123,19 +1209,22 @@ function isValidTimeWindow(value: string): boolean {
                 </h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-1.5">
-                    <FieldLabel icon='/instagram.svg'>Instagram</FieldLabel>
+                    <FieldLabel icon="/instagram.svg">Instagram</FieldLabel>
                     <Input
                       placeholder="Instagram"
                       value={updateRest.restInstagram}
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, restInstagram: e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          restInstagram: e.target.value,
+                        })
                       }
                     />
                   </div>
                   <div className="flex flex-col gap-y-1.5">
-                    <FieldLabel icon='/facebook.svg'>Facebook</FieldLabel>
+                    <FieldLabel icon="/facebook.svg">Facebook</FieldLabel>
                     <Input
                       placeholder="Facebook"
                       value={updateRest.restFB}
@@ -1162,7 +1251,10 @@ function isValidTimeWindow(value: string): boolean {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, metaTitle: e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          metaTitle: e.target.value,
+                        })
                       }
                     />
                   </div>
@@ -1174,43 +1266,52 @@ function isValidTimeWindow(value: string): boolean {
                       className="h-11 rounded-xl text-base"
                       style={{ borderColor: BORDER }}
                       onChange={(e) =>
-                        setUpdateRest({ ...updateRest, metaDesc: e.target.value })
+                        setUpdateRest({
+                          ...updateRest,
+                          metaDesc: e.target.value,
+                        })
                       }
                     />
                   </div>
                   <div className="flex flex-col gap-y-1.5">
-  <FieldLabel icon={Palette}>Theme</FieldLabel>
-  <Select
-    value={updateRest.restTheme || DEFAULT_THEME}
-    onValueChange={(value) =>
-      setUpdateRest({ ...updateRest, restTheme: value as ThemeName })
-    }
-  >
-    <SelectTrigger className="h-11 rounded-xl text-base w-full">
-      <SelectValue placeholder="Select a theme" />
-    </SelectTrigger>
-    <SelectContent>
-      {THEME_NAMES.map((theme) => (
-        <SelectItem key={theme} value={theme}>
-          <span className="flex items-center gap-2">
-            <span
-              className="w-3.5 h-3.5 rounded-full border border-border shrink-0"
-              style={{ backgroundColor: THEME_META[theme].swatch }}
-            />
-            {THEME_META[theme].label}
-          </span>
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
+                    <FieldLabel icon={Palette}>Theme</FieldLabel>
+                    <Select
+                      value={updateRest.restTheme || DEFAULT_THEME}
+                      onValueChange={(value) =>
+                        setUpdateRest({
+                          ...updateRest,
+                          restTheme: value as ThemeName,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-11 rounded-xl text-base w-full">
+                        <SelectValue placeholder="Select a theme" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {THEME_NAMES.map((theme) => (
+                          <SelectItem key={theme} value={theme}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className="w-3.5 h-3.5 rounded-full border border-border shrink-0"
+                                style={{
+                                  backgroundColor: THEME_META[theme].swatch,
+                                }}
+                              />
+                              {THEME_META[theme].label}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
               <div>
                 <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
-                  Images - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only
-                </h2> 
+                  Images - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed
+                  only
+                </h2>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-2">
                     <FieldLabel icon={ImagePlus}>Restaurant Logo </FieldLabel>
@@ -1224,7 +1325,9 @@ function isValidTimeWindow(value: string): boolean {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => setLogoFile(e.target.files?.[0] || null)}
+                        onChange={(e) =>
+                          setLogoFile(e.target.files?.[0] || null)
+                        }
                       />
                     </label>
                     {logoPreview && (
@@ -1249,7 +1352,9 @@ function isValidTimeWindow(value: string): boolean {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
+                        onChange={(e) =>
+                          setBannerFile(e.target.files?.[0] || null)
+                        }
                       />
                     </label>
                     {bannerPreview && (
@@ -1278,29 +1383,37 @@ function isValidTimeWindow(value: string): boolean {
                   disabled={!!customDomainError}
                   onClick={() => {
                     if (customDomainError) {
-                      toast.error(customDomainError)
-                      return
+                      toast.error(customDomainError);
+                      return;
                     }
 
-                    const previousCustomDomain = restDetails?.getRest?.customDomain ?? ""
+                    const previousCustomDomain =
+                      restDetails?.getRest?.customDomain ?? "";
                     const nextCustomDomain =
-                      !isFreePlan && isValidCustomDomain(updateRest.customDomain, lockedSubdomain)
+                      !isFreePlan &&
+                      isValidCustomDomain(
+                        updateRest.customDomain,
+                        lockedSubdomain,
+                      )
                         ? updateRest.customDomain.trim().toLowerCase()
-                        : previousCustomDomain
+                        : previousCustomDomain;
 
                     changeSettings(
                       { id: restDetails?.getRest?.id },
                       {
                         onSuccess: () => {
-                          if (nextCustomDomain && nextCustomDomain !== previousCustomDomain) {
+                          if (
+                            nextCustomDomain &&
+                            nextCustomDomain !== previousCustomDomain
+                          ) {
                             updateNetlifyAliasM({
                               oldDomain: previousCustomDomain || undefined,
                               newDomain: nextCustomDomain,
-                            })
+                            });
                           }
                         },
                       },
-                    )
+                    );
                   }}
                 >
                   Save
@@ -1310,133 +1423,135 @@ function isValidTimeWindow(value: string): boolean {
           </div>
         )}
 
-        
+        <div className="bg-white rounded-2xl border p-6 mt-6">
+          <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <BadgeCheck className="w-5 h-5 text-red-500" />
+                <h2 className="text-lg font-bold text-gray-900">
+                  Crimson Castle Branding
+                </h2>
+              </div>
 
-<div className="bg-white rounded-2xl border p-6 mt-6">
-  <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        <BadgeCheck className="w-5 h-5 text-red-500" />
-        <h2 className="text-lg font-bold text-gray-900">
-          Crimson Castle Branding
-        </h2>
-      </div>
+              <p className="text-sm text-gray-500">
+                {isFreePlan
+                  ? "Upgrade to Pro to remove the 'Powered by Crimson Castle' footer from your storefront."
+                  : crimsonBranding
+                    ? "Your storefront currently displays the 'Powered by Crimson Castle' footer."
+                    : "The 'Powered by Crimson Castle' footer has been removed from your storefront."}
+              </p>
+            </div>
 
-      <p className="text-sm text-gray-500">
-        {isFreePlan
-          ? "Upgrade to Pro to remove the 'Powered by Crimson Castle' footer from your storefront."
-          : crimsonBranding
-          ? "Your storefront currently displays the 'Powered by Crimson Castle' footer."
-          : "The 'Powered by Crimson Castle' footer has been removed from your storefront."}
-      </p>
-    </div>
+            <div className="flex items-center gap-3">
+              <Switch
+                disabled={isFreePlan}
+                checked={crimsonBranding}
+                onCheckedChange={handleBranding}
+              />
 
-    {isFreePlan ? (
-      <Button
-        disabled
-        variant="outline"
-        className="rounded-xl"
-      >
-        Pro Required
-      </Button>
-    ) : (
-      <Button
-        onClick={handleBranding}
-        className="rounded-xl min-w-40"
-        variant={crimsonBranding ? "destructive" : "destructive"}
-      >
-        {crimsonBranding ? "Remove Branding" : "Enable Branding"}
-      </Button>
-    )}
-  </div>
-</div>
+              {isFreePlan && (
+                <span className="text-sm text-muted-foreground">
+                  Pro Required
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
 
-<div className="bg-white rounded-2xl border p-6 mt-6" style={{ borderColor: BORDER }}>
-  <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
-    <div>
-      <div className="flex items-center gap-2 mb-2">
-        <Bell className="w-5 h-5" style={{ color: ACCENT }} />
-        <h2 className="text-lg font-bold" style={{ color: INK }}>
-          Push Notifications
-        </h2>
-      </div>
-      <p className="text-sm" style={{ color: MUTE }}>
-        Get notified when orders or events happen
-      </p>
-    </div>
+        <div
+          className="bg-white rounded-2xl border p-6 mt-6"
+          style={{ borderColor: BORDER }}
+        >
+          <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Bell className="w-5 h-5" style={{ color: ACCENT }} />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
+                  Push Notifications
+                </h2>
+              </div>
+              <p className="text-sm" style={{ color: MUTE }}>
+                Get notified when orders or events happen
+              </p>
+            </div>
 
-    {notifLoading ? (
-      <Button disabled variant="outline" className="rounded-xl min-w-40">
-        <Loader2 className="w-4 h-4 animate-spin" />
-      </Button>
-    ) : notificationsEnabled ? (
-      <Button disabled variant="outline" className="rounded-xl min-w-40 text-green-600 border-green-300">
-        ✓ Enabled
-      </Button>
-    ) : (
-      <Button
-        onClick={handleEnableNotifications}
-        disabled={enablingNotifs}
-        className="rounded-xl min-w-40 text-white disabled:opacity-60"
-        style={{ backgroundColor: ACCENT }}
-      >
-        {enablingNotifs ? "Enabling…" : "Enable Notifications"}
-      </Button>
-    )}
-  </div>
-</div>
+            {notifLoading ? (
+              <Button
+                disabled
+                variant="outline"
+                className="rounded-xl min-w-40"
+              >
+                <Loader2 className="w-4 h-4 animate-spin" />
+              </Button>
+            ) : notificationsEnabled ? (
+              <Button
+                disabled
+                variant="outline"
+                className="rounded-xl min-w-40 text-green-600 border-green-300"
+              >
+                ✓ Enabled
+              </Button>
+            ) : (
+              <Button
+                onClick={handleEnableNotifications}
+                disabled={enablingNotifs}
+                className="rounded-xl min-w-40 text-white disabled:opacity-60"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {enablingNotifs ? "Enabling…" : "Enable Notifications"}
+              </Button>
+            )}
+          </div>
+        </div>
 
-<div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5" style={{ borderColor: BORDER }}>
-  <div className="flex items-center gap-2 mb-2">
+        <div
+          className="bg-white rounded-2xl border p-6 mt-6 flex items-center justify-between gap-y-5"
+          style={{ borderColor: BORDER }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <ReceiptTextIcon className="w-5 h-5" style={{ color: ACCENT }} />
+            <h2 className="text-lg font-bold" style={{ color: INK }}>
+              Turn OFF Ordering
+            </h2>
+          </div>
+          <Switch
+            checked={orderingDisabled}
+            onCheckedChange={handleDisableOrdering}
+          />
+        </div>
 
-        <ReceiptTextIcon className="w-5 h-5" style={{ color: ACCENT }} />
-        <h2 className="text-lg font-bold" style={{ color: INK }}>
-          Enable or Disable Ordering
-        </h2>
-      </div>
-    <Button
-        onClick={handleDisableOrdering}
-        className="rounded-xl min-w-40 w-fit"
-        variant={crimsonBranding ? "destructive" : "destructive"}
-      >
-        {orderingDisabled ? "Enable Ordering" : "Disable Ordering"}
-      </Button>
-</div>
+        <div
+          className="bg-white rounded-2xl border p-6 mt-6 flex items-center justify-between  gap-y-5"
+          style={{ borderColor: BORDER }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Handbag className="w-5 h-5" style={{ color: ACCENT }} />
+            <h2 className="text-lg font-bold" style={{ color: INK }}>
+              Turn ON or OFF Pick-up
+            </h2>
+          </div>
+          <Switch
+  checked={pickupEnabled}
+  onCheckedChange={handlePickupEnable}
+/>
+        </div>
 
- 
-  <div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5" style={{ borderColor: BORDER }}>
-  <div className="flex items-center gap-2 mb-2">
-    <Handbag className="w-5 h-5" style={{ color: ACCENT }} />
-    <h2 className="text-lg font-bold" style={{ color: INK }}>
-      Enable or Disable Pick-up
-    </h2>
-  </div>
-  <Button
-    onClick={handlePickupEnable}
-    className="rounded-xl min-w-40 w-fit"
-    variant={pickupEnabled ? "destructive" : "default"}
-    style={!pickupEnabled ? { backgroundColor: ACCENT } : undefined}
-  >
-    {pickupEnabled ? "Disable Pickup" : "Enable Pickup"}
-  </Button>
-</div>
-
-<div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5" style={{ borderColor: BORDER }}>
-  <div className="flex items-center gap-2 mb-2">
-    <Bike className="w-5 h-5" style={{ color: ACCENT }} />
-    <h2 className="text-lg font-bold" style={{ color: INK }}>
-      Enable or Disable Delivery
-    </h2>
-  </div>
-  <Button
-    onClick={handleDeliveryEnable}
-    className="rounded-xl min-w-40 w-fit"
-    variant={deliveryEnabled ? "destructive" : "default"}
-    style={!deliveryEnabled ? { backgroundColor: ACCENT } : undefined}
-  >
-    {deliveryEnabled ? "Disable Delivery" : "Enable Delivery"}
-  </Button>
-</div>
+        <div
+          className="bg-white rounded-2xl border p-6 mt-6 flex items-center justify-between gap-y-5"
+          style={{ borderColor: BORDER }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Bike className="w-5 h-5" style={{ color: ACCENT }} />
+            <h2 className="text-lg font-bold" style={{ color: INK }}>
+              Turn ON or OFF Delivery
+            </h2>
+          </div>
+          <Switch 
+          checked={deliveryEnabled}
+          onCheckedChange={handleDeliveryEnable}
+          />
+          
+        </div>
 
         {/* ================= PICKUP LOCATION ================= */}
         <div
@@ -1547,7 +1662,9 @@ function isValidTimeWindow(value: string): boolean {
                     value={preOrderMinHours}
                     className="h-11 rounded-xl text-base bg-white"
                     style={{ borderColor: BORDER }}
-                    onChange={(e) => setPreOrderMinHours(Number(e.target.value))}
+                    onChange={(e) =>
+                      setPreOrderMinHours(Number(e.target.value))
+                    }
                   />
                 </div>
 
@@ -1583,23 +1700,25 @@ function isValidTimeWindow(value: string): boolean {
                       onChange={(e) => setNewWindow(e.target.value)}
                     />
                     <Button
-  className="rounded-xl text-white shrink-0"
-  style={{ backgroundColor: ACCENT }}
-  onClick={() => {
-    const w = newWindow.trim();
-    if (!w) return;
+                      className="rounded-xl text-white shrink-0"
+                      style={{ backgroundColor: ACCENT }}
+                      onClick={() => {
+                        const w = newWindow.trim();
+                        if (!w) return;
 
-    if (!isValidTimeWindow(w)) {
-      toast.error("Use a format like '7pm - 9pm' or '15:00 - 16:00'");
-      return;
-    }
+                        if (!isValidTimeWindow(w)) {
+                          toast.error(
+                            "Use a format like '7pm - 9pm' or '15:00 - 16:00'",
+                          );
+                          return;
+                        }
 
-    setDeliveryWindows([...deliveryWindows, w]);
-    setNewWindow("");
-  }}
->
-  Add
-</Button>
+                        setDeliveryWindows([...deliveryWindows, w]);
+                        setNewWindow("");
+                      }}
+                    >
+                      Add
+                    </Button>
                   </div>
                   {deliveryWindows.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -1614,7 +1733,9 @@ function isValidTimeWindow(value: string): boolean {
                             className="w-4 h-4 cursor-pointer"
                             style={{ color: ACCENT }}
                             onClick={() => {
-                              setDeliveryWindows(deliveryWindows.filter((_, i) => i !== idx))
+                              setDeliveryWindows(
+                                deliveryWindows.filter((_, i) => i !== idx),
+                              );
                             }}
                           />
                         </div>
@@ -1641,24 +1762,26 @@ function isValidTimeWindow(value: string): boolean {
                       style={{ borderColor: BORDER }}
                       onChange={(e) => setNewPickupWindow(e.target.value)}
                     />
-                   <Button
-  className="rounded-xl text-white shrink-0"
-  style={{ backgroundColor: ACCENT }}
-  onClick={() => {
-    const w = newPickupWindow.trim();
-    if (!w) return;
+                    <Button
+                      className="rounded-xl text-white shrink-0"
+                      style={{ backgroundColor: ACCENT }}
+                      onClick={() => {
+                        const w = newPickupWindow.trim();
+                        if (!w) return;
 
-    if (!isValidTimeWindow(w)) {
-      toast.error("Use a format like '6pm - 8pm' or '18:00 - 20:00'");
-      return;
-    }
+                        if (!isValidTimeWindow(w)) {
+                          toast.error(
+                            "Use a format like '6pm - 8pm' or '18:00 - 20:00'",
+                          );
+                          return;
+                        }
 
-    setPickupWindows([...pickUpWindows, w]);
-    setNewPickupWindow("");
-  }}
->
-  Add
-</Button>
+                        setPickupWindows([...pickUpWindows, w]);
+                        setNewPickupWindow("");
+                      }}
+                    >
+                      Add
+                    </Button>
                   </div>
                   {pickUpWindows.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -1673,7 +1796,9 @@ function isValidTimeWindow(value: string): boolean {
                             className="w-4 h-4 cursor-pointer"
                             style={{ color: ACCENT }}
                             onClick={() => {
-                              setPickupWindows(pickUpWindows.filter((_, i) => i !== idx))
+                              setPickupWindows(
+                                pickUpWindows.filter((_, i) => i !== idx),
+                              );
                             }}
                           />
                         </div>
@@ -1708,8 +1833,8 @@ function isValidTimeWindow(value: string): boolean {
                       preOrderMaxDays,
                       deliveryWindows,
                       pickUpWindows,
-                    })
-                    setPreorderEditMode(false)
+                    });
+                    setPreorderEditMode(false);
                   }}
                 >
                   Save Preorder Settings
@@ -1718,25 +1843,25 @@ function isValidTimeWindow(value: string): boolean {
             )}
           </div>
         </div>
-        <div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5"
-          style={{ borderColor: BORDER }}>
+        <div
+          className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5"
+          style={{ borderColor: BORDER }}
+        >
           <div className="flex items-center gap-2 ">
-              <HelpCircle className="w-5 h-5" style={{ color: ACCENT }} />
-              <h2 className="text-lg font-bold" style={{ color: INK }}>
-                Have a question?
-              </h2>
-            </div>
-            <Button
-                onClick={() => navigate("/support")}
-                className="rounded-xl gap-2 text-white w-fit p-4 font-bold"
-                style={{ backgroundColor: ACCENT }}
-              >
-               
-                Contact Support
-              </Button>
+            <HelpCircle className="w-5 h-5" style={{ color: ACCENT }} />
+            <h2 className="text-lg font-bold" style={{ color: INK }}>
+              Have a question?
+            </h2>
+          </div>
+          <Button
+            onClick={() => navigate("/support")}
+            className="rounded-xl gap-2 text-white w-fit p-4 font-bold"
+            style={{ backgroundColor: ACCENT }}
+          >
+            Contact Support
+          </Button>
         </div>
       </div>
-      
     </div>
-  )
+  );
 }

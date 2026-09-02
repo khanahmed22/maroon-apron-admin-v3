@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router"
 import { UserAuth } from "../context/AuthContext"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery,useMutation } from "@tanstack/react-query"
 import { initPaddle } from "../lib/paddle"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -12,6 +12,20 @@ import {
   CreditCard,
 } from "lucide-react"
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../components/ui/alert-dialog";
+
+import { Input } from "../components/ui/input";
+
 const ACCENT = "#D6293F"
 const INK = "#171717"
 const MUTE = "#6B7280"
@@ -22,6 +36,7 @@ export default function Account() {
   const navigate = useNavigate()
   const { session, checkAuth } = UserAuth()
   const [loading, setLoading] = useState(false)
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
 
   const fetchLogout = async () => {
     try {
@@ -143,6 +158,45 @@ export default function Account() {
   }
 
   const isPro = merchantStatus?.plan === "pro"
+
+  // delete account 
+
+  const deleteAccount = async () => {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/delete-account`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+  userConfirm: "DELETE",
+}),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Failed to delete account");
+  }
+  
+
+  return data;
+};
+
+const deleteAccountMutation = useMutation({
+  mutationFn: deleteAccount,
+
+  onSuccess: async () => {
+    toast.success("Account deleted successfully");
+
+    await checkAuth()
+    navigate("/login")
+  },
+
+  onError: (error) => {
+    toast.error(error.message);
+  },
+});
 
   if (isPending) {
     return (
@@ -307,6 +361,80 @@ export default function Account() {
         </div>
 
       </div>
+
+      <div
+  className="max-w-md w-full mx-auto rounded-2xl border bg-white p-5 sm:p-6 mt-44"
+  style={{ borderColor: "#FECACA" }}
+>
+  <div className="mb-4">
+    <h2 className="text-lg font-bold text-red-600">
+      Danger Zone
+    </h2>
+
+    <p className="text-sm text-gray-500 mt-1">
+      Deleting your account is permanent and cannot be undone.
+    </p>
+  </div>
+
+  <AlertDialog>
+    <AlertDialogTrigger asChild>
+      <button
+        className="w-full rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors"
+      >
+        Delete Account
+      </button>
+    </AlertDialogTrigger>
+
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>
+          Are you absolutely sure?
+        </AlertDialogTitle>
+
+        <AlertDialogDescription>
+          This will permanently delete your account and all
+          associated data. This action cannot be undone.
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+
+      <div className="space-y-2 py-2">
+        <p className="text-sm font-medium">
+          Type <span className="font-bold">DELETE</span> to confirm.
+        </p>
+
+        <Input
+          value={deleteConfirmation}
+          onChange={(e) => setDeleteConfirmation(e.target.value)}
+          placeholder="DELETE"
+          autoComplete="off"
+        />
+      </div>
+
+      <AlertDialogFooter>
+        <AlertDialogCancel
+          onClick={() => setDeleteConfirmation("")}
+        >
+          Cancel
+        </AlertDialogCancel>
+
+        <AlertDialogAction
+          disabled={
+            deleteConfirmation !== "DELETE" ||
+            deleteAccountMutation.isPending
+          }
+          onClick={() => deleteAccountMutation.mutate()}
+          className="bg-red-600 hover:bg-red-700"
+        >
+          {deleteAccountMutation.isPending
+            ? "Deleting..."
+            : "Permanently Delete Account"}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+</div>
+
+
     </div>
   )
 }

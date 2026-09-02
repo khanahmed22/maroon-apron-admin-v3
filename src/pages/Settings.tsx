@@ -35,7 +35,9 @@ import {
   X,
   BadgeCheck,
   HelpCircle,
-  ReceiptTextIcon
+  ReceiptTextIcon,
+  Bike,
+  Handbag
 } from "lucide-react"
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
 import type { ThemeName } from "../lib/themes"
@@ -97,7 +99,9 @@ interface RestListProps {
   long:number,
   crimsonBranding:boolean,
   subdomain:string,
-  orderingDisabled:boolean
+  orderingDisabled:boolean,
+  pickupEnabled:boolean,
+  deliveryEnabled:boolean
 }
 interface RestResponse {
   getRest: RestListProps
@@ -192,6 +196,9 @@ export default function Settings({ restId }: { restId: string | null }) {
   const [newPickupWindow, setNewPickupWindow] = useState("");
   const [crimsonBranding,setCrimsonBranding] = useState(true)
   const [orderingDisabled,setOrderingDisabled] = useState(false)
+
+  const [deliveryEnabled,setSetDeliveryEnabled] = useState(false)
+  const [pickupEnabled,setPickupEnabled] = useState(false)
   
   const queryClient = useQueryClient()
 
@@ -240,6 +247,8 @@ export default function Settings({ restId }: { restId: string | null }) {
     crimsonBranding:true,
     subdomain:"",
     orderingDisabled:false,
+    pickupEnabled:true,
+    deliveryEnabled:true
   })
   const { session } = UserAuth()
 
@@ -300,6 +309,10 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   setDeliveryWindows(restDetails.getRest.deliveryWindows ?? []);
   setPickupWindows(restDetails.getRest.pickUpWindows ?? []);
+  setCrimsonBranding(restDetails.getRest.crimsonBranding ?? true);
+  setOrderingDisabled(restDetails.getRest.orderingDisabled ?? false);
+  setPickupEnabled(restDetails.getRest.pickupEnabled ?? true);
+  setSetDeliveryEnabled(restDetails.getRest.deliveryEnabled ?? true);
 }, [restDetails]);
 
   const [editMode, setEditMode] = useState(false)
@@ -345,7 +358,10 @@ export default function Settings({ restId }: { restId: string | null }) {
       long:restDetails.getRest.long ?? 0,
       crimsonBranding:restDetails.getRest.crimsonBranding ?? true,
       subdomain: restDetails.getRest.subdomain ?? "",
-      orderingDisabled:restDetails.getRest.orderingDisabled ?? false
+      orderingDisabled:restDetails.getRest.orderingDisabled ?? false,
+      pickupEnabled:restDetails?.getRest?.pickupEnabled ?? true,
+      deliveryEnabled:restDetails?.getRest?.deliveryEnabled ?? true
+
     })
 
     setEditMode(true)
@@ -636,6 +652,98 @@ const disableOrdering = async (disabled: boolean) => {
   disableOrderingM(newValue);
 }
 
+// enable pickup 
+
+const enablePickup = async (enabled: boolean) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: restId,
+      pickupEnabled:enabled ,
+    }),
+  });
+
+  if(!res.ok){
+    throw new Error("Failed to disable Ordering")
+  }
+
+  return res.json();
+};
+
+ const { mutate: enablePickupM } = useMutation({
+  mutationKey: ["enablePickupM"],
+  mutationFn: enablePickup,
+  onSuccess: () => {
+    toast.success("Pickup setting updated");
+
+    queryClient.invalidateQueries({
+      queryKey: ["restDetails"],
+    });
+  },
+  onError: () => {
+    toast.error("Pick Up settting not updated");
+  },
+});
+
+ function handlePickupEnable() {
+  const newValue = !pickupEnabled;
+
+  setPickupEnabled(newValue);
+  enablePickupM(newValue);
+}
+
+
+
+// enable delivery
+
+const enableDelivery = async (enabled: boolean) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: restId,
+      deliveryEnabled: enabled,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to update delivery setting")
+  }
+
+  return res.json();
+};
+
+const { mutate: enableDeliveryM } = useMutation({
+  mutationKey: ["enableDeliveryM"],
+  mutationFn: enableDelivery,
+  onSuccess: () => {
+    toast.success("Delivery setting updated");
+
+    queryClient.invalidateQueries({
+      queryKey: ["restDetails"],
+    });
+  },
+  onError: () => {
+    toast.error("Delivery setting not updated");
+  },
+});
+
+function handleDeliveryEnable() {
+  const newValue = !deliveryEnabled;
+
+  setSetDeliveryEnabled(newValue);
+  enableDeliveryM(newValue);
+}
+
+//enable notification
+
 const { data: notificationsEnabled, isLoading: notifLoading } = useQuery({
   queryKey: ["notificationStatus"],
   queryFn: fetchNotificationStatus,
@@ -708,6 +816,20 @@ const handleEnableNotifications = async () => {
     setPendingLocation(null)
     setLocationResetToken((t) => t + 1)
   }
+
+  // Validates "start - end" time range format, e.g. "7pm - 9pm", "15:00 - 16:00"
+function isValidTimeWindow(value: string): boolean {
+  const timePattern = /^(\d{1,2})(:\d{2})?\s*(am|pm)?$/i;
+  const parts = value.split("-").map((p) => p.trim());
+
+  if (parts.length !== 2) return false;
+  const [start, end] = parts;
+  if (!start || !end) return false;
+
+  return timePattern.test(start) && timePattern.test(end);
+}
+
+  
 
   if (isPending) {
     return (
@@ -1281,6 +1403,41 @@ const handleEnableNotifications = async () => {
       </Button>
 </div>
 
+ 
+  <div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5" style={{ borderColor: BORDER }}>
+  <div className="flex items-center gap-2 mb-2">
+    <Handbag className="w-5 h-5" style={{ color: ACCENT }} />
+    <h2 className="text-lg font-bold" style={{ color: INK }}>
+      Enable or Disable Pick-up
+    </h2>
+  </div>
+  <Button
+    onClick={handlePickupEnable}
+    className="rounded-xl min-w-40 w-fit"
+    variant={pickupEnabled ? "destructive" : "default"}
+    style={!pickupEnabled ? { backgroundColor: ACCENT } : undefined}
+  >
+    {pickupEnabled ? "Disable Pickup" : "Enable Pickup"}
+  </Button>
+</div>
+
+<div className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5" style={{ borderColor: BORDER }}>
+  <div className="flex items-center gap-2 mb-2">
+    <Bike className="w-5 h-5" style={{ color: ACCENT }} />
+    <h2 className="text-lg font-bold" style={{ color: INK }}>
+      Enable or Disable Delivery
+    </h2>
+  </div>
+  <Button
+    onClick={handleDeliveryEnable}
+    className="rounded-xl min-w-40 w-fit"
+    variant={deliveryEnabled ? "destructive" : "default"}
+    style={!deliveryEnabled ? { backgroundColor: ACCENT } : undefined}
+  >
+    {deliveryEnabled ? "Disable Delivery" : "Enable Delivery"}
+  </Button>
+</div>
+
         {/* ================= PICKUP LOCATION ================= */}
         <div
           className="bg-white rounded-2xl border p-6 mt-6"
@@ -1426,17 +1583,23 @@ const handleEnableNotifications = async () => {
                       onChange={(e) => setNewWindow(e.target.value)}
                     />
                     <Button
-                      className="rounded-xl text-white shrink-0"
-                      style={{ backgroundColor: ACCENT }}
-                      onClick={() => {
-                        const w = newWindow.trim()
-                        if (!w) return
-                        setDeliveryWindows([...deliveryWindows, w])
-                        setNewWindow("")
-                      }}
-                    >
-                      Add
-                    </Button>
+  className="rounded-xl text-white shrink-0"
+  style={{ backgroundColor: ACCENT }}
+  onClick={() => {
+    const w = newWindow.trim();
+    if (!w) return;
+
+    if (!isValidTimeWindow(w)) {
+      toast.error("Use a format like '7pm - 9pm' or '15:00 - 16:00'");
+      return;
+    }
+
+    setDeliveryWindows([...deliveryWindows, w]);
+    setNewWindow("");
+  }}
+>
+  Add
+</Button>
                   </div>
                   {deliveryWindows.length > 0 ? (
                     <div className="flex flex-wrap gap-2">
@@ -1478,18 +1641,24 @@ const handleEnableNotifications = async () => {
                       style={{ borderColor: BORDER }}
                       onChange={(e) => setNewPickupWindow(e.target.value)}
                     />
-                    <Button
-                      className="rounded-xl text-white shrink-0"
-                      style={{ backgroundColor: ACCENT }}
-                      onClick={() => {
-                        const w = newPickupWindow.trim()
-                        if (!w) return
-                        setPickupWindows([...pickUpWindows, w])
-                        setNewPickupWindow("")
-                      }}
-                    >
-                      Add
-                    </Button>
+                   <Button
+  className="rounded-xl text-white shrink-0"
+  style={{ backgroundColor: ACCENT }}
+  onClick={() => {
+    const w = newPickupWindow.trim();
+    if (!w) return;
+
+    if (!isValidTimeWindow(w)) {
+      toast.error("Use a format like '6pm - 8pm' or '18:00 - 20:00'");
+      return;
+    }
+
+    setPickupWindows([...pickUpWindows, w]);
+    setNewPickupWindow("");
+  }}
+>
+  Add
+</Button>
                   </div>
                   {pickUpWindows.length > 0 ? (
                     <div className="flex flex-wrap gap-2">

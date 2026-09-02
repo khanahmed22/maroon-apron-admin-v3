@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, ChevronDown, Settings, ShoppingCart, Package, BarChart3, Truck, Tag, Users, User, HelpCircle } from 'lucide-react'
+import { Search, ChevronDown, Settings, ShoppingCart, Package,Clock, BarChart3, Truck, Tag, Users, User, HelpCircle } from 'lucide-react'
 import { Input } from '../components/ui/input'
 import type { LucideIcon } from "lucide-react";
 
@@ -105,6 +105,13 @@ const knowledgeBaseItems:KnowledgeBaseItem[] = [
       
     ],
   },
+  {
+  id: 'pre-order',
+  title: 'Pre-order Setting',
+  icon: Clock,
+  description: 'Let customers schedule orders in advance',
+  content: 'Enable pre-orders so customers pick a future date and time slot instead of ordering for right now - ideal since home-chef orders need prep time. Set a minimum notice period (e.g. 2 hours), how many days ahead customers can schedule, and separate time windows for pickup and delivery.',
+},
   {
     id: 'delivery-charges',
     title: 'Delivery Charges',

@@ -897,136 +897,125 @@ if (isPending) {
       </Dialog>
 
       {/* ================= ITEM GRID ================= */}
-      {filterBySearch?.length > 0 ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filterBySearch?.map((inv) => (
-            <div
-              key={inv.id}
-              className="bg-white rounded-2xl border overflow-hidden flex flex-col"
-              style={{ borderColor: BORDER }}
-            >
-              <img
-                src={inv?.imageUrl || "/cc.jpg"}
-                alt={inv.name}
-                className="w-full h-44 object-cover"
-              />
+      {/* ================= ITEM LIST ================= */}
+{filterBySearch?.length > 0 ? (
+  <div className="flex flex-col gap-2.5">
+    {filterBySearch?.map((inv) => (
+      <div
+        key={inv.id}
+        className="bg-white rounded-xl border overflow-hidden flex flex-row"
+        style={{ borderColor: BORDER }}
+      >
+        <img
+          src={inv?.imageUrl || "/cc.jpg"}
+          alt={inv.name}
+          className="w-20 h-20 sm:w-24 sm:h-24 object-cover shrink-0"
+        />
 
-              <div className="p-4 flex flex-col flex-1">
-                <div className="flex flex-col items-start justify-between gap-2 mb-1">
-                  <span className="text-lg font-bold" style={{ color: INK }}>
-                    {inv.name}
-                  </span>
-                  <span
-                    className="text-sm font-semibold shrink-0"
-                    style={{ color: MUTE }}
-                  >
-                    In Stock: {inv.stockAmount || 0}
-                  </span>
-                  {inv.variants?.length > 0 ? (
-                    <div>
-                      Starting from Rs.{" "}
-                      {Math.min(...inv.variants.map((v) => v.variantPrice))}
-                    </div>
-                  ) : (
-                    <span
-                      className="text-lg font-bold shrink-0"
-                      style={{ color: ACCENT }}
-                    >
-                      Rs: {inv.price}
-                    </span>
-                  )}
-
-                  <span
-                    className="text-sm shrink-0"
-                    
-                  >
-                    <span className="font-bold">Description:</span> {inv.description || ""}
-                  </span>
-                  <span
-                    className="text-sm font-bold shrink-0"
-                    style={{ color: ACCENT }}
-                  >
-                    Cost Price Rs: {inv.costPrice || ""}
-                  </span>
-                </div>
-
-                {inv?.category && (
-                  <span
-                    className="inline-block w-fit text-sm font-medium p-2 rounded-full mb-3 bg-red-500 text-white"
-                   
-                  >
-                    {inv.category}
-                  </span>
-                )}
-
-                {inv?.variants?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {inv.variants.map((v) => (
-                      <span
-                        key={v.id}
-                        className="text-sm font-medium px-2.5 py-1 rounded-full border"
-                        style={{ borderColor: BORDER, color: MUTE }}
-                      >
-                        {v.variantName} · Rs. {v.variantPrice} · Cost Price:
-                        {v.variantCostPrice}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex gap-3 mt-auto pt-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1 rounded-xl gap-2 text-base"
-                    onClick={() => {
-                      setEditMode(true);
-                      setFile(null);
-                      setupdateForm({
-                        id: inv.id,
-                        userId: session?.id,
-                        name: inv.name,
-                        price: inv.price,
-                        costPrice: inv.costPrice,
-                        description: inv.description,
-                        category: inv.category,
-                        stockAmount: inv.stockAmount,
-                        imageUrl: inv.imageUrl,
-                        variants: inv.variants.map((v) => ({
-                          variantName: v.variantName,
-                          variantPrice: v.variantPrice,
-                          variantCostPrice: v.variantCostPrice,
-                        })),
-                      });
-                    }}
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    className="flex-1 rounded-xl gap-2 text-base"
-                    onClick={() => deleteItemM(inv.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </Button>
-                </div>
-              </div>
+        <div className="p-2.5 flex flex-col flex-1 min-w-0">
+          <div className="flex flex-col items-start gap-0.5 mb-1">
+            <div className="flex items-center justify-between w-full gap-2">
+              <span className="text-sm font-bold truncate" style={{ color: INK }}>
+                {inv.name}
+              </span>
+              <span className="text-xs font-semibold shrink-0" style={{ color: MUTE }}>
+                Stock: {inv.stockAmount || 0}
+              </span>
             </div>
-          ))}
+
+            {inv.variants?.length > 0 ? (
+              <div className="text-xs" style={{ color: MUTE }}>
+                From Rs. {Math.min(...inv.variants.map((v) => v.variantPrice))}
+              </div>
+            ) : (
+              <span className="text-sm font-bold" style={{ color: ACCENT }}>
+                Rs: {inv.price}
+              </span>
+            )}
+
+            <span className="text-xs line-clamp-1" style={{ color: MUTE }}>
+              {inv.description || ""}
+            </span>
+            <span className="text-xs font-semibold" style={{ color: ACCENT }}>
+              Cost: Rs {inv.costPrice || ""}
+            </span>
+          </div>
+
+          {inv?.category && (
+            <span className="inline-block w-fit text-xs font-medium px-2 py-0.5 rounded-full mb-1.5 bg-red-500 text-white">
+              {inv.category}
+            </span>
+          )}
+
+          {inv?.variants?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {inv.variants.map((v) => (
+                <span
+                  key={v.id}
+                  className="text-xs font-medium px-2 py-0.5 rounded-full border"
+                  style={{ borderColor: BORDER, color: MUTE }}
+                >
+                  {v.variantName} · Rs.{v.variantPrice} · CP:{v.variantCostPrice}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2 mt-auto pt-1 max-w-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 rounded-lg gap-1 text-xs h-8"
+              onClick={() => {
+                setEditMode(true);
+                setFile(null);
+                setupdateForm({
+                  id: inv.id,
+                  userId: session?.id,
+                  name: inv.name,
+                  price: inv.price,
+                  costPrice: inv.costPrice,
+                  description: inv.description,
+                  category: inv.category,
+                  stockAmount: inv.stockAmount,
+                  imageUrl: inv.imageUrl,
+                  variants: inv.variants.map((v) => ({
+                    variantName: v.variantName,
+                    variantPrice: v.variantPrice,
+                    variantCostPrice: v.variantCostPrice,
+                  })),
+                });
+              }}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              Edit
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="flex-1 rounded-lg gap-1 text-xs h-8"
+              onClick={() => deleteItemM(inv.id)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </Button>
+          </div>
         </div>
-      ) : (
-        <div
-          className="bg-white rounded-2xl border flex flex-col items-center justify-center gap-2 py-20 text-center"
-          style={{ borderColor: BORDER, color: MUTE }}
-        >
-          <Package className="w-10 h-10" style={{ color: BORDER }} />
-          <h1 className="text-lg font-semibold" style={{ color: INK }}>
-            Add items to inventory
-          </h1>
-          <p className="text-base">Items you add will show up here.</p>
-        </div>
-      )}
+      </div>
+    ))}
+  </div>
+) : (
+  <div
+    className="bg-white rounded-2xl border flex flex-col items-center justify-center gap-2 py-20 text-center"
+    style={{ borderColor: BORDER, color: MUTE }}
+  >
+    <Package className="w-10 h-10" style={{ color: BORDER }} />
+    <h1 className="text-lg font-semibold" style={{ color: INK }}>
+      Add items to inventory
+    </h1>
+    <p className="text-base">Items you add will show up here.</p>
+  </div>
+)}
 
       {/* ================= ADD ITEM ================= */}
       <Dialog open={addMode} onOpenChange={(open) => {

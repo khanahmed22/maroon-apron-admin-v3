@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useCart } from "../zustand/cartStore.ts";
 import { v4 as uuidv4 } from "uuid";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -86,7 +86,7 @@ export default function PlaceOrder({ restId ,restName}:RestResponse) {
   const { cart, addCart, clearCart, deleteCart } = useCart();
 const [selections, setSelections] = useState<Record<string, Selection>>({});
 
-const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays} = UserAuth()
+const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours,} = UserAuth()
  
   function generateOrderNumber(): number {
     return Date.now();
@@ -248,35 +248,72 @@ const setItemQuantity = (
     enabled:!!subdomain
   });
 
-  const placeOrder = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const availableWindows = (
+  custDetails.recieveMethod === "pickup" ? pickUpWindows : deliveryWindows
+)?.filter((window) =>
+  isWindowAvailable(custDetails.scheduledDate, window, preOrderMinHours ?? 0)
+) ?? [];
 
+const noSlotsForSelectedDate =
+  !!custDetails.scheduledDate && availableWindows.length === 0;
+
+
+const placeOrder = async () => {
+
+  // Basic customer details
+  if (
+    !custDetails.custName.trim() ||
+    !custDetails.custEmail.trim() ||
+    !custDetails.custPhone.trim() ||
+    !custDetails.recieveMethod
+  ) {
+    throw new Error("Please fill all customer details");
+  }
+
+  // Delivery-specific validation
+  if (custDetails.recieveMethod === "delivery") {
+    if (!custDetails.custAddress.trim()) {
+      throw new Error("Address is required for delivery");
+    }
+
+    if (!custDetails.deliveryArea) {
+      throw new Error("Please select a delivery area");
+    }
+
+    if (belowMinimumOrder) {
+      throw new Error(
+        fixRateM?.fixMode
+          ? `Minimum order is Rs.${minimumOrder}`
+          : `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`
+      );
+    }
+  }
+
+  
+  if (preOrdersEnabled) {
+    if (!custDetails.scheduledDate) {
+      throw new Error("Please select a date.");
+    }
+    if (!custDetails.scheduledWindow) {
+      throw new Error("Please select a time window.");
+    }
     if (
-      !custDetails.custName ||
-      !custDetails.custEmail ||
-      !custDetails.custPhone ||
-      !custDetails.recieveMethod
+      !isWindowAvailable(custDetails.scheduledDate, custDetails.scheduledWindow, preOrderMinHours ?? 0)
     ) {
-      return toast.error("Fill all fields");
+      throw new Error(
+        `That time slot is no longer available. Please pick another slot at least ${preOrderMinHours} hour(s) from now.`
+      );
     }
+  }
 
-    if (custDetails.recieveMethod === "delivery") {
-      if (!custDetails.custAddress) {
-        return toast.error("Address is required for delivery");
-      }
-      if (!custDetails.deliveryArea) {
-        return toast.error("Please select a delivery area");
-      }
-      if (belowMinimumOrder) {
-        return toast.error(
-          fixRateM?.fixMode
-            ? `Minimum order is Rs.${minimumOrder}`
-            : `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`
-        );
-      }
-    }
+  // Make sure there is something to order
+  if (!cart || cart.length === 0) {
+    throw new Error("Your cart is empty");
+  }
 
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/orders`, {
+  const res = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/orders`,
+    {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -284,18 +321,20 @@ const setItemQuantity = (
       body: JSON.stringify({
         custDetails: {
           ...custDetails,
+          isPreOrder: preOrdersEnabled, // derived, not user-toggled
           orderTotal: finalTotal,
           deliveryArea:
             custDetails.recieveMethod === "delivery"
               ? selectedArea?.areaName ?? ""
               : "",
-         
+
           deliveryFee:
             custDetails.recieveMethod === "delivery"
               ? String(deliveryFee)
               : "",
+
           restId,
-          restName
+          restName,
         },
         cart,
         coupon: appliedCoupon
@@ -306,28 +345,46 @@ const setItemQuantity = (
             }
           : null,
       }),
-    });
-    if(!res.ok){
-      
-      throw new Error('Failed to place order')
-      
     }
+  );
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+
+    throw new Error(
+      data?.message || data?.error || "Failed to place order"
+    );
+  }
+
+  return res.json();
+}
+
+
+  const { mutate: placeOrderM } = useMutation({
+  mutationKey: ["place-order"],
+  mutationFn: placeOrder,
+
+  onSuccess: () => {
     clearCart();
     setAppliedCoupon(null);
     setCouponCode("");
-    return res.json();
-  };
 
-  const { mutate: placeOrderM } = useMutation({
-    mutationKey: ["place-order"],
-    mutationFn: placeOrder,
-    onSuccess: () => {
-      toast.success("Order Placed");
-    },
-    onError:()=>{
-      toast.error('Order could not be placed')
-    }
-  });
+    toast.success("Order placed successfully");
+  },
+
+  onError: (error) => {
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "Failed to place order"
+    );
+  },
+});
+
+  function handlePlaceOrder(e: React.FormEvent<HTMLFormElement>){
+    e.preventDefault()
+    placeOrderM()
+  }
 
   function generateUUID(): string {
     return uuidv4();
@@ -404,6 +461,11 @@ const setItemQuantity = (
   const deliveryAreaMissing =
     custDetails.recieveMethod === "delivery" && !custDetails.deliveryArea;
 
+  // Pre-order fields must be filled before the button is even enabled
+  const preOrderMissing =
+    preOrdersEnabled &&
+    (!custDetails.scheduledDate || !custDetails.scheduledWindow);
+
   const ACCENT = "#D6293F"
 const INK = "#171717"
 const MUTE = "#6B7280"
@@ -411,17 +473,7 @@ const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
 const SUCCESS = "#16A34A"
 
- if (isPending) {
-    return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center gap-3"
-        style={{ color: MUTE }}
-      >
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: ACCENT }} />
-        <p className="text-sm font-medium">Loading Place Order…</p>
-      </div>
-    )
-  }
+ 
 
   const today = new Date();
 
@@ -437,6 +489,76 @@ const maxDate =
         return date.toISOString().split("T")[0];
       })()
     : undefined;
+
+  // ================= PRE-ORDER TIME WINDOW HELPERS =================
+
+function parseClockTime(raw: string): { hours: number; minutes: number } | null {
+  const trimmed = raw.trim().toLowerCase();
+  const match = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+  if (!match) return null;
+
+  let hours = parseInt(match[1], 10);
+  const minutes = match[2] ? parseInt(match[2], 10) : 0;
+  const meridiem = match[3];
+
+  if (meridiem === "pm" && hours !== 12) hours += 12;
+  if (meridiem === "am" && hours === 12) hours = 0;
+
+  if (hours > 23 || minutes > 59) return null;
+  return { hours, minutes };
+}
+
+// "7pm - 9pm" -> Date for the window's START time on the given date
+function getWindowStart(dateStr: string, window: string): Date | null {
+  const startRaw = window.split("-")[0];
+  if (!startRaw) return null;
+
+  const parsed = parseClockTime(startRaw);
+  if (!parsed) return null;
+
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day, parsed.hours, parsed.minutes, 0, 0);
+}
+
+// Is this window still bookable given the minimum-notice requirement?
+function isWindowAvailable(
+  dateStr: string | null,
+  window: string,
+  minHours: number
+): boolean {
+  if (!dateStr) return true; 
+  const windowStart = getWindowStart(dateStr, window);
+  if (!windowStart) return true; 
+
+  const cutoff = new Date(Date.now() + minHours * 60 * 60 * 1000);
+  return windowStart.getTime() >= cutoff.getTime();
+}
+
+useEffect(() => {
+  if (!custDetails.scheduledDate || !custDetails.scheduledWindow) return;
+
+  const stillValid = isWindowAvailable(
+    custDetails.scheduledDate,
+    custDetails.scheduledWindow,
+    preOrderMinHours ?? 0
+  );
+
+  if (!stillValid) {
+    setCustDetails((prev) => ({ ...prev, scheduledWindow: "" }));
+  }
+}, [custDetails.scheduledDate, custDetails.scheduledWindow, preOrderMinHours]);
+
+if (isPending) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-3"
+        style={{ color: MUTE }}
+      >
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: ACCENT }} />
+        <p className="text-sm font-medium">Loading Place Order…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
@@ -668,7 +790,7 @@ const maxDate =
               Customer Details
             </h2>
  
-            <form onSubmit={placeOrderM} className="flex flex-col gap-y-4">
+            <form onSubmit={handlePlaceOrder} className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-1.5">
                 <label className="text-sm font-semibold" style={{ color: INK }}>
                   Name
@@ -859,76 +981,65 @@ const maxDate =
  {preOrdersEnabled &&
   (custDetails.recieveMethod === "pickup" ||
     custDetails.recieveMethod === "delivery") && (
-    <div className="space-y-4 rounded-xl border p-4" style={{ borderColor: BORDER }}>
-      <label className="flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={custDetails.isPreOrder}
-          onChange={(e) =>
-            setCustDetails({
-              ...custDetails,
-              isPreOrder: e.target.checked,
-              scheduledDate: null,
-              scheduledWindow: "",
-            })
-          }
-        />
-        Schedule your Order
-      </label>
+  <div className="space-y-4 rounded-xl border p-4" style={{ borderColor: BORDER }}>
+    <p className="text-sm font-semibold" style={{ color: INK }}>
+      Schedule your Order
+    </p>
 
+    <Input
+      type="date"
+      min={minDate}
+      max={maxDate}
+      required
+      value={custDetails.scheduledDate ?? ""}
+      onChange={(e) =>
+        setCustDetails({
+          ...custDetails,
+          scheduledDate: e.target.value,
+          scheduledWindow: "", // reset window when date changes
+        })
+      }
+    />
 
-      {custDetails.isPreOrder && (
-        <>
-          <Input
-            type="date"
-            min={minDate}
-            max={maxDate}
-            value={custDetails.scheduledDate ?? ""}
-            onChange={(e) =>
-              setCustDetails({
-                ...custDetails,
-                scheduledDate: e.target.value,
-              })
+    {noSlotsForSelectedDate ? (
+      <p className="text-sm font-medium" style={{ color: ACCENT }}>
+        We can't {custDetails.recieveMethod === "pickup" ? "prepare pickup" : "deliver"} for
+        this date anymore - all time slots have passed. Please choose a later date.
+      </p>
+    ) : (
+      <Select
+        value={custDetails.scheduledWindow}
+        onValueChange={(value) =>
+          setCustDetails({
+            ...custDetails,
+            scheduledWindow: value,
+          })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue
+            placeholder={
+              custDetails.recieveMethod === "pickup"
+                ? "Select Pickup Window"
+                : "Select Delivery Window"
             }
           />
+        </SelectTrigger>
 
-          <Select
-            value={custDetails.scheduledWindow}
-            onValueChange={(value) =>
-              setCustDetails({
-                ...custDetails,
-                scheduledWindow: value,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue
-                placeholder={
-                  custDetails.recieveMethod === "pickup"
-                    ? "Select Pickup Window"
-                    : "Select Delivery Window"
-                }
-              />
-            </SelectTrigger>
-
-            <SelectContent>
-              {(custDetails.recieveMethod === "pickup"
-                ? pickUpWindows
-                : deliveryWindows
-              )?.map((window) => (
-                <SelectItem key={window} value={window}>
-                  {window}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </>
-      )}
-    </div>
-  )}
+        <SelectContent>
+          {availableWindows.map((window) => (
+            <SelectItem key={window} value={window}>
+              {window}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    )}
+  </div>
+)}
               <Button
                 type="submit"
-                disabled={deliveryAreaMissing || belowMinimumOrder}
+                disabled={deliveryAreaMissing || belowMinimumOrder || preOrderMissing}
                 className="h-11 rounded-xl text-base font-semibold text-white mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: ACCENT }}
               >

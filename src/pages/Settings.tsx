@@ -24,7 +24,7 @@ import {
   MapPin,
   Tag,
   FileText,
-  ImagePlus,
+  
   Loader2,
   Store,
   Globe,
@@ -37,7 +37,8 @@ import {
   HelpCircle,
   ReceiptTextIcon,
   Bike,
-  Handbag
+  Handbag,
+  Search
 } from "lucide-react"
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes"
 import type { ThemeName } from "../lib/themes"
@@ -50,7 +51,7 @@ import {
 } from "../components/ui/select"
 import Map from "./Map"
 import { Bell } from "lucide-react"
-import { enableNotifications, fetchNotificationStatus } from "../lib/firebase" // adjust path to wherever you save firebase.ts
+import { enableNotifications, fetchNotificationStatus } from "../lib/firebase" 
 import { Switch } from "../components/ui/switch"
 
 
@@ -140,6 +141,17 @@ function FieldLabel({
   )
 }
 
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3
+      className="text-xs font-bold uppercase tracking-wide mt-8 mb-2 px-1"
+      style={{ color: MUTE }}
+    >
+      {children}
+    </h3>
+  )
+}
+
 function InfoRow({
   icon,
   label,
@@ -184,22 +196,77 @@ function InfoRow({
   )
 }
 
+
+function EditToggleButton({ onClick }: { onClick: () => void }) {
+  return (
+    <Button
+      variant="outline"
+      onClick={onClick}
+      className="h-8 rounded-lg text-xs px-3 gap-1.5 shrink-0"
+    >
+      <Pencil className="w-3.5 h-3.5" />
+      Edit
+    </Button>
+  )
+}
+
+function SectionSaveRow({
+  onCancel,
+  onSave,
+  saving,
+}: {
+  onCancel: () => void
+  onSave: () => void
+  saving?: boolean
+}) {
+  return (
+    <div className="flex gap-3 pt-2">
+      <Button
+        variant="outline"
+        className="flex-1 h-10 rounded-xl text-sm"
+        onClick={onCancel}
+      >
+        Cancel
+      </Button>
+      <Button
+        disabled={saving}
+        className="flex-1 h-10 rounded-xl text-sm text-white disabled:opacity-60"
+        style={{ backgroundColor: ACCENT }}
+        onClick={onSave}
+      >
+        {saving ? "Saving…" : "Save"}
+      </Button>
+    </div>
+  )
+}
+
 export default function Settings({ restId }: { restId: string | null }) {
    const [preOrdersEnabled, setPreOrderEnabled] = useState<boolean>(true);
    const [preOrderMinHours, setPreOrderMinHours] = useState<number>(2);
    const [preOrderMaxDays, setPreOrderMaxDays] = useState<number>(7);
-
+   const [preOrderEditMode,setPreOrderEditMode] = useState<boolean>(false)
   const [deliveryWindows, setDeliveryWindows] = useState<string[]>([]);
   const [pickUpWindows, setPickupWindows] = useState<string[]>([]);
 
   const [newWindow, setNewWindow] = useState("");
 
-  const [newPickupWindow, setNewPickupWindow] = useState("");
-  const [crimsonBranding,setCrimsonBranding] = useState(true)
-  const [orderingDisabled,setOrderingDisabled] = useState(false)
+  const [newPickupWindow, setNewPickupWindow] = useState<string>("");
+  const [crimsonBranding,setCrimsonBranding] = useState<boolean>(true)
+  const [orderingDisabled,setOrderingDisabled] = useState<boolean>(false)
+
+  const [pickupLocEditMode,setPickupLocEditMode] = useState<boolean>(false)
 
   const [deliveryEnabled,setSetDeliveryEnabled] = useState(false)
   const [pickupEnabled,setPickupEnabled] = useState(false)
+
+  // ================= SETTINGS SEARCH =================
+  const [settingsSearch, setSettingsSearch] = useState("")
+
+  const matchesSearch = (keywords: string[]) => {
+    const term = settingsSearch.trim().toLowerCase()
+    if (!term) return true
+    return keywords.some((k) => k.toLowerCase().includes(term))
+  }
   
   const queryClient = useQueryClient()
 
@@ -256,14 +323,13 @@ export default function Settings({ restId }: { restId: string | null }) {
  
   const isFreePlan = !merchantStatus?.plan || merchantStatus.plan === "free"
 
-  // Derives a URL-safe subdomain slug from the restaurant name,
-  // e.g. "Pizza Town" -> "pizzatown"
+ 
   const slugify = (name: string) =>
     name
       .toLowerCase()
       .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "") // strip accents
-      .replace(/[^a-z0-9]/g, "")       // drop spaces/punctuation
+      .replace(/[\u0300-\u036f]/g, "") 
+      .replace(/[^a-z0-9]/g, "")       
 
   const isValidCustomDomain = (domain: string, sub?: string) => {
     if (!domain || !sub) return false
@@ -316,57 +382,73 @@ export default function Settings({ restId }: { restId: string | null }) {
   setSetDeliveryEnabled(restDetails.getRest.deliveryEnabled ?? true);
 }, [restDetails]);
 
-  const [editMode, setEditMode] = useState(false)
-  const [preorderEditMode, setPreorderEditMode] = useState(false)
+  // ================= PER-SECTION EDIT MODE =================
+ 
+  const [domainEditMode, setDomainEditMode] = useState(false)
+  const [announcementEditMode, setAnnouncementEditMode] = useState(false)
+  const [contactEditMode, setContactEditMode] = useState(false)
+  const [socialsEditMode, setSocialsEditMode] = useState(false)
+  const [seoEditMode, setSeoEditMode] = useState(false)
+  const [brandingEditMode, setBrandingEditMode] = useState(false)
 
-  const cancelPreorderEdit = () => {
+ 
+  const resetPreorderFields = () => {
     if (restDetails?.getRest) {
-      setPreOrderEnabled(restDetails.getRest.preOrdersEnabled ?? true)
       setPreOrderMinHours(restDetails.getRest.preOrderMinHours ?? 2)
       setPreOrderMaxDays(restDetails.getRest.preOrderMaxDays ?? 7)
       setDeliveryWindows(restDetails.getRest.deliveryWindows ?? [])
       setPickupWindows(restDetails.getRest.pickUpWindows ?? [])
     }
-    setPreorderEditMode(false)
   }
 
-  const openEdit = () => {
-    if (!restDetails?.getRest) return
-
-    setUpdateRest({
-      id: restDetails.getRest.id,
-      restName: restDetails.getRest.restName,
-      restPhone: restDetails.getRest.restPhone ?? "",
-      restEmail: restDetails.getRest.restEmail ?? "",
-      restAnnouncement: restDetails.getRest.restAnnouncement ?? "",
-      restAddress: restDetails.getRest.restAddress ?? "",
-      restLogo: restDetails.getRest.restLogo ?? "",
-      restBanner: restDetails.getRest.restBanner ?? "",
-      restInstagram: restDetails.getRest.restInstagram ?? "",
-      restFB: restDetails.getRest.restFB ?? "",
-      metaTitle: restDetails.getRest.metaTitle ?? "",
-      metaDesc: restDetails.getRest.metaDesc ?? "",
-      logoId: restDetails.getRest.logoId ?? "",
-      bannerId: restDetails.getRest.bannerId ?? "",
-      customDomain: restDetails.getRest.customDomain ?? "",
-      restTheme: restDetails.getRest.restTheme ?? "",
-      preOrdersEnabled: restDetails.getRest.preOrdersEnabled ?? true,
-      preOrderMinHours: restDetails.getRest.preOrderMinHours ?? 2,
-      preOrderMaxDays: restDetails.getRest.preOrderMaxDays ?? 7,
-      pickUpWindows: restDetails.getRest.pickUpWindows ?? [],
-      deliveryWindows: restDetails.getRest.deliveryWindows ?? [],
-      lat:restDetails.getRest.lat ?? 0,
-      long:restDetails.getRest.long ?? 0,
-      crimsonBranding:restDetails.getRest.crimsonBranding ?? true,
-      subdomain: restDetails.getRest.subdomain ?? "",
-      orderingDisabled:restDetails.getRest.orderingDisabled ?? false,
-      pickupEnabled:restDetails?.getRest?.pickupEnabled ?? true,
-      deliveryEnabled:restDetails?.getRest?.deliveryEnabled ?? true
-
-    })
-
-    setEditMode(true)
+  
+  const openDomainEdit = () => {
+    setUpdateRest((prev) => ({ ...prev, customDomain: restDetails?.getRest?.customDomain ?? "" }))
+    setDomainEditMode(true)
   }
+  const openAnnouncementEdit = () => {
+    setUpdateRest((prev) => ({ ...prev, restAnnouncement: restDetails?.getRest?.restAnnouncement ?? "" }))
+    setAnnouncementEditMode(true)
+  }
+  const openContactEdit = () => {
+    setUpdateRest((prev) => ({
+      ...prev,
+      restPhone: restDetails?.getRest?.restPhone ?? "",
+      restEmail: restDetails?.getRest?.restEmail ?? "",
+      restAddress: restDetails?.getRest?.restAddress ?? "",
+    }))
+    setContactEditMode(true)
+  }
+  const openSocialsEdit = () => {
+    setUpdateRest((prev) => ({
+      ...prev,
+      restInstagram: restDetails?.getRest?.restInstagram ?? "",
+      restFB: restDetails?.getRest?.restFB ?? "",
+    }))
+    setSocialsEditMode(true)
+  }
+  const openSeoEdit = () => {
+    setUpdateRest((prev) => ({
+      ...prev,
+      metaTitle: restDetails?.getRest?.metaTitle ?? "",
+      metaDesc: restDetails?.getRest?.metaDesc ?? "",
+    }))
+    setSeoEditMode(true)
+  }
+  const openBrandingEdit = () => {
+    setUpdateRest((prev) => ({
+      ...prev,
+      restTheme: restDetails?.getRest?.restTheme ?? "",
+      restLogo: restDetails?.getRest?.restLogo ?? "",
+      restBanner: restDetails?.getRest?.restBanner ?? "",
+      logoId: restDetails?.getRest?.logoId ?? "",
+      bannerId: restDetails?.getRest?.bannerId ?? "",
+    }))
+    setLogoFile(null)
+    setBannerFile(null)
+    setBrandingEditMode(true)
+  }
+  
 
   const uploadImage = async (file: File, folder: string): Promise<UploadResponse> => {
     const formData = new FormData()
@@ -387,74 +469,132 @@ export default function Settings({ restId }: { restId: string | null }) {
     return data
   }
 
-  const updateRestDetails = async ({ id }: { id: string | undefined }) => {
-    try {
-      let restLogo = updateRest.restLogo
-      let restBanner = updateRest.restBanner
-      let logoId = updateRest.logoId
-      let bannerId = updateRest.bannerId
+  const { mutate: saveLogoM, isPending: logoSaving } = useMutation({
+  mutationKey: ["saveLogoM"],
+  mutationFn: async (file: File) => {
+    const uploaded = await uploadImage(file, "restaurant/logos")
+    return savePartialSettings({ restLogo: uploaded.imageUrl, logoId: uploaded.publicId })
+  },
+  onSuccess: () => {
+    toast.success("Logo updated")
+    queryClient.invalidateQueries({ queryKey: ["restDetails"] })
+    setLogoFile(null)
+  },
+  onError: () => {
+    toast.error("Failed to update logo")
+    setLogoFile(null)
+  },
+})
 
-      if (logoFile) {
-        const uploadedLogo = await uploadImage(logoFile, "restaurant/logos")
-        restLogo = uploadedLogo.imageUrl
-        logoId = uploadedLogo.publicId
-      }
+const { mutate: saveBannerM, isPending: bannerSaving } = useMutation({
+  mutationKey: ["saveBannerM"],
+  mutationFn: async (file: File) => {
+    const uploaded = await uploadImage(file, "restaurant/banners")
+    return savePartialSettings({ restBanner: uploaded.imageUrl, bannerId: uploaded.publicId })
+  },
+  onSuccess: () => {
+    toast.success("Banner updated")
+    queryClient.invalidateQueries({ queryKey: ["restDetails"] })
+    setBannerFile(null)
+  },
+  onError: () => {
+    toast.error("Failed to update banner")
+    setBannerFile(null)
+  },
+})
 
-      if (bannerFile) {
-        const uploadedBanner = await uploadImage(bannerFile, "restaurant/banners")
-        restBanner = uploadedBanner.imageUrl
-        bannerId = uploadedBanner.publicId
-      }
-
-     
-      const customDomain =
-        isFreePlan || !isValidCustomDomain(updateRest.customDomain, lockedSubdomain)
-          ? restDetails?.getRest?.customDomain ?? ""
-          : updateRest.customDomain.trim().toLowerCase()
-
-     
-      const { lat: _lat, long: _long, restName: _restName, subdomain: _subdomain, ...restFieldsWithoutLocked } = updateRest
-
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
-        method: "PUT",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id,
-          ...restFieldsWithoutLocked,
-          restLogo,
-          restBanner,
-          logoId,
-          bannerId,
-          customDomain,
-          
-        }),
-      })
-      if(!res.ok){
-        throw new Error("Failed to update settings");
-        
-      }
-
-      setEditMode(false)
-      return await res.json()
-    } catch (err) {
-      throw err
+  
+  const savePartialSettings = async (payload: Record<string, unknown>) => {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: restDetails?.getRest?.id,
+        ...payload,
+      }),
+    })
+    if (!res.ok) {
+      throw new Error("Failed to update settings")
     }
+    return res.json()
   }
 
-  const { mutate: changeSettings } = useMutation({
-    mutationKey: ["changeSettingsM"],
-    mutationFn: updateRestDetails,
+  const { mutate: savePartialSettingsM, isPending: partialSaving } = useMutation({
+    mutationKey: ["savePartialSettingsM"],
+    mutationFn: savePartialSettings,
     onSuccess: () => {
       toast.success("Details Updated")
       queryClient.invalidateQueries({ queryKey: ["restDetails"] })
     },
-    onError:()=>{
-      toast.error('Something went wrong')
-    }
+    onError: () => {
+      toast.error("Something went wrong")
+    },
   })
+
+  const saveDomainSettings = () => {
+    if (customDomainError) {
+      toast.error(customDomainError)
+      return
+    }
+
+    const previousCustomDomain = restDetails?.getRest?.customDomain ?? ""
+    const nextCustomDomain =
+      !isFreePlan && isValidCustomDomain(updateRest.customDomain, lockedSubdomain)
+        ? updateRest.customDomain.trim().toLowerCase()
+        : previousCustomDomain
+
+    savePartialSettingsM(
+      { customDomain: nextCustomDomain },
+      {
+        onSuccess: () => {
+          if (nextCustomDomain && nextCustomDomain !== previousCustomDomain) {
+            updateNetlifyAliasM({
+              oldDomain: previousCustomDomain || undefined,
+              newDomain: nextCustomDomain,
+            })
+          }
+          setDomainEditMode(false)
+        },
+      },
+    )
+  }
+
+  const saveAnnouncementSettings = () => {
+    savePartialSettingsM(
+      { restAnnouncement: updateRest.restAnnouncement },
+      { onSuccess: () => setAnnouncementEditMode(false) },
+    )
+  }
+
+  const saveContactSettings = () => {
+    savePartialSettingsM(
+      {
+        restPhone: updateRest.restPhone,
+        restEmail: updateRest.restEmail,
+        restAddress: updateRest.restAddress,
+      },
+      { onSuccess: () => setContactEditMode(false) },
+    )
+  }
+
+  const saveSocialsSettings = () => {
+    savePartialSettingsM(
+      { restInstagram: updateRest.restInstagram, restFB: updateRest.restFB },
+      { onSuccess: () => setSocialsEditMode(false) },
+    )
+  }
+
+  const saveSeoSettings = () => {
+    savePartialSettingsM(
+      { metaTitle: updateRest.metaTitle, metaDesc: updateRest.metaDesc },
+      { onSuccess: () => setSeoEditMode(false) },
+    )
+  }
+
+ 
 
   
   const updateNetlifyAlias = async ({
@@ -633,14 +773,14 @@ const disableOrdering = async (disabled: boolean) => {
   mutationKey: ["disableOrderingM"],
   mutationFn: disableOrdering,
   onSuccess: () => {
-    toast.success("Ordering Disabled");
+    toast.success("Ordering setting updated");
 
     queryClient.invalidateQueries({
       queryKey: ["restDetails"],
     });
   },
   onError: () => {
-    toast.error("Ordering was not disabled");
+    toast.error("Ordering setting was not updated");
   },
 });
 
@@ -689,8 +829,6 @@ const enablePickup = async (enabled: boolean) => {
 });
 
  function handlePickupEnable(checked:boolean) {
-  
-
   setPickupEnabled(checked);
   enablePickupM(checked);
 }
@@ -735,10 +873,50 @@ const { mutate: enableDeliveryM } = useMutation({
 });
 
 function handleDeliveryEnable(checked:boolean) {
-  
-
   setSetDeliveryEnabled(checked);
   enableDeliveryM(checked);
+}
+
+//enable preorders
+
+const enablePreorders = async (enabled: boolean) => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      id: restDetails?.getRest?.id,
+      preOrdersEnabled: enabled,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to update preorder setting")
+  }
+
+  return res.json();
+};
+
+const { mutate: enablePreordersM } = useMutation({
+  mutationKey: ["enablePreordersM"],
+  mutationFn: enablePreorders,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["restDetails"] });
+  },
+  onError: () => {
+    toast.error("Preorder setting not updated");
+  },
+});
+
+function handlePreorderToggle(checked: boolean) {
+  setPreOrderEnabled(checked);
+  enablePreordersM(checked);
+  if (!checked) {
+   
+    resetPreorderFields();
+  }
 }
 
 //enable notification
@@ -816,7 +994,7 @@ const handleEnableNotifications = async () => {
     setLocationResetToken((t) => t + 1)
   }
 
-  // Validates "start - end" time range format, e.g. "7pm - 9pm", "15:00 - 16:00"
+ 
 function isValidTimeWindow(value: string): boolean {
   const timePattern = /^(\d{1,2})(:\d{2})?\s*(am|pm)?$/i;
   const parts = value.split("-").map((p) => p.trim());
@@ -842,8 +1020,7 @@ function isValidTimeWindow(value: string): boolean {
     )
   }
 
-  const logoPreview = logoFile ? URL.createObjectURL(logoFile) : updateRest.restLogo
-  const bannerPreview = bannerFile ? URL.createObjectURL(bannerFile) : updateRest.restBanner
+ 
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
@@ -902,23 +1079,28 @@ function isValidTimeWindow(value: string): boolean {
       )}
 
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between gap-4 mb-6">
+        <div className="flex items-center justify-between gap-4 mb-4">
           <h1
             className="text-3xl max-md:text-xl font-extrabold"
             style={{ color: INK }}
           >
             Settings
           </h1>
-          {!editMode && (
-            <Button
-              onClick={openEdit}
-              className="rounded-xl gap-2 text-base text-white"
-              style={{ backgroundColor: ACCENT }}
-            >
-              <Pencil className="w-4 h-4" />
-              Edit
-            </Button>
-          )}
+        </div>
+
+        {/* ================= SETTINGS SEARCH ================= */}
+        <div className="relative mb-6">
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4"
+            style={{ color: MUTE }}
+          />
+          <Input
+            value={settingsSearch}
+            onChange={(e) => setSettingsSearch(e.target.value)}
+            placeholder="Search settings - e.g. delivery, branding, preorder..."
+            className="h-11 pl-11 pr-4 rounded-xl bg-white text-base"
+            style={{ borderColor: BORDER }}
+          />
         </div>
 
         {/* ================= PROFILE HEADER ================= */}
@@ -926,10 +1108,21 @@ function isValidTimeWindow(value: string): boolean {
           className="bg-white rounded-2xl border overflow-hidden mb-6"
           style={{ borderColor: BORDER }}
         >
-          <div className="h-32 sm:h-40" style={{ backgroundColor: SOFT }}>
-            {restDetails?.getRest?.restBanner ? (
+          <div
+            className="relative h-32 sm:h-40"
+            style={{ backgroundColor: SOFT }}
+          >
+            {(
+              bannerFile
+                ? URL.createObjectURL(bannerFile)
+                : restDetails?.getRest?.restBanner
+            ) ? (
               <img
-                src={restDetails.getRest.restBanner}
+                src={
+                  bannerFile
+                    ? URL.createObjectURL(bannerFile)
+                    : restDetails!.getRest!.restBanner
+                }
                 alt="Restaurant banner"
                 className="w-full h-full object-cover"
               />
@@ -941,26 +1134,82 @@ function isValidTimeWindow(value: string): boolean {
                 <Store className="w-8 h-8" />
               </div>
             )}
+            <label
+              className="absolute bottom-3 right-3 w-9 h-9 rounded-full flex items-center justify-center cursor-pointer border-2 border-white disabled:opacity-60"
+              style={{ backgroundColor: ACCENT }}
+            >
+              {bannerSaving ? (
+                <Loader2 className="w-4 h-4 text-white animate-spin" />
+              ) : (
+                <Pencil className="w-4 h-4 text-white" />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={bannerSaving}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    setBannerFile(f);
+                    saveBannerM(f);
+                  }
+                }}
+              />
+            </label>
           </div>
           <div className="px-6 pb-6 -mt-10 flex items-end gap-4">
-            <div
-              className="w-20 h-20 rounded-2xl border-4 border-white bg-white overflow-hidden shrink-0"
-              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
-            >
-              {restDetails?.getRest?.restLogo ? (
-                <img
-                  src={restDetails.getRest.restLogo}
-                  alt="Restaurant logo"
-                  className="w-full h-full object-cover"
+            <div className="relative shrink-0">
+              <div
+                className="w-20 h-20 rounded-2xl border-4 border-white bg-white overflow-hidden"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+              >
+                {(
+                  logoFile
+                    ? URL.createObjectURL(logoFile)
+                    : restDetails?.getRest?.restLogo
+                ) ? (
+                  <img
+                    src={
+                      logoFile
+                        ? URL.createObjectURL(logoFile)
+                        : restDetails!.getRest!.restLogo
+                    }
+                    alt="Restaurant logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-full h-full flex items-center justify-center"
+                    style={{ color: MUTE, backgroundColor: SOFT }}
+                  >
+                    <Store className="w-8 h-8" />
+                  </div>
+                )}
+              </div>
+              <label
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center cursor-pointer border-2 border-white disabled:opacity-60"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {logoSaving ? (
+                  <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
+                ) : (
+                  <Pencil className="w-3.5 h-3.5 text-white" />
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={logoSaving}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) {
+                      setLogoFile(f);
+                      saveLogoM(f);
+                    }
+                  }}
                 />
-              ) : (
-                <div
-                  className="w-full h-full flex items-center justify-center"
-                  style={{ color: MUTE, backgroundColor: SOFT }}
-                >
-                  <Store className="w-8 h-8" />
-                </div>
-              )}
+              </label>
             </div>
             <p
               className="text-2xl max-md:text-lg font-extrabold pb-1"
@@ -971,129 +1220,235 @@ function isValidTimeWindow(value: string): boolean {
             {restDetails?.getRest?.restSite && (
               <div className="mb-2 ">
                 <a
-                  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs "
+                  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs"
                   href={restDetails?.getRest?.restSite}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <span className="max-md:hidden">Visit Store</span> Store
+                  <span className="max-md:hidden">Visit Store</span>
+                  <span className="md:hidden">Store</span>
                 </a>
               </div>
             )}
           </div>
         </div>
 
-        {!editMode ? (
-          /* ================= VIEW MODE ================= */
+        {/* ================= DOMAIN MANAGEMENT ================= */}
+        {matchesSearch([
+          "domain",
+          "domain management",
+          "store url",
+          "custom domain",
+          "subdomain",
+        ]) && (
           <div
-            className="bg-white rounded-2xl border p-6"
+            className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
-            <InfoRow
-              icon={Globe}
-              label="Store URL"
-              value={
-                restDetails?.getRest?.subdomain
-                  ? `${restDetails.getRest.subdomain}.${CRIMSON_BASE_DOMAIN}`
-                  : undefined
-              }
-            />
-            <InfoRow
-              icon={Phone}
-              label="Phone"
-              value={restDetails?.getRest?.restPhone}
-            />
-            <InfoRow
-              icon={Mail}
-              label="Email"
-              value={restDetails?.getRest?.restEmail}
-            />
-            <InfoRow
-              icon={MapPin}
-              label="Address"
-              value={restDetails?.getRest?.restAddress}
-            />
-            <InfoRow
-              icon="/instagram.svg"
-              label="Instagram"
-              value={restDetails?.getRest?.restInstagram}
-            />
-            <InfoRow
-              icon="/facebook.svg"
-              label="Facebook"
-              value={restDetails?.getRest?.restFB}
-            />
-            <InfoRow
-              icon={Tag}
-              label="Meta Title"
-              value={restDetails?.getRest?.metaTitle}
-            />
-            <InfoRow
-              icon={FileText}
-              label="Meta Description"
-              value={restDetails?.getRest?.metaDesc}
-            />
-            <InfoRow
-              icon={Palette}
-              label="Theme"
-              value={restDetails?.getRest?.restTheme}
-            />
-            <InfoRow
-              icon={PartyPopper}
-              label="Announcement"
-              value={restDetails?.getRest?.restAnnouncement}
-            />
-            <InfoRow
-              icon={Globe}
-              label="Custom Domain"
-              value={restDetails?.getRest?.customDomain}
-            />
-          </div>
-        ) : (
-          /* ================= EDIT MODE ================= */
-          <div
-            className="bg-white rounded-2xl border p-6"
-            style={{ borderColor: BORDER }}
-          >
-            <div className="space-y-5">
-              <div>
-                <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
-                  Restaurant Info
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5" style={{ color: ACCENT }} />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
+                  Domain Management
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-y-1.5">
-                    <FieldLabel icon={Store}>Name</FieldLabel>
-                    <Input
-                      value={restDetails?.getRest?.restName ?? ""}
-                      disabled
-                      className="h-11 rounded-xl text-base disabled:cursor-not-allowed disabled:opacity-60"
-                      style={{ borderColor: BORDER }}
-                    />
-                    <p className="text-xs" style={{ color: MUTE }}>
-                      Store URL:{" "}
-                      <span className="font-semibold" style={{ color: INK }}>
-                        {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
-                      </span>{" "}
-                      - locked, <a href="/support">contact support</a> to change
-                    </p>
-                  </div>
+              </div>
+              {!domainEditMode && <EditToggleButton onClick={openDomainEdit} />}
+            </div>
+            {!domainEditMode ? (
+              <>
+                <InfoRow
+                  icon={Globe}
+                  label="Store URL"
+                  value={
+                    restDetails?.getRest?.subdomain
+                      ? `${restDetails.getRest.subdomain}.${CRIMSON_BASE_DOMAIN}`
+                      : undefined
+                  }
+                />
+                <InfoRow
+                  icon={Globe}
+                  label="Custom Domain"
+                  value={restDetails?.getRest?.customDomain}
+                />
+              </>
+            ) : (
+              <div className="space-y-4 pt-2">
+                <div className="flex flex-col gap-y-1.5">
+                  <FieldLabel icon={Store}>Restaurant Name</FieldLabel>
+                  <Input
+                    value={restDetails?.getRest?.restName ?? ""}
+                    disabled
+                    className="h-11 rounded-xl text-base disabled:cursor-not-allowed disabled:opacity-60"
+                    style={{ borderColor: BORDER }}
+                  />
+                  <p className="text-xs" style={{ color: MUTE }}>
+                    Store URL:{" "}
+                    <span className="font-semibold" style={{ color: INK }}>
+                      {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
+                    </span>{" "}
+                    - locked, <a href="/support">contact support</a> to change
+                  </p>
+                </div>
 
-                  <div className="flex flex-col gap-y-1.5">
-                    <FieldLabel icon={PartyPopper}>Announcement</FieldLabel>
-                    <Input
-                      type="text"
-                      placeholder="Text here will show on top of store"
-                      value={updateRest.restAnnouncement}
-                      className="h-11 rounded-xl text-base"
-                      style={{ borderColor: BORDER }}
-                      onChange={(e) =>
-                        setUpdateRest({
-                          ...updateRest,
-                          restAnnouncement: e.target.value,
-                        })
-                      }
-                    />
+                <div className="flex flex-col gap-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <FieldLabel icon={isFreePlan ? Lock : Globe}>
+                      Custom Domain
+                    </FieldLabel>
+                    {isFreePlan && (
+                      <span
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                        style={{ backgroundColor: SOFT, color: ACCENT }}
+                      >
+                        Pro plan required
+                      </span>
+                    )}
                   </div>
+                  <Input
+                    placeholder={
+                      isFreePlan
+                        ? "Upgrade to Pro to set a custom domain"
+                        : lockedSubdomain
+                          ? `${lockedSubdomain}.com`
+                          : "yoursubdomain.com"
+                    }
+                    value={updateRest.customDomain}
+                    disabled={isFreePlan}
+                    className="h-11 rounded-xl text-base disabled:cursor-not-allowed disabled:opacity-60"
+                    style={{
+                      borderColor: customDomainError ? "#DC2626" : BORDER,
+                    }}
+                    onChange={(e) =>
+                      setUpdateRest({
+                        ...updateRest,
+                        customDomain: e.target.value,
+                      })
+                    }
+                  />
+                  {!isFreePlan && (
+                    <p
+                      className="text-xs"
+                      style={{ color: customDomainError ? "#DC2626" : MUTE }}
+                    >
+                      {customDomainError ??
+                        `Must start with your subdomain - e.g. ${lockedSubdomain}.com, ${lockedSubdomain}.lol`}
+                    </p>
+                  )}
+                  {!isFreePlan &&
+                    updateRest.customDomain &&
+                    !customDomainError && (
+                      <p className="text-xs" style={{ color: MUTE }}>
+                        In your domain provider, add a CNAME record pointing to{" "}
+                        <span className="font-semibold" style={{ color: INK }}>
+                          {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
+                        </span>
+                      </p>
+                    )}
+                </div>
+
+                <SectionSaveRow
+                  onCancel={() => setDomainEditMode(false)}
+                  onSave={saveDomainSettings}
+                  saving={partialSaving}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= ANNOUNCEMENT ================= */}
+        {matchesSearch(["announcement", "banner message", "promo text"]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mb-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <PartyPopper className="w-5 h-5" style={{ color: ACCENT }} />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
+                  Announcement
+                </h2>
+              </div>
+              {!announcementEditMode && (
+                <EditToggleButton onClick={openAnnouncementEdit} />
+              )}
+            </div>
+            {!announcementEditMode ? (
+              <InfoRow
+                icon={PartyPopper}
+                label="Announcement"
+                value={restDetails?.getRest?.restAnnouncement}
+              />
+            ) : (
+              <div className="flex flex-col gap-y-1.5 pt-2">
+                <FieldLabel icon={PartyPopper}>Announcement</FieldLabel>
+                <Input
+                  type="text"
+                  placeholder="Text here will show on top of store"
+                  value={updateRest.restAnnouncement}
+                  className="h-11 rounded-xl text-base"
+                  style={{ borderColor: BORDER }}
+                  onChange={(e) =>
+                    setUpdateRest({
+                      ...updateRest,
+                      restAnnouncement: e.target.value,
+                    })
+                  }
+                />
+                <SectionSaveRow
+                  onCancel={() => setAnnouncementEditMode(false)}
+                  onSave={saveAnnouncementSettings}
+                  saving={partialSaving}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= CONTACT DETAILS ================= */}
+        {matchesSearch([
+          "contact",
+          "contact details",
+          "phone",
+          "email",
+          "address",
+        ]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mb-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <Phone className="w-5 h-5" style={{ color: ACCENT }} />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
+                  Contact Details
+                </h2>
+              </div>
+              {!contactEditMode && (
+                <EditToggleButton onClick={openContactEdit} />
+              )}
+            </div>
+            {!contactEditMode ? (
+              <>
+                <InfoRow
+                  icon={Phone}
+                  label="Phone"
+                  value={restDetails?.getRest?.restPhone}
+                />
+                <InfoRow
+                  icon={Mail}
+                  label="Email"
+                  value={restDetails?.getRest?.restEmail}
+                />
+                <InfoRow
+                  icon={MapPin}
+                  label="Address"
+                  value={restDetails?.getRest?.restAddress}
+                />
+              </>
+            ) : (
+              <div className="space-y-4 pt-2">
+                <div className="grid sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon={Phone}>Phone</FieldLabel>
                     <Input
@@ -1125,7 +1480,7 @@ function isValidTimeWindow(value: string): boolean {
                       }
                     />
                   </div>
-                  <div className="flex flex-col gap-y-1.5">
+                  <div className="flex flex-col gap-y-1.5 sm:col-span-2">
                     <FieldLabel icon={MapPin}>Address</FieldLabel>
                     <Input
                       placeholder="Address"
@@ -1140,73 +1495,49 @@ function isValidTimeWindow(value: string): boolean {
                       }
                     />
                   </div>
-
-                  <div className="flex flex-col gap-y-1.5 sm:col-span-2">
-                    <div className="flex items-center justify-between">
-                      <FieldLabel icon={isFreePlan ? Lock : Globe}>
-                        Custom Domain
-                      </FieldLabel>
-                      {isFreePlan && (
-                        <span
-                          className="text-xs font-semibold px-2.5 py-1 rounded-full"
-                          style={{ backgroundColor: SOFT, color: ACCENT }}
-                        >
-                          Pro plan required
-                        </span>
-                      )}
-                    </div>
-                    <Input
-                      placeholder={
-                        isFreePlan
-                          ? "Upgrade to Pro to set a custom domain"
-                          : lockedSubdomain
-                            ? `${lockedSubdomain}.com`
-                            : "yoursubdomain.com"
-                      }
-                      value={updateRest.customDomain}
-                      disabled={isFreePlan}
-                      className="h-11 rounded-xl text-base disabled:cursor-not-allowed disabled:opacity-60"
-                      style={{
-                        borderColor: customDomainError ? "#DC2626" : BORDER,
-                      }}
-                      onChange={(e) =>
-                        setUpdateRest({
-                          ...updateRest,
-                          customDomain: e.target.value,
-                        })
-                      }
-                    />
-                    {!isFreePlan && (
-                      <p
-                        className="text-xs"
-                        style={{ color: customDomainError ? "#DC2626" : MUTE }}
-                      >
-                        {customDomainError ??
-                          `Must start with your subdomain - e.g. ${lockedSubdomain}.com, ${lockedSubdomain}.lol`}
-                      </p>
-                    )}
-                    {!isFreePlan &&
-                      updateRest.customDomain &&
-                      !customDomainError && (
-                        <p className="text-xs" style={{ color: MUTE }}>
-                          In your domain provider, add a CNAME record pointing
-                          to{" "}
-                          <span
-                            className="font-semibold"
-                            style={{ color: INK }}
-                          >
-                            {lockedSubdomain}.{CRIMSON_BASE_DOMAIN}
-                          </span>
-                        </p>
-                      )}
-                  </div>
                 </div>
+                <SectionSaveRow
+                  onCancel={() => setContactEditMode(false)}
+                  onSave={saveContactSettings}
+                  saving={partialSaving}
+                />
               </div>
+            )}
+          </div>
+        )}
 
-              <div>
-                <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
-                  Social Links
+        {/* ================= SOCIALS ================= */}
+        {matchesSearch(["social", "socials", "instagram", "facebook"]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mb-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <img src="/instagram.svg" className="w-5 h-5" />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
+                  Socials
                 </h2>
+              </div>
+              {!socialsEditMode && (
+                <EditToggleButton onClick={openSocialsEdit} />
+              )}
+            </div>
+            {!socialsEditMode ? (
+              <>
+                <InfoRow
+                  icon="/instagram.svg"
+                  label="Instagram"
+                  value={restDetails?.getRest?.restInstagram}
+                />
+                <InfoRow
+                  icon="/facebook.svg"
+                  label="Facebook"
+                  value={restDetails?.getRest?.restFB}
+                />
+              </>
+            ) : (
+              <div className="space-y-4 pt-2">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon="/instagram.svg">Instagram</FieldLabel>
@@ -1236,12 +1567,46 @@ function isValidTimeWindow(value: string): boolean {
                     />
                   </div>
                 </div>
+                <SectionSaveRow
+                  onCancel={() => setSocialsEditMode(false)}
+                  onSave={saveSocialsSettings}
+                  saving={partialSaving}
+                />
               </div>
+            )}
+          </div>
+        )}
 
-              <div>
-                <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
+        {/* ================= SEO ================= */}
+        {matchesSearch(["seo", "meta title", "meta description"]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mb-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <Tag className="w-5 h-5" style={{ color: ACCENT }} />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
                   SEO
                 </h2>
+              </div>
+              {!seoEditMode && <EditToggleButton onClick={openSeoEdit} />}
+            </div>
+            {!seoEditMode ? (
+              <>
+                <InfoRow
+                  icon={Tag}
+                  label="Meta Title"
+                  value={restDetails?.getRest?.metaTitle}
+                />
+                <InfoRow
+                  icon={FileText}
+                  label="Meta Description"
+                  value={restDetails?.getRest?.metaDesc}
+                />
+              </>
+            ) : (
+              <div className="space-y-4 pt-2">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-y-1.5">
                     <FieldLabel icon={Tag}>Meta Title</FieldLabel>
@@ -1273,594 +1638,635 @@ function isValidTimeWindow(value: string): boolean {
                       }
                     />
                   </div>
-                  <div className="flex flex-col gap-y-1.5">
-                    <FieldLabel icon={Palette}>Theme</FieldLabel>
-                    <Select
-                      value={updateRest.restTheme || DEFAULT_THEME}
-                      onValueChange={(value) =>
-                        setUpdateRest({
-                          ...updateRest,
-                          restTheme: value as ThemeName,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="h-11 rounded-xl text-base w-full">
-                        <SelectValue placeholder="Select a theme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {THEME_NAMES.map((theme) => (
-                          <SelectItem key={theme} value={theme}>
-                            <span className="flex items-center gap-2">
-                              <span
-                                className="w-3.5 h-3.5 rounded-full border border-border shrink-0"
-                                style={{
-                                  backgroundColor: THEME_META[theme].swatch,
-                                }}
-                              />
-                              {THEME_META[theme].label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                 </div>
+                <SectionSaveRow
+                  onCancel={() => setSeoEditMode(false)}
+                  onSave={saveSeoSettings}
+                  saving={partialSaving}
+                />
               </div>
+            )}
+          </div>
+        )}
 
-              <div>
-                <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
-                  Images - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed
-                  only
+        {/* ================= BRANDING & IMAGES ================= */}
+        {matchesSearch([
+          
+          "theme",
+          "store theme",
+          
+         
+          "appearance",
+        ]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mb-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-2 mb-1">
+              <div className="flex items-center gap-2">
+                <Palette className="w-5 h-5" style={{ color: ACCENT }} />
+                <h2 className="text-lg font-bold" style={{ color: INK }}>
+                  Store Theme
                 </h2>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-y-2">
-                    <FieldLabel icon={ImagePlus}>Restaurant Logo </FieldLabel>
-                    <label
-                      className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
-                      style={{ borderColor: BORDER, color: MUTE }}
-                    >
-                      <ImagePlus className="w-4.5 h-4.5" />
-                      Choose a logo
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          setLogoFile(e.target.files?.[0] || null)
-                        }
-                      />
-                    </label>
-                    {logoPreview && (
-                      <img
-                        src={logoPreview}
-                        className="w-24 h-24 object-cover rounded-xl border"
-                        style={{ borderColor: BORDER }}
-                        alt="Logo preview"
-                      />
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-y-2">
-                    <FieldLabel icon={ImagePlus}>Restaurant Banner</FieldLabel>
-                    <label
-                      className="flex items-center gap-2 h-11 rounded-xl border border-dashed px-4 text-base cursor-pointer"
-                      style={{ borderColor: BORDER, color: MUTE }}
-                    >
-                      <ImagePlus className="w-4.5 h-4.5" />
-                      Choose a banner
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          setBannerFile(e.target.files?.[0] || null)
-                        }
-                      />
-                    </label>
-                    {bannerPreview && (
-                      <img
-                        src={bannerPreview}
-                        className="w-full h-28 object-cover rounded-xl border"
-                        style={{ borderColor: BORDER }}
-                        alt="Banner preview"
-                      />
-                    )}
-                  </div>
+              </div>
+              {!brandingEditMode && (
+                <EditToggleButton onClick={openBrandingEdit} />
+              )}
+            </div>
+            {!brandingEditMode ? (
+              <InfoRow
+                icon={Palette}
+                label="Theme"
+                value={restDetails?.getRest?.restTheme}
+              />
+            ) : (
+              <div className="space-y-4 pt-2">
+                <div className="flex flex-col gap-y-1.5">
+                  <FieldLabel icon={Palette}>Theme</FieldLabel>
+                  <Select
+                    value={updateRest.restTheme || DEFAULT_THEME}
+                    onValueChange={(value) =>
+                      setUpdateRest({
+                        ...updateRest,
+                        restTheme: value as ThemeName,
+                      })
+                    }
+                  >
+                    <SelectTrigger className="h-11 rounded-xl text-base w-full">
+                      <SelectValue placeholder="Select a theme" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {THEME_NAMES.map((theme) => (
+                        <SelectItem key={theme} value={theme}>
+                          <span className="flex items-center gap-2">
+                            <span
+                              className="w-3.5 h-3.5 rounded-full border border-border shrink-0"
+                              style={{
+                                backgroundColor: THEME_META[theme].swatch,
+                              }}
+                            />
+                            {THEME_META[theme].label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                <SectionSaveRow
+                  onCancel={() => setBrandingEditMode(false)}
+                  onSave={() =>
+                    savePartialSettingsM(
+                      { restTheme: updateRest.restTheme },
+                      { onSuccess: () => setBrandingEditMode(false) },
+                    )
+                  }
+                  saving={partialSaving}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {matchesSearch(["branding", "footer", "notifications", "push"]) && (
+          <SectionHeading>Storefront</SectionHeading>
+        )}
+
+        {matchesSearch([
+          "branding",
+          "powered by crimson castle",
+          "footer",
+          "white label",
+        ]) && (
+          <div
+            className="bg-white rounded-2xl border p-6"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <BadgeCheck className="w-5 h-5 text-red-500" />
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Crimson Castle Branding
+                  </h2>
+                </div>
+
+                <p className="text-sm text-gray-500">
+                  {isFreePlan
+                    ? "Upgrade to Pro to remove the 'Powered by Crimson Castle' footer from your storefront."
+                    : crimsonBranding
+                      ? "Your storefront currently displays the 'Powered by Crimson Castle' footer."
+                      : "The 'Powered by Crimson Castle' footer has been removed from your storefront."}
+                </p>
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 h-11 rounded-xl text-base"
-                  onClick={() => setEditMode(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 h-11 rounded-xl text-base text-white disabled:opacity-60"
-                  style={{ backgroundColor: ACCENT }}
-                  disabled={!!customDomainError}
-                  onClick={() => {
-                    if (customDomainError) {
-                      toast.error(customDomainError);
-                      return;
-                    }
+              <div className="flex items-center gap-3">
+                <Switch
+                  disabled={isFreePlan}
+                  checked={crimsonBranding}
+                  onCheckedChange={handleBranding}
+                />
 
-                    const previousCustomDomain =
-                      restDetails?.getRest?.customDomain ?? "";
-                    const nextCustomDomain =
-                      !isFreePlan &&
-                      isValidCustomDomain(
-                        updateRest.customDomain,
-                        lockedSubdomain,
-                      )
-                        ? updateRest.customDomain.trim().toLowerCase()
-                        : previousCustomDomain;
-
-                    changeSettings(
-                      { id: restDetails?.getRest?.id },
-                      {
-                        onSuccess: () => {
-                          if (
-                            nextCustomDomain &&
-                            nextCustomDomain !== previousCustomDomain
-                          ) {
-                            updateNetlifyAliasM({
-                              oldDomain: previousCustomDomain || undefined,
-                              newDomain: nextCustomDomain,
-                            });
-                          }
-                        },
-                      },
-                    );
-                  }}
-                >
-                  Save
-                </Button>
+                {isFreePlan && (
+                  <span className="text-sm text-muted-foreground">
+                    Pro Required
+                  </span>
+                )}
               </div>
             </div>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border p-6 mt-6">
-          <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <BadgeCheck className="w-5 h-5 text-red-500" />
-                <h2 className="text-lg font-bold text-gray-900">
-                  Crimson Castle Branding
-                </h2>
+        {matchesSearch(["notifications", "push", "alerts", "orders"]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mt-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Bell className="w-5 h-5" style={{ color: ACCENT }} />
+                  <h2 className="text-lg font-bold" style={{ color: INK }}>
+                    Push Notifications
+                  </h2>
+                </div>
+                <p className="text-sm" style={{ color: MUTE }}>
+                  Get notified when orders or events happen
+                </p>
               </div>
 
-              <p className="text-sm text-gray-500">
-                {isFreePlan
-                  ? "Upgrade to Pro to remove the 'Powered by Crimson Castle' footer from your storefront."
-                  : crimsonBranding
-                    ? "Your storefront currently displays the 'Powered by Crimson Castle' footer."
-                    : "The 'Powered by Crimson Castle' footer has been removed from your storefront."}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Switch
-                disabled={isFreePlan}
-                checked={crimsonBranding}
-                onCheckedChange={handleBranding}
-              />
-
-              {isFreePlan && (
-                <span className="text-sm text-muted-foreground">
-                  Pro Required
-                </span>
+              {notifLoading ? (
+                <Button
+                  disabled
+                  variant="outline"
+                  className="rounded-xl min-w-40"
+                >
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                </Button>
+              ) : notificationsEnabled ? (
+                <Button
+                  disabled
+                  variant="outline"
+                  className="rounded-xl min-w-40 text-green-600 border-green-300"
+                >
+                  ✓ Enabled
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleEnableNotifications}
+                  disabled={enablingNotifs}
+                  className="rounded-xl min-w-40 text-white disabled:opacity-60"
+                  style={{ backgroundColor: ACCENT }}
+                >
+                  {enablingNotifs ? "Enabling…" : "Enable Notifications"}
+                </Button>
               )}
             </div>
           </div>
-        </div>
+        )}
 
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center justify-between gap-4 max-md:flex-col max-md:items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Bell className="w-5 h-5" style={{ color: ACCENT }} />
-                <h2 className="text-lg font-bold" style={{ color: INK }}>
-                  Push Notifications
-                </h2>
+        {matchesSearch([
+          "ordering",
+          "pickup",
+          "delivery",
+          "fulfillment",
+          "store open",
+          "store closed",
+        ]) && <SectionHeading>Order Fulfillment</SectionHeading>}
+
+        {matchesSearch([
+          "ordering",
+          "pickup",
+          "delivery",
+          "fulfillment",
+          "store open",
+          "store closed",
+          "collect",
+          "courier",
+        ]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 divide-y"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center justify-between gap-4 pb-4">
+              <div className="flex items-center gap-3">
+                <ReceiptTextIcon
+                  className="w-5 h-5 shrink-0"
+                  style={{ color: ACCENT }}
+                />
+                <div>
+                  <h2 className="text-base font-bold" style={{ color: INK }}>
+                    Ordering
+                  </h2>
+                  <p className="text-xs" style={{ color: MUTE }}>
+                    {orderingDisabled
+                      ? "Customers can't place any orders right now."
+                      : "Customers can currently place orders."}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm" style={{ color: MUTE }}>
-                Get notified when orders or events happen
-              </p>
+              <Switch
+                checked={!orderingDisabled}
+                onCheckedChange={(checked) => handleDisableOrdering(!checked)}
+              />
             </div>
 
-            {notifLoading ? (
-              <Button
-                disabled
-                variant="outline"
-                className="rounded-xl min-w-40"
-              >
-                <Loader2 className="w-4 h-4 animate-spin" />
-              </Button>
-            ) : notificationsEnabled ? (
-              <Button
-                disabled
-                variant="outline"
-                className="rounded-xl min-w-40 text-green-600 border-green-300"
-              >
-                ✓ Enabled
-              </Button>
-            ) : (
-              <Button
-                onClick={handleEnableNotifications}
-                disabled={enablingNotifs}
-                className="rounded-xl min-w-40 text-white disabled:opacity-60"
-                style={{ backgroundColor: ACCENT }}
-              >
-                {enablingNotifs ? "Enabling…" : "Enable Notifications"}
-              </Button>
-            )}
-          </div>
-        </div>
+            <div className="flex flex-col gap-4 py-4">
+  {/* Pickup header */}
+  <div className="flex items-center justify-between gap-4">
+    <div className="flex items-center gap-3">
+      <Handbag
+        className="w-5 h-5 shrink-0"
+        style={{ color: ACCENT }}
+      />
 
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6 flex items-center justify-between gap-y-5"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <ReceiptTextIcon className="w-5 h-5" style={{ color: ACCENT }} />
-            <h2 className="text-lg font-bold" style={{ color: INK }}>
-              Turn OFF Ordering
-            </h2>
-          </div>
-          <Switch
-            checked={orderingDisabled}
-            onCheckedChange={handleDisableOrdering}
+      <div>
+        <h2 className="text-base font-bold" style={{ color: INK }}>
+          Pickup
+        </h2>
+        <p className="text-xs" style={{ color: MUTE }}>
+          {pickupEnabled
+            ? "Pickup is offered at checkout."
+            : "Pickup is currently turned off."}
+        </p>
+      </div>
+    </div>
+
+    {/* Controls */}
+    <div className="flex items-center gap-3 shrink-0">
+      
+
+      {pickupEnabled &&  <Button
+       className="h-8 rounded-lg text-xs px-3 gap-1.5 shrink-0"
+
+        variant='outline'
+        
+        onClick={() => setPickupLocEditMode(!pickupLocEditMode)}
+      >
+        {pickupLocEditMode ? "Close" : "Edit"}
+      </Button>
+     
+      }
+
+      <Switch
+        checked={pickupEnabled}
+        onCheckedChange={handlePickupEnable}
+      />
+     
+    </div>
+  </div>
+
+  {/* Pickup location editor */}
+  {pickupLocEditMode && (
+    <div
+      className="bg-white rounded-2xl border p-6"
+      style={{ borderColor: BORDER }}
+    >
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex items-center gap-2">
+          <MapPin
+            className="w-5 h-5"
+            style={{ color: ACCENT }}
           />
+
+          <h2
+            className="text-lg font-bold"
+            style={{ color: INK }}
+          >
+            Pickup Location
+          </h2>
         </div>
 
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6 flex items-center justify-between  gap-y-5"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Handbag className="w-5 h-5" style={{ color: ACCENT }} />
-            <h2 className="text-lg font-bold" style={{ color: INK }}>
-              Turn ON or OFF Pick-up
-            </h2>
+        {pendingLocation && (
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="h-8 rounded-lg text-xs px-3"
+              onClick={cancelLocationEdit}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              disabled={locationSaving}
+              className="h-8 rounded-lg text-xs px-3 text-white disabled:opacity-60"
+              style={{ backgroundColor: ACCENT }}
+              onClick={() => updateLocationM(pendingLocation)}
+            >
+              {locationSaving ? "Saving…" : "Save Location"}
+            </Button>
           </div>
-          <Switch
-  checked={pickupEnabled}
-  onCheckedChange={handlePickupEnable}
-/>
-        </div>
+        )}
+      </div>
 
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6 flex items-center justify-between gap-y-5"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Bike className="w-5 h-5" style={{ color: ACCENT }} />
-            <h2 className="text-lg font-bold" style={{ color: INK }}>
-              Turn ON or OFF Delivery
-            </h2>
-          </div>
-          <Switch 
-          checked={deliveryEnabled}
-          onCheckedChange={handleDeliveryEnable}
-          />
-          
-        </div>
+      <p className="text-xs mb-3" style={{ color: MUTE }}>
+        Click on the map, or drag the pin, to update your pickup location
+      </p>
 
-        {/* ================= PICKUP LOCATION ================= */}
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center justify-between gap-2 mb-1">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" style={{ color: ACCENT }} />
-              <h2 className="text-lg font-bold" style={{ color: INK }}>
-                Pickup Location
-              </h2>
-            </div>
-            {pendingLocation && (
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="h-8 rounded-lg text-xs px-3"
-                  onClick={cancelLocationEdit}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  disabled={locationSaving}
-                  className="h-8 rounded-lg text-xs px-3 text-white disabled:opacity-60"
-                  style={{ backgroundColor: ACCENT }}
-                  onClick={() => updateLocationM(pendingLocation)}
-                >
-                  {locationSaving ? "Saving…" : "Save Location"}
-                </Button>
+      <Map
+        latitude={pendingLocation?.lat ?? lat}
+        longitude={pendingLocation?.long ?? long}
+        editable
+        resetToken={locationResetToken}
+        onLocationChange={(newLat, newLong) =>
+          setPendingLocation({ lat: newLat, long: newLong })
+        }
+      />
+    </div>
+  )}
+</div>
+
+            <div className="flex items-center justify-between gap-4 pt-4">
+              <div className="flex items-center gap-3">
+                <Bike className="w-5 h-5 shrink-0" style={{ color: ACCENT }} />
+                <div>
+                  <h2 className="text-base font-bold" style={{ color: INK }}>
+                    Delivery
+                  </h2>
+                  <p className="text-xs" style={{ color: MUTE }}>
+                    {deliveryEnabled
+                      ? "Delivery is offered at checkout."
+                      : "Delivery is currently turned off."}
+                  </p>
+                </div>
               </div>
-            )}
+              <Switch
+                checked={deliveryEnabled}
+                onCheckedChange={handleDeliveryEnable}
+              />
+            </div>
           </div>
-          <p className="text-xs mb-3" style={{ color: MUTE }}>
-            Click on the map, or drag the pin, to update your pickup location
-          </p>
-
-          <Map
-            latitude={pendingLocation?.lat ?? lat}
-            longitude={pendingLocation?.long ?? long}
-            editable
-            resetToken={locationResetToken}
-            onLocationChange={(newLat, newLong) =>
-              setPendingLocation({ lat: newLat, long: newLong })
-            }
-          />
-        </div>
+        )}
 
         {/* ================= PREORDER SETTINGS ================= */}
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center justify-between gap-2 mb-4">
-            <div className="flex items-center gap-2">
+        {matchesSearch([
+          "preorder",
+          "pre-order",
+          "schedule",
+          "time window",
+          "minimum notice",
+          "advance order",
+        ]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 mt-3"
+            style={{ borderColor: BORDER }}
+          >
+            <div className="flex items-center gap-2 mb-4">
               <Clock className="w-5 h-5" style={{ color: ACCENT }} />
               <h2 className="text-lg font-bold" style={{ color: INK }}>
                 Preorder Settings
               </h2>
             </div>
-            {!preorderEditMode && (
-              <Button
-                onClick={() => setPreorderEditMode(true)}
-                className="rounded-xl gap-2 text-white"
-                style={{ backgroundColor: ACCENT }}
-              >
-                <Pencil className="w-4 h-4" />
-                Edit
-              </Button>
-            )}
-          </div>
 
-          <div className="space-y-4">
-            {/* Enable preorders */}
-            <div
-              className="flex items-center justify-between rounded-xl border p-4"
-              style={{ borderColor: BORDER, backgroundColor: SOFT }}
-            >
-              <div>
-                <p className="font-semibold" style={{ color: INK }}>
-                  Enable Preorders
-                </p>
-                <p className="text-xs" style={{ color: MUTE }}>
-                  Customers can schedule orders for a later time
-                </p>
+            <div className="space-y-4">
+              {/* Enable preorders */}
+              <div
+                className="flex items-center justify-between rounded-xl border p-4"
+                style={{ borderColor: BORDER, backgroundColor: SOFT }}
+              >
+                <div>
+                  <p className="font-semibold" style={{ color: INK }}>
+                    Enable Preorders
+                  </p>
+                  <p className="text-xs" style={{ color: MUTE }}>
+                    Customers can schedule orders for a later time
+                  </p>
+                </div>
+                <Switch
+                  checked={preOrdersEnabled}
+                  onCheckedChange={handlePreorderToggle}
+                />
               </div>
-              <Button
-                disabled={!preorderEditMode}
-                className="rounded-xl text-white disabled:opacity-60"
-                style={{ backgroundColor: preOrdersEnabled ? ACCENT : MUTE }}
-                onClick={() => setPreOrderEnabled(!preOrdersEnabled)}
-              >
-                {preOrdersEnabled ? "Enabled" : "Disabled"}
-              </Button>
-            </div>
 
-            {preorderEditMode && preOrdersEnabled && (
-              <>
-                {/* Minimum notice */}
-                <div
-                  className="rounded-xl border p-4 space-y-2"
-                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
-                >
-                  <FieldLabel icon={Clock}>Minimum notice (hours)</FieldLabel>
-                  <Input
-                    type="number"
-                    min={0}
-                    value={preOrderMinHours}
-                    className="h-11 rounded-xl text-base bg-white"
-                    style={{ borderColor: BORDER }}
-                    onChange={(e) =>
-                      setPreOrderMinHours(Number(e.target.value))
-                    }
-                  />
-                </div>
-
-                {/* Max days */}
-                <div
-                  className="rounded-xl border p-4 space-y-2"
-                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
-                >
-                  <FieldLabel icon={Clock}>Max days in advance</FieldLabel>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={30}
-                    value={preOrderMaxDays}
-                    className="h-11 rounded-xl text-base bg-white"
-                    style={{ borderColor: BORDER }}
-                    onChange={(e) => setPreOrderMaxDays(Number(e.target.value))}
-                  />
-                </div>
-
-                {/* Delivery windows */}
-                <div
-                  className="rounded-xl border p-4 space-y-3"
-                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
-                >
-                  <FieldLabel icon={Clock}>Delivery time windows</FieldLabel>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newWindow}
-                      placeholder="e.g. 7pm - 9pm"
-                      className="h-11 rounded-xl text-base bg-white"
-                      style={{ borderColor: BORDER }}
-                      onChange={(e) => setNewWindow(e.target.value)}
-                    />
-                    <Button
-                      className="rounded-xl text-white shrink-0"
-                      style={{ backgroundColor: ACCENT }}
-                      onClick={() => {
-                        const w = newWindow.trim();
-                        if (!w) return;
-
-                        if (!isValidTimeWindow(w)) {
-                          toast.error(
-                            "Use a format like '7pm - 9pm' or '15:00 - 16:00'",
-                          );
-                          return;
-                        }
-
-                        setDeliveryWindows([...deliveryWindows, w]);
-                        setNewWindow("");
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  {deliveryWindows.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {deliveryWindows.map((w, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
-                          style={{ borderColor: BORDER }}
-                        >
-                          <span>{w}</span>
-                          <X
-                            className="w-4 h-4 cursor-pointer"
-                            style={{ color: ACCENT }}
-                            onClick={() => {
-                              setDeliveryWindows(
-                                deliveryWindows.filter((_, i) => i !== idx),
-                              );
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs" style={{ color: MUTE }}>
-                      No windows added yet
-                    </p>
-                  )}
-                </div>
-
-                {/* Pickup windows */}
-                <div
-                  className="rounded-xl border p-4 space-y-3"
-                  style={{ borderColor: BORDER, backgroundColor: SOFT }}
-                >
-                  <FieldLabel icon={Clock}>Pickup time windows</FieldLabel>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newPickupWindow}
-                      placeholder="e.g. 6pm - 8pm"
-                      className="h-11 rounded-xl text-base bg-white"
-                      style={{ borderColor: BORDER }}
-                      onChange={(e) => setNewPickupWindow(e.target.value)}
-                    />
-                    <Button
-                      className="rounded-xl text-white shrink-0"
-                      style={{ backgroundColor: ACCENT }}
-                      onClick={() => {
-                        const w = newPickupWindow.trim();
-                        if (!w) return;
-
-                        if (!isValidTimeWindow(w)) {
-                          toast.error(
-                            "Use a format like '6pm - 8pm' or '18:00 - 20:00'",
-                          );
-                          return;
-                        }
-
-                        setPickupWindows([...pickUpWindows, w]);
-                        setNewPickupWindow("");
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                  {pickUpWindows.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {pickUpWindows.map((w, idx) => (
-                        <div
-                          key={idx}
-                          className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
-                          style={{ borderColor: BORDER }}
-                        >
-                          <span>{w}</span>
-                          <X
-                            className="w-4 h-4 cursor-pointer"
-                            style={{ color: ACCENT }}
-                            onClick={() => {
-                              setPickupWindows(
-                                pickUpWindows.filter((_, i) => i !== idx),
-                              );
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs" style={{ color: MUTE }}>
-                      No windows added yet
-                    </p>
-                  )}
-                </div>
-              </>
-            )}
-
-            {preorderEditMode && (
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 h-11 rounded-xl text-base"
-                  onClick={cancelPreorderEdit}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  disabled={preorderLoading}
-                  className="flex-1 h-11 rounded-xl text-base text-white disabled:opacity-60"
+              {preOrdersEnabled && (
+                <button
                   style={{ backgroundColor: ACCENT }}
-                  onClick={() => {
-                    updatePreorderSettingsM({
-                      preOrdersEnabled,
-                      preOrderMinHours,
-                      preOrderMaxDays,
-                      deliveryWindows,
-                      pickUpWindows,
-                    });
-                    setPreorderEditMode(false);
-                  }}
+                  className="flex items-center gap-x-2 rounded-xl text-white p-2 text-xs"
+                  onClick={() => setPreOrderEditMode(!preOrderEditMode)}
                 >
-                  Save Preorder Settings
-                </Button>
-              </div>
-            )}
+                  <span> Change Pre-Order Settings</span>
+                </button>
+              )}
+
+              {preOrdersEnabled && preOrderEditMode && (
+                <>
+                  {/* Minimum notice */}
+                  <div
+                    className="rounded-xl border p-4 space-y-2"
+                    style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                  >
+                    <FieldLabel icon={Clock}>Minimum notice (hours)</FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={preOrderMinHours}
+                      className="h-11 rounded-xl text-base bg-white"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) =>
+                        setPreOrderMinHours(Number(e.target.value))
+                      }
+                    />
+                  </div>
+
+                  {/* Max days */}
+                  <div
+                    className="rounded-xl border p-4 space-y-2"
+                    style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                  >
+                    <FieldLabel icon={Clock}>Max days in advance</FieldLabel>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={30}
+                      value={preOrderMaxDays}
+                      className="h-11 rounded-xl text-base bg-white"
+                      style={{ borderColor: BORDER }}
+                      onChange={(e) =>
+                        setPreOrderMaxDays(Number(e.target.value))
+                      }
+                    />
+                  </div>
+
+                  {/* Delivery windows */}
+                  <div
+                    className="rounded-xl border p-4 space-y-3"
+                    style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                  >
+                    <FieldLabel icon={Clock}>Delivery time windows</FieldLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newWindow}
+                        placeholder="e.g. 7pm - 9pm"
+                        className="h-11 rounded-xl text-base bg-white"
+                        style={{ borderColor: BORDER }}
+                        onChange={(e) => setNewWindow(e.target.value)}
+                      />
+                      <Button
+                        className="rounded-xl text-white shrink-0"
+                        style={{ backgroundColor: ACCENT }}
+                        onClick={() => {
+                          const w = newWindow.trim();
+                          if (!w) return;
+
+                          if (!isValidTimeWindow(w)) {
+                            toast.error(
+                              "Use a format like '7pm - 9pm' or '15:00 - 16:00'",
+                            );
+                            return;
+                          }
+
+                          setDeliveryWindows([...deliveryWindows, w]);
+                          setNewWindow("");
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    {deliveryWindows.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {deliveryWindows.map((w, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
+                            style={{ borderColor: BORDER }}
+                          >
+                            <span>{w}</span>
+                            <X
+                              className="w-4 h-4 cursor-pointer"
+                              style={{ color: ACCENT }}
+                              onClick={() => {
+                                setDeliveryWindows(
+                                  deliveryWindows.filter((_, i) => i !== idx),
+                                );
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs" style={{ color: MUTE }}>
+                        No windows added yet
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Pickup windows */}
+                  <div
+                    className="rounded-xl border p-4 space-y-3"
+                    style={{ borderColor: BORDER, backgroundColor: SOFT }}
+                  >
+                    <FieldLabel icon={Clock}>Pickup time windows</FieldLabel>
+                    <div className="flex gap-2">
+                      <Input
+                        value={newPickupWindow}
+                        placeholder="e.g. 6pm - 8pm"
+                        className="h-11 rounded-xl text-base bg-white"
+                        style={{ borderColor: BORDER }}
+                        onChange={(e) => setNewPickupWindow(e.target.value)}
+                      />
+                      <Button
+                        className="rounded-xl text-white shrink-0"
+                        style={{ backgroundColor: ACCENT }}
+                        onClick={() => {
+                          const w = newPickupWindow.trim();
+                          if (!w) return;
+
+                          if (!isValidTimeWindow(w)) {
+                            toast.error(
+                              "Use a format like '6pm - 8pm' or '18:00 - 20:00'",
+                            );
+                            return;
+                          }
+
+                          setPickupWindows([...pickUpWindows, w]);
+                          setNewPickupWindow("");
+                        }}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    {pickUpWindows.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {pickUpWindows.map((w, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 px-3 py-1 rounded-full border bg-white text-sm"
+                            style={{ borderColor: BORDER }}
+                          >
+                            <span>{w}</span>
+                            <X
+                              className="w-4 h-4 cursor-pointer"
+                              style={{ color: ACCENT }}
+                              onClick={() => {
+                                setPickupWindows(
+                                  pickUpWindows.filter((_, i) => i !== idx),
+                                );
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs" style={{ color: MUTE }}>
+                        No windows added yet
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 h-11 rounded-xl text-base"
+                      onClick={() => setPreOrderEditMode(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      disabled={preorderLoading}
+                      className="flex-1 h-11 rounded-xl text-base text-white disabled:opacity-60"
+                      style={{ backgroundColor: ACCENT }}
+                      onClick={() => {
+                        updatePreorderSettingsM({
+                          preOrderMinHours,
+                          preOrderMaxDays,
+                          deliveryWindows,
+                          pickUpWindows,
+                        });
+                        setPreOrderEditMode(false);
+                      }}
+                    >
+                      Save Preorder Settings
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
-        <div
-          className="bg-white rounded-2xl border p-6 mt-6 flex flex-col gap-y-5"
-          style={{ borderColor: BORDER }}
-        >
-          <div className="flex items-center gap-2 ">
-            <HelpCircle className="w-5 h-5" style={{ color: ACCENT }} />
-            <h2 className="text-lg font-bold" style={{ color: INK }}>
-              Have a question?
-            </h2>
-          </div>
-          <Button
-            onClick={() => navigate("/support")}
-            className="rounded-xl gap-2 text-white w-fit p-4 font-bold"
-            style={{ backgroundColor: ACCENT }}
+        )}
+
+        {matchesSearch(["support", "help", "question", "contact"]) && (
+          <SectionHeading>Support</SectionHeading>
+        )}
+
+        {matchesSearch(["support", "help", "question", "contact"]) && (
+          <div
+            className="bg-white rounded-2xl border p-6 flex flex-col gap-y-5"
+            style={{ borderColor: BORDER }}
           >
-            Contact Support
-          </Button>
-        </div>
+            <div className="flex items-center gap-2 ">
+              <HelpCircle className="w-5 h-5" style={{ color: ACCENT }} />
+              <h2 className="text-lg font-bold" style={{ color: INK }}>
+                Have a question?
+              </h2>
+            </div>
+            <Button
+              onClick={() => navigate("/support")}
+              className="rounded-xl gap-2 text-white w-fit p-4 font-bold"
+              style={{ backgroundColor: ACCENT }}
+            >
+              Contact Support
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -18,9 +18,7 @@ export default function PrivacyPolicy() {
 
       <div className="max-w-4xl mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold mb-2">Merchant Privacy Policy</h1>
-        <p className="text-muted-foreground mb-8">
-          Last updated: August 2026
-        </p>
+        <p className="text-muted-foreground mb-8">Last updated: August 2026</p>
 
         <div className="space-y-8">
           {/* 1 */}
@@ -50,8 +48,14 @@ export default function PrivacyPolicy() {
               <li>Order, transaction, and operational data</li>
               <li>Account credentials and access logs</li>
               <li>Device, browser, and IP address data</li>
-              <li>Website usage and analytics data (pages visited, referrer, general location derived from IP)</li>
-              <li>Error and diagnostic data collected automatically when the platform encounters technical issues</li>
+              <li>
+                Website usage and analytics data (pages visited, referrer,
+                general location derived from IP)
+              </li>
+              <li>
+                Error and diagnostic data collected automatically when the
+                platform encounters technical issues
+              </li>
             </ul>
           </section>
 
@@ -78,8 +82,8 @@ export default function PrivacyPolicy() {
               ("Paddle"), which acts as the Merchant of Record for all
               subscription transactions on the platform. This means Paddle is
               the authorized reseller and handles payment processing, billing,
-              tax calculation, and tax remittance on our behalf. Crimson
-              Castle Shop does not store full payment card details. Financial
+              tax calculation, and tax remittance on our behalf. Crimson Castle
+              Shop does not store full payment card details. Financial
               information is processed securely by Paddle in accordance with
               industry standards. For details on how Paddle handles your data,
               please refer to Paddle's own privacy policy.
@@ -108,8 +112,8 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-bold mb-4">6. Data Sharing</h2>
             <p className="text-muted-foreground mb-4">
               We share limited data with the following categories of trusted
-              service providers to operate the platform. We do not sell
-              merchant data.
+              service providers to operate the platform. We do not sell merchant
+              data.
             </p>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
               <li>
@@ -118,11 +122,15 @@ export default function PrivacyPolicy() {
                 compliance)
               </li>
               <li>
-                <span className="font-medium text-foreground">Email delivery:</span>{" "}
+                <span className="font-medium text-foreground">
+                  Email delivery:
+                </span>{" "}
                 Resend (transactional and account-related emails)
               </li>
               <li>
-                <span className="font-medium text-foreground">Error monitoring:</span>{" "}
+                <span className="font-medium text-foreground">
+                  Error monitoring:
+                </span>{" "}
                 Sentry (automated error and diagnostic logging)
               </li>
               <li>
@@ -130,7 +138,9 @@ export default function PrivacyPolicy() {
                 Umami Cloud (privacy-focused website usage analytics)
               </li>
               <li>
-                <span className="font-medium text-foreground">Uptime monitoring:</span>{" "}
+                <span className="font-medium text-foreground">
+                  Uptime monitoring:
+                </span>{" "}
                 UptimeRobot (automated availability checks)
               </li>
             </ul>
@@ -146,8 +156,8 @@ export default function PrivacyPolicy() {
             </h2>
             <p className="text-muted-foreground">
               Merchant data may be processed or stored outside your country of
-              residence, including by service providers such as Paddle,
-              Resend, Sentry, Umami Cloud, and UptimeRobot, which may operate
+              residence, including by service providers such as Paddle, Resend,
+              Sentry, Umami Cloud, and UptimeRobot, which may operate
               infrastructure in the United States, European Union, or other
               jurisdictions. Where international transfers occur, appropriate
               safeguards are applied to protect your information.
@@ -199,7 +209,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold mb-4">12. Contact Information</h2>
             <p className="text-muted-foreground">
-              Email: support@crimsoncastle.biz
+              Email: support@maroonapron.com
               <br />
               Phone: +92 (334)-820-4806
               <br />

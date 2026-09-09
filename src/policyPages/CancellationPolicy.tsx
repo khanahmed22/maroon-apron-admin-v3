@@ -30,8 +30,8 @@ export default function CancellationPolicy() {
             <h2 className="text-2xl font-semibold mb-4">Overview</h2>
             <p className="text-muted-foreground leading-relaxed">
               This Cancellation Policy explains how merchants may cancel their
-              subscriptions, how cancellation timing works, and when refunds
-              may apply.
+              subscriptions, how cancellation timing works, and when refunds may
+              apply.
             </p>
           </section>
 
@@ -100,8 +100,8 @@ export default function CancellationPolicy() {
                 already processed.
               </p>
               <p className="text-muted-foreground">
-                You are responsible for cancelling before your next billing
-                date to avoid renewal.
+                You are responsible for cancelling before your next billing date
+                to avoid renewal.
               </p>
             </div>
           </section>
@@ -154,13 +154,13 @@ export default function CancellationPolicy() {
             <p className="text-muted-foreground">
               For assistance with cancellation, please contact{" "}
               <a
-                href="mailto:support@crimsoncastle.biz"
+                href="mailto:support@maroonapron.com"
                 className="text-primary hover:underline"
               >
-                support@crimsoncastle.biz
+                support@maroonapron.com
               </a>{" "}
-              or call +92 (334)-820-4806. Support hours are Monday–Friday,
-              9 AM–6 PM (PKT).
+              or call +92 (334)-820-4806. Support hours are Monday–Friday, 9
+              AM–6 PM (PKT).
             </p>
           </section>
         </div>

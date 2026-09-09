@@ -133,10 +133,10 @@ export default function ContactUs() {
               </CardHeader>
               <CardContent className="text-center">
                 <a
-                  href="mailto:support@crimsoncastle.biz"
+                  href="mailto:support@maroonapron.com"
                   className="flex flex-col gap-y-3 text-foreground hover:text-primary transition-colors font-medium"
                 >
-                  <span>info@crimsoncastle.biz</span>
+                  <span>info@maroonapron.com</span>
                 </a>
               </CardContent>
             </Card>

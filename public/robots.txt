@@ -12,4 +12,4 @@ Disallow: /dashboard
 
 
 
-Sitemap: https://crimsoncastle.biz/sitemap.xml
+Sitemap: https://maroonapron.com/sitemap.xml

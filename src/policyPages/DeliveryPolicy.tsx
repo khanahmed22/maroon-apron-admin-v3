@@ -20,7 +20,6 @@ export default function DeliveryPolicy() {
           <p className="text-muted-foreground mb-8">
             Last updated: December 2025
           </p>
-          
 
           <div className="prose prose-invert max-w-none space-y-8">
             {/* 1 */}
@@ -29,11 +28,11 @@ export default function DeliveryPolicy() {
                 1. Digital Service Delivery
               </h2>
               <p>
-                Crimson Castle Shop provides a fully digital Software-as-a-Service
-                (SaaS) platform. No physical goods are shipped or delivered.
-                Access to the service is provided electronically through web
-                and mobile applications immediately after successful
-                subscription activation.
+                Crimson Castle Shop provides a fully digital
+                Software-as-a-Service (SaaS) platform. No physical goods are
+                shipped or delivered. Access to the service is provided
+                electronically through web and mobile applications immediately
+                after successful subscription activation.
               </p>
             </section>
 
@@ -70,10 +69,11 @@ export default function DeliveryPolicy() {
                 4. Service Availability
               </h2>
               <p>
-                Crimson Castle Shop strives to provide high service availability.
-                Temporary interruptions may occur due to maintenance, updates,
-                or unforeseen technical issues. Scheduled maintenance will be
-                communicated in advance whenever reasonably possible.
+                Crimson Castle Shop strives to provide high service
+                availability. Temporary interruptions may occur due to
+                maintenance, updates, or unforeseen technical issues. Scheduled
+                maintenance will be communicated in advance whenever reasonably
+                possible.
               </p>
             </section>
 
@@ -83,10 +83,10 @@ export default function DeliveryPolicy() {
                 5. Updates & Feature Enhancements
               </h2>
               <p>
-                As part of the SaaS model, Crimson Castle Shop continuously improves
-                its platform. Feature availability may vary by subscription
-                tier, and certain features may be modified or discontinued with
-                prior notice.
+                As part of the SaaS model, Crimson Castle Shop continuously
+                improves its platform. Feature availability may vary by
+                subscription tier, and certain features may be modified or
+                discontinued with prior notice.
               </p>
             </section>
 
@@ -105,8 +105,9 @@ export default function DeliveryPolicy() {
                 <Link to="/cancellation-policy" className="text-primary">
                   Cancellation Policy
                 </Link>
-                . Crimson Castle Shop does not provide refunds outside the conditions
-                specified in those policies or where required by applicable law.
+                . Crimson Castle Shop does not provide refunds outside the
+                conditions specified in those policies or where required by
+                applicable law.
               </p>
             </section>
 
@@ -117,8 +118,8 @@ export default function DeliveryPolicy() {
               </h2>
               <p>
                 Merchants receive onboarding assistance and technical support
-                during active subscriptions. Support channels and response
-                times may vary depending on subscription tier.
+                during active subscriptions. Support channels and response times
+                may vary depending on subscription tier.
               </p>
             </section>
 
@@ -128,10 +129,10 @@ export default function DeliveryPolicy() {
                 8. Data Storage & Retention
               </h2>
               <p>
-                Merchant data is securely stored and backed up regularly.
-                Upon subscription cancellation, merchant data is retained for
-                up to 90 days to allow data export, after which it is
-                permanently deleted unless retention is required by law.
+                Merchant data is securely stored and backed up regularly. Upon
+                subscription cancellation, merchant data is retained for up to
+                90 days to allow data export, after which it is permanently
+                deleted unless retention is required by law.
               </p>
             </section>
 
@@ -141,8 +142,8 @@ export default function DeliveryPolicy() {
                 9. Service Termination
               </h2>
               <p>
-                Crimson Castle Shop may suspend or terminate access for violations
-                of our{" "}
+                Crimson Castle Shop may suspend or terminate access for
+                violations of our{" "}
                 <Link to="/terms-and-conditions" className="text-primary">
                   Terms & Conditions
                 </Link>
@@ -157,7 +158,7 @@ export default function DeliveryPolicy() {
                 10. Contact Information
               </h2>
               <p className="font-semibold">
-                Email: support@crimsoncastle.biz
+                Email: support@maroonapron.com
                 <br />
                 Phone: +92 (334)-820-4806
                 <br />

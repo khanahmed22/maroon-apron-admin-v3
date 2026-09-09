@@ -17,9 +17,7 @@ export default function MerchantTermsAndConditions() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <h1 className="text-4xl font-bold mb-2">
-          Merchant Terms & Conditions
-        </h1>
+        <h1 className="text-4xl font-bold mb-2">Merchant Terms & Conditions</h1>
         <p className="text-muted-foreground mb-8">
           Last updated: December 2025
         </p>
@@ -32,9 +30,9 @@ export default function MerchantTermsAndConditions() {
             </h2>
             <div className="space-y-3 text-muted-foreground">
               <p>
-                To use the Crimson Castle Shop merchant platform, you must operate a
-                legitimate business and provide accurate, complete, and current
-                registration information.
+                To use the Crimson Castle Shop merchant platform, you must
+                operate a legitimate business and provide accurate, complete,
+                and current registration information.
               </p>
               <p>
                 You are responsible for maintaining the confidentiality of your
@@ -51,9 +49,9 @@ export default function MerchantTermsAndConditions() {
             </h2>
             <div className="space-y-3 text-muted-foreground">
               <p>
-                Subscription fees are billed in advance on a recurring basis.
-                By subscribing, you authorize automatic charges using your
-                selected payment method.
+                Subscription fees are billed in advance on a recurring basis. By
+                subscribing, you authorize automatic charges using your selected
+                payment method.
               </p>
               <ul className="list-disc ml-6 space-y-2">
                 <li>
@@ -75,22 +73,18 @@ export default function MerchantTermsAndConditions() {
                     Refund Policy
                   </Link>
                 </li>
-                <li>
-                  Pricing may change with prior notice before renewal
-                </li>
+                <li>Pricing may change with prior notice before renewal</li>
               </ul>
             </div>
           </section>
 
           {/* 3 */}
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              3. Commissions & Fees
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">3. Commissions & Fees</h2>
             <div className="space-y-3 text-muted-foreground">
               <p>
-                Crimson Castle Shop may charge commissions and additional fees as
-                displayed in your merchant dashboard.
+                Crimson Castle Shop may charge commissions and additional fees
+                as displayed in your merchant dashboard.
               </p>
               <p>
                 Fees already incurred are non-refundable except where required
@@ -114,9 +108,7 @@ export default function MerchantTermsAndConditions() {
 
           {/* 5 */}
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              5. Prohibited Conduct
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">5. Prohibited Conduct</h2>
             <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
               <li>Fraud, chargeback abuse, or deceptive practices</li>
               <li>Illegal or unauthorized activity</li>
@@ -159,8 +151,9 @@ export default function MerchantTermsAndConditions() {
                 disputes.
               </p>
               <p>
-                You agree to indemnify Crimson Castle Shop against claims arising
-                from your business operations or violations of these terms.
+                You agree to indemnify Crimson Castle Shop against claims
+                arising from your business operations or violations of these
+                terms.
               </p>
             </div>
           </section>
@@ -179,9 +172,7 @@ export default function MerchantTermsAndConditions() {
 
           {/* 9 */}
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              9. Changes to Terms
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">9. Changes to Terms</h2>
             <p className="text-muted-foreground">
               We may update these terms from time to time. Continued use of the
               platform constitutes acceptance of updated terms.
@@ -190,12 +181,12 @@ export default function MerchantTermsAndConditions() {
 
           {/* 10 */}
           <section>
-            <h2 className="text-2xl font-bold mb-4">
-              10. Contact
-            </h2>
+            <h2 className="text-2xl font-bold mb-4">10. Contact</h2>
             <p className="text-muted-foreground">
-              Email: support@crimsoncastle.biz<br />
-              Phone: +92 (334)-820-4806<br />
+              Email: support@maroonapron.com
+              <br />
+              Phone: +92 (334)-820-4806
+              <br />
               Hours: Monday–Friday, 9 AM–6 PM (PKT)
             </p>
           </section>
@@ -203,8 +194,8 @@ export default function MerchantTermsAndConditions() {
 
         <div className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            By using the Crimson Castle Shop platform, you agree to these Merchant
-            Terms & Conditions.
+            By using the Crimson Castle Shop platform, you agree to these
+            Merchant Terms & Conditions.
           </p>
         </div>
       </div>

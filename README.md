@@ -10,7 +10,6 @@ Crimson Castle is split into two interconnected systems:
 A complete business management platform built for home chefs.  
 Manage orders, inventory, customers, delivery operations, analytics, and store customization from one centralized dashboard — without relying on scattered WhatsApp, Instagram, or Facebook messages.
 
-
 **Keep 100% of your earnings. No commissions.**
 
 ![Home Page](https://res.cloudinary.com/dgmfm08s8/image/upload/v1787327145/Homepage_yatmmn.png)
@@ -19,7 +18,7 @@ Manage orders, inventory, customers, delivery operations, analytics, and store c
 
 ## Live Website
 
-https://crimsoncastle.biz
+https://maroonapron.com
 
 ---
 
@@ -116,7 +115,6 @@ Configure delivery charges based on zones or apply fixed delivery fees.
 
 ---
 
-
 ## Customer Management
 
 View and manage customers who sign up through your store.
@@ -128,6 +126,7 @@ View and manage customers who sign up through your store.
 # Tech Stack
 
 ## Frontend
+
 - React
 - Vite
 - Typescript
@@ -135,11 +134,13 @@ View and manage customers who sign up through your store.
 - shadcn/ui
 
 ## State & Data Management
+
 - TanStack Query
 - Zustand
 
 ## Backend & Infrastructure
-- Express.js 
+
+- Express.js
 - Node.js
 - Prisma ORM
 - Neon Postgres
@@ -148,6 +149,7 @@ View and manage customers who sign up through your store.
 Backend Repository: [Crimson Castle Backend](https://github.com/khanahmed22/crimson-backend-v3)
 
 ## Payments
+
 - Paddle
 
 ---

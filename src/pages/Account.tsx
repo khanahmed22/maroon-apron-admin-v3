@@ -63,7 +63,7 @@ export default function Account() {
 
   const getPaymentStatus = async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/paddle/account`,
+      `${import.meta.env.VITE_BACKEND_URL}/account/paddle`,
       {
         credentials: "include",
       }
@@ -83,14 +83,14 @@ export default function Account() {
   })
 
   const handleManageSubscription = async () => {
-    if (!merchantStatus?.subscription_id) {
+    if (!merchantStatus?.paddleSubscription_id) {
       toast.error("No active subscription")
       return
     }
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/paddle/create-paddle-link`,
+        `${import.meta.env.VITE_BACKEND_URL}/account/create-paddle-link`,
         {
           method: "POST",
           credentials: "include",

@@ -25,9 +25,7 @@ export default function MerchantRefundPolicy() {
             <h1 className="text-3xl sm:text-4xl font-bold">
               Merchant Refund Policy
             </h1>
-            <p className="text-muted-foreground">
-              Last updated: December 2025
-            </p>
+            <p className="text-muted-foreground">Last updated: December 2025</p>
           </div>
 
           {/* Introduction */}
@@ -35,8 +33,9 @@ export default function MerchantRefundPolicy() {
             <p>
               This Merchant Refund Policy explains how refunds, cancellations,
               and billing disputes are handled for subscriptions and services
-              purchased through Crimson Castle Shop. By purchasing a subscription
-              or service, you agree to the terms outlined in this policy.
+              purchased through Crimson Castle Shop. By purchasing a
+              subscription or service, you agree to the terms outlined in this
+              policy.
             </p>
           </section>
 
@@ -66,8 +65,8 @@ export default function MerchantRefundPolicy() {
             </h2>
             <div className="space-y-3 text-base leading-relaxed">
               <p>
-                You may cancel your subscription at any time through your account
-                settings.
+                You may cancel your subscription at any time through your
+                account settings.
               </p>
               <p>
                 If you cancel within 14 days of the initial purchase, you may be
@@ -133,9 +132,7 @@ export default function MerchantRefundPolicy() {
 
           {/* Special Circumstances */}
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold">
-              6. Special Circumstances
-            </h2>
+            <h2 className="text-2xl font-semibold">6. Special Circumstances</h2>
             <div className="space-y-3 text-base leading-relaxed">
               <p>
                 Refunds related to service outages, billing errors, or permanent
@@ -150,7 +147,7 @@ export default function MerchantRefundPolicy() {
             <div className="space-y-3 text-base leading-relaxed">
               <ul className="space-y-2 ml-2">
                 <li>
-                  <strong>Email:</strong> support@crimsoncastle.biz
+                  <strong>Email:</strong> support@maroonapron.com
                 </li>
                 <li>
                   <strong>Phone:</strong> +92 (334)-820-4806

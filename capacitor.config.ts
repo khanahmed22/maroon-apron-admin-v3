@@ -1,4 +1,4 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.crimson.app",
@@ -6,11 +6,9 @@ const config: CapacitorConfig = {
   webDir: "dist",
 
   server: {
-    hostname: "android.crimsoncastle.biz",
+    hostname: "android.maroonapron.com",
     androidScheme: "https",
   },
 };
-
-
 
 export default config;

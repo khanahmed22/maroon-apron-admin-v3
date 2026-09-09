@@ -415,7 +415,7 @@ export default function Home() {
               style={{ backgroundColor: ACCENT }}
             >
               <img
-                src={cldImage("cc_p878bp")}
+                src={cldImage("MaroonApron-logo")}
                 alt="Maroon Apron logo"
                 className="w-full h-full object-cover"
                 loading="eager"
@@ -1157,7 +1157,7 @@ export default function Home() {
                 style={{ backgroundColor: ACCENT }}
               >
                 <img
-                  src={cldImage("cc_p878bp")}
+                  src={cldImage("MaroonApron-logo")}
                   alt="Maroon Apron logo"
                   className="w-full h-full object-cover"
                   loading="eager"

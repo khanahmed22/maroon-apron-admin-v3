@@ -218,7 +218,7 @@ const PLANS: Plan[] = [
       "Up to 5 products",
       "Basic order management",
       "Stock tracking",
-      "Crimson Castle subdomain",
+      "Maroon Apron subdomain",
     ],
     highlighted: false,
   },
@@ -233,7 +233,7 @@ const PLANS: Plan[] = [
 
       "Custom domain",
       "Priority support",
-      "No Crimson Castle branding",
+      "No Maroon Apron branding",
     ],
     highlighted: true,
   },
@@ -241,12 +241,12 @@ const PLANS: Plan[] = [
 
 const FAQS: FAQ[] = [
   {
-    q: "What is Crimson Castle?",
-    a: "Crimson Castle helps home chefs run their food business from one dashboard. You get your own branded online store, orders in one place, and tools built for home kitchens rather than restaurant chains.",
+    q: "What is Maroon Apron?",
+    a: "Maroon Apron helps home chefs run their food business from one dashboard. You get your own branded online store, orders in one place, and tools built for home kitchens rather than restaurant chains.",
   },
   {
     q: "Where are you based?",
-    a: "Crimson Castle is based in Karachi, Pakistan.",
+    a: "Maroon Apron is based in Karachi, Pakistan.",
   },
   {
     q: "How long does setup take?",
@@ -262,11 +262,11 @@ const FAQS: FAQ[] = [
   },
   {
     q: "Do you handle delivery?",
-    a: "No. Crimson Castle handles ordering. Delivery is arranged by you.",
+    a: "No. Maroon Apron handles ordering. Delivery is arranged by you.",
   },
   {
     q: "Does this work outside Karachi?",
-    a: "Right now Crimson Castle is focused on home chefs in Karachi only.",
+    a: "Right now Maroon Apron is focused on home chefs in Karachi only.",
   },
 ];
 
@@ -416,12 +416,12 @@ export default function Home() {
             >
               <img
                 src={cldImage("cc_p878bp")}
-                alt="Crimson Castle logo"
+                alt="Maroon Apron logo"
                 className="w-full h-full object-cover"
                 loading="eager"
               />
             </div>
-            <span className="font-bold text-[15px]">Crimson Castle</span>
+            <span className="font-bold text-[15px]">Maroon Apron</span>
           </div>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -523,7 +523,7 @@ export default function Home() {
               className="mt-6 text-[17px] leading-[1.7]"
               style={{ color: MUTE }}
             >
-              Crimson Castle replaces WhatsApp, Instagram, and Facebook
+              Maroon Apron replaces WhatsApp, Instagram, and Facebook
               order-taking with a proper storefront and dashboard. You keep 100%
               of what you earn, with no commission on any order.
             </p>
@@ -592,7 +592,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ================= WHATSAPP VS CRIMSON CASTLE ================= */}
+        {/* ================= WHATSAPP VS Maroon Apron ================= */}
         <section
           className="max-w-6xl mx-auto px-6 py-24 border-t"
           style={{ borderColor: BORDER }}
@@ -601,7 +601,7 @@ export default function Home() {
             <SectionHeading
               eyebrow=" The difference"
               title="From scattered messages to one organized business"
-              subtitle="Every order starts as a message. Crimson Castle turns it into a complete workflow."
+              subtitle="Every order starts as a message. Maroon Apron turns it into a complete workflow."
             />
           </Reveal>
 
@@ -696,7 +696,7 @@ export default function Home() {
               </div>
 
               <h3 className="text-xl font-bold mb-8" style={{ color: ACCENT }}>
-                Crimson Castle
+                Maroon Apron
               </h3>
 
               <div className="space-y-5">
@@ -754,7 +754,7 @@ export default function Home() {
             <SectionHeading
               eyebrow=" Our product"
               title="Two systems, one platform"
-              subtitle="Crimson Castle is built for Pakistan's home chef industry - a centralized system for running a food business, in place of fragmented chat-based ordering."
+              subtitle="Maroon Apron is built for Pakistan's home chef industry - a centralized system for running a food business, in place of fragmented chat-based ordering."
             />
           </Reveal>
 
@@ -807,7 +807,7 @@ export default function Home() {
                 </p>
                 <img
                   src={cldImage("dashboard_nsmx8x")}
-                  alt="Crimson Castle admin dashboard"
+                  alt="Maroon Apron admin dashboard"
                   className="mt-auto w-full h-72 rounded-xl border object-contain "
                   style={{ borderColor: BORDER }}
                   loading="lazy"
@@ -1158,12 +1158,12 @@ export default function Home() {
               >
                 <img
                   src={cldImage("cc_p878bp")}
-                  alt="Crimson Castle logo"
+                  alt="Maroon Apron logo"
                   className="w-full h-full object-cover"
                   loading="eager"
                 />
               </div>
-              <span className="font-bold text-[15px]">Crimson Castle</span>
+              <span className="font-bold text-[15px]">Maroon Apron</span>
             </div>
             <p className="text-sm leading-[1.7]" style={{ color: MUTE }}>
               Helping home chefs run their food business online.
@@ -1248,7 +1248,7 @@ export default function Home() {
                 href="https://www.instagram.com/maroonapron.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Crimson Castle Instagram Page"
+                aria-label="Maroon Apron Instagram Page"
                 className="transition-colors hover:text-[#B1111C]"
               >
                 <svg
@@ -1266,7 +1266,7 @@ export default function Home() {
                 href="https://www.facebook.com/profile.php?id=61570768106092"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Crimson Castle Facebook Page"
+                aria-label="Maroon Apron Facebook Page"
                 className="transition-colors hover:text-[#B1111C]"
               >
                 <svg
@@ -1284,7 +1284,7 @@ export default function Home() {
                 href="https://linkedin.com/company/crimson-castle-pk"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Crimson Castle LinkedIn Page"
+                aria-label="Maroon Apron LinkedIn Page"
                 className="transition-colors hover:text-[#B1111C]"
               >
                 <svg
@@ -1302,7 +1302,7 @@ export default function Home() {
                 href="https://www.youtube.com/@crimsoncastle-o9e"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Crimson Castle Youtube Page"
+                aria-label="Maroon Apron Youtube Page"
                 className="transition-colors hover:text-[#B1111C]"
               >
                 <svg
@@ -1320,7 +1320,7 @@ export default function Home() {
           className="border-t py-6 text-center text-xs"
           style={{ borderColor: BORDER, color: MUTE }}
         >
-          © 2026 Crimson Castle. All rights reserved.
+          © 2026 Maroon Apron. All rights reserved.
         </div>
       </footer>
     </div>

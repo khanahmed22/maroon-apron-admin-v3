@@ -1,11 +1,11 @@
-## Crimson Castle System Architecture
+## Maroon Apron System Architecture
 
-Crimson Castle is split into two interconnected systems:
+Maroon Apron is split into two interconnected systems:
 
 - **Crimson Client App**: Handles customer interactions including ordering, menus, and order tracking. Visit here: https://github.com/khanahmed22/crimson-next-v3
 - **Crimson Admin App**: Handles platform operations such as user management, order moderation, analytics, and payouts.(This one)
 
-# Crimson Castle Admin App
+# Maroon Apron Admin App
 
 A complete business management platform built for home chefs.  
 Manage orders, inventory, customers, delivery operations, analytics, and store customization from one centralized dashboard — without relying on scattered WhatsApp, Instagram, or Facebook messages.
@@ -39,7 +39,7 @@ Home chefs often struggle with:
 - Managing payments and promotions
 - Monitoring business performance
 
-**Crimson Castle** solves this by providing a professional admin platform tailored specifically for home-based food businesses in Pakistan.
+**Maroon Apron** solves this by providing a professional admin platform tailored specifically for home-based food businesses in Pakistan.
 
 ---
 
@@ -146,7 +146,7 @@ View and manage customers who sign up through your store.
 - Neon Postgres
 - Firebase Cloud Messaging (Push Notifications)
 
-Backend Repository: [Crimson Castle Backend](https://github.com/khanahmed22/crimson-backend-v3)
+Backend Repository: [Maroon Apron Backend](https://github.com/khanahmed22/crimson-backend-v3)
 
 ## Payments
 
@@ -156,6 +156,6 @@ Backend Repository: [Crimson Castle Backend](https://github.com/khanahmed22/crim
 
 # Vision
 
-Crimson Castle aims to help home chefs operate like modern digital businesses without paying marketplace commissions or depending entirely on social media inboxes.
+Maroon Apron aims to help home chefs operate like modern digital businesses without paying marketplace commissions or depending entirely on social media inboxes.
 
 The platform gives home chefs full ownership of their customers, branding, and revenue while simplifying day-to-day operations.

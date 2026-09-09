@@ -33,9 +33,8 @@ export default function MerchantRefundPolicy() {
             <p>
               This Merchant Refund Policy explains how refunds, cancellations,
               and billing disputes are handled for subscriptions and services
-              purchased through Crimson Castle Shop. By purchasing a
-              subscription or service, you agree to the terms outlined in this
-              policy.
+              purchased through Maroon Apron Shop. By purchasing a subscription
+              or service, you agree to the terms outlined in this policy.
             </p>
           </section>
 
@@ -173,7 +172,7 @@ export default function MerchantRefundPolicy() {
           <div className="border-t border-border pt-8 mt-12">
             <p className="text-sm text-muted-foreground">
               This policy applies to all merchant subscriptions and services
-              offered by Crimson Castle Shop.
+              offered by Maroon Apron Shop.
             </p>
           </div>
         </div>

@@ -1,30 +1,30 @@
 import { useParams, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
-import { Lock, Eye, EyeOff, ChefHat, AlertCircle } from "lucide-react"
+import { Lock, Eye, EyeOff, ChefHat, AlertCircle } from "lucide-react";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { UserAuth } from "../context/AuthContext";
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const {session} = UserAuth()
+  const { session } = UserAuth();
 
   const [valid, setValid] = useState(false);
   const [loading, setLoading] = useState(true);
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const [showPassword, setShowPassword] = useState(false)
-  const ACCENT = "#D6293F"
-const INK = "#171717"
-const MUTE = "#6B7280"
-const BORDER = "#E7E5E4"
-const SOFT = "#FBF7F6"
+  const [showPassword, setShowPassword] = useState(false);
+  const ACCENT = "#D6293F";
+  const INK = "#171717";
+  const MUTE = "#6B7280";
+  const BORDER = "#E7E5E4";
+  const SOFT = "#FBF7F6";
 
   useEffect(() => {
     const verifyToken = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/reset-password/${token}`
+          `${import.meta.env.VITE_BACKEND_URL}/reset-password/${token}`,
         );
 
         const data = await res.json();
@@ -52,16 +52,19 @@ const SOFT = "#FBF7F6"
     e.preventDefault();
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+            password,
+          }),
         },
-        body: JSON.stringify({
-          token,
-          password,
-        }),
-      });
+      );
 
       const data = await res.json();
 
@@ -87,16 +90,16 @@ const SOFT = "#FBF7F6"
     return <h2>Invalid or expired reset link.</h2>;
   }
 
-  if(session){
-    return(
+  if (session) {
+    return (
       <div className="flex items-center justify-center min-h-screen font-bold text-2xl">
         You are already signed in
       </div>
-    )
+    );
   }
 
   return (
-     <div
+    <div
       className="min-h-screen flex flex-col items-center justify-center px-4"
       style={{ backgroundColor: SOFT }}
     >
@@ -108,10 +111,10 @@ const SOFT = "#FBF7F6"
           <ChefHat size={18} />
         </div>
         <span className="font-bold text-lg" style={{ color: INK }}>
-          Crimson Castle
+          Maroon Apron
         </span>
       </div>
- 
+
       <div
         className="bg-white p-8 rounded-2xl w-full max-w-sm border shadow-sm"
         style={{ borderColor: BORDER }}
@@ -122,7 +125,7 @@ const SOFT = "#FBF7F6"
         <p className="text-sm mt-1 mb-6" style={{ color: MUTE }}>
           Choose a new password for your account.
         </p>
- 
+
         <form onSubmit={handleReset} className="flex flex-col gap-y-5">
           <div className="flex flex-col gap-y-1.5">
             <label className="text-sm font-medium" style={{ color: INK }}>
@@ -149,11 +152,15 @@ const SOFT = "#FBF7F6"
                 style={{ color: MUTE }}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
- 
+
           {message && (
             <div
               className="flex items-start gap-2 text-sm font-medium rounded-xl px-3.5 py-3"
@@ -163,7 +170,7 @@ const SOFT = "#FBF7F6"
               <span>{message}</span>
             </div>
           )}
- 
+
           <Button
             type="submit"
             className="h-11 rounded-xl text-white font-semibold text-base"

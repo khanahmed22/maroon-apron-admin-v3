@@ -30,9 +30,9 @@ export default function MerchantTermsAndConditions() {
             </h2>
             <div className="space-y-3 text-muted-foreground">
               <p>
-                To use the Crimson Castle Shop merchant platform, you must
-                operate a legitimate business and provide accurate, complete,
-                and current registration information.
+                To use the Maroon Apron Shop merchant platform, you must operate
+                a legitimate business and provide accurate, complete, and
+                current registration information.
               </p>
               <p>
                 You are responsible for maintaining the confidentiality of your
@@ -83,8 +83,8 @@ export default function MerchantTermsAndConditions() {
             <h2 className="text-2xl font-bold mb-4">3. Commissions & Fees</h2>
             <div className="space-y-3 text-muted-foreground">
               <p>
-                Crimson Castle Shop may charge commissions and additional fees
-                as displayed in your merchant dashboard.
+                Maroon Apron Shop may charge commissions and additional fees as
+                displayed in your merchant dashboard.
               </p>
               <p>
                 Fees already incurred are non-refundable except where required
@@ -146,14 +146,13 @@ export default function MerchantTermsAndConditions() {
             </h2>
             <div className="space-y-3 text-muted-foreground">
               <p>
-                The platform is provided “as is”. Crimson Castle Shop is not
+                The platform is provided “as is”. Maroon Apron Shop is not
                 responsible for merchant operations, food quality, or customer
                 disputes.
               </p>
               <p>
-                You agree to indemnify Crimson Castle Shop against claims
-                arising from your business operations or violations of these
-                terms.
+                You agree to indemnify Maroon Apron Shop against claims arising
+                from your business operations or violations of these terms.
               </p>
             </div>
           </section>
@@ -194,8 +193,8 @@ export default function MerchantTermsAndConditions() {
 
         <div className="mt-12 pt-8 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            By using the Crimson Castle Shop platform, you agree to these
-            Merchant Terms & Conditions.
+            By using the Maroon Apron Shop platform, you agree to these Merchant
+            Terms & Conditions.
           </p>
         </div>
       </div>

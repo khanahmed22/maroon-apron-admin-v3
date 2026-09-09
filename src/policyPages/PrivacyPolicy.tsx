@@ -25,10 +25,10 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold mb-4">1. Data Controller</h2>
             <p className="text-muted-foreground">
-              Crimson Castle Shop (“we”, “us”, “our”) acts as the data
-              controller for merchant information processed through the Crimson
-              Castle Shop SaaS platform. We determine how and why merchant data
-              is processed in accordance with applicable data protection laws.
+              Maroon Apron Shop (“we”, “us”, “our”) acts as the data controller
+              for merchant information processed through the Maroon Apron SaaS
+              platform. We determine how and why merchant data is processed in
+              accordance with applicable data protection laws.
             </p>
           </section>
 
@@ -82,7 +82,7 @@ export default function PrivacyPolicy() {
               ("Paddle"), which acts as the Merchant of Record for all
               subscription transactions on the platform. This means Paddle is
               the authorized reseller and handles payment processing, billing,
-              tax calculation, and tax remittance on our behalf. Crimson Castle
+              tax calculation, and tax remittance on our behalf. Maroon Apron
               Shop does not store full payment card details. Financial
               information is processed securely by Paddle in accordance with
               industry standards. For details on how Paddle handles your data,
@@ -190,7 +190,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold mb-4">10. Children’s Data</h2>
             <p className="text-muted-foreground">
-              Crimson Castle Shop does not knowingly collect personal data from
+              Maroon Apron Shop does not knowingly collect personal data from
               individuals under the age of 18.
             </p>
           </section>

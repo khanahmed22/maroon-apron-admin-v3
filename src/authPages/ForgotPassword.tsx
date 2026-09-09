@@ -1,72 +1,67 @@
-import { Input } from "../components/ui/input"
-import { Button } from "../components/ui/button"
-import { useState,useEffect } from "react"
-import { Mail,  ArrowLeft } from "lucide-react"
-import { UserAuth } from "../context/AuthContext"
-import { toast } from "sonner"
+import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
+import { useState, useEffect } from "react";
+import { Mail, ArrowLeft } from "lucide-react";
+import { UserAuth } from "../context/AuthContext";
+import { toast } from "sonner";
 
-export default function ForgotPassword(){
+export default function ForgotPassword() {
+  const [email, setEmail] = useState<string>("");
+  const { session } = UserAuth();
 
-  const [email,setEmail] = useState<string>("")
-  const {session} = UserAuth()
+  const ACCENT = "#D6293F";
+  const INK = "#171717";
+  const MUTE = "#6B7280";
+  const BORDER = "#E7E5E4";
+  const SOFT = "#FBF7F6";
+  const [cooldown, setCooldown] = useState(0);
 
-  const ACCENT = "#D6293F"
-const INK = "#171717"
-const MUTE = "#6B7280"
-const BORDER = "#E7E5E4"
-const SOFT = "#FBF7F6"
-const [cooldown, setCooldown] = useState(0);
+  useEffect(() => {
+    if (cooldown <= 0) return;
 
-useEffect(() => {
-  if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
 
-  const timer = setInterval(() => {
-    setCooldown((prev) => prev - 1);
-  }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
-  return () => clearInterval(timer);
-}, [cooldown]);
+  const sendForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  const sendForgotPassword = async (
-  e: React.FormEvent<HTMLFormElement>
-) => {
-  e.preventDefault();
+    if (cooldown > 0) return;
 
-  
-
-  if (cooldown > 0) return;
-
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/forgot-password/merchant`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/forgot-password/merchant`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
         },
-        body: JSON.stringify({ email }),
-      }
-    );
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    toast.info("Email sent to your inbox");
-    setCooldown(60);
+      toast.info("Email sent to your inbox");
+      setCooldown(60);
 
-    return data;
-  } catch (err) {
-    toast.error(`Something went wrong: ${err}`);
-  }
-};
+      return data;
+    } catch (err) {
+      toast.error(`Something went wrong: ${err}`);
+    }
+  };
 
-  if(session){
-    return(
+  if (session) {
+    return (
       <div className="flex items-center justify-center min-h-screen font-bold text-2xl">
         You are already signed in
       </div>
-    )
+    );
   }
-  return(
+  return (
     <div
       className="min-h-screen flex flex-col items-center justify-center px-4"
       style={{ backgroundColor: SOFT }}
@@ -76,13 +71,13 @@ useEffect(() => {
           className="w-9 h-9 rounded-lg flex items-center justify-center text-white"
           style={{ backgroundColor: ACCENT }}
         >
-          <img src="/cc.jpg" className="rounded-sm" alt="logo"/>
+          <img src="/cc.jpg" className="rounded-sm" alt="logo" />
         </div>
         <span className="font-bold text-lg" style={{ color: INK }}>
-          Crimson Castle
+          Maroon Apron
         </span>
       </div>
- 
+
       <div
         className="bg-white p-8 rounded-2xl w-full max-w-sm border shadow-sm"
         style={{ borderColor: BORDER }}
@@ -93,7 +88,7 @@ useEffect(() => {
         <p className="text-sm mt-1 mb-6" style={{ color: MUTE }}>
           Enter your email and we'll send you a link to reset it.
         </p>
- 
+
         <form onSubmit={sendForgotPassword} className="flex flex-col gap-y-5">
           <div className="flex flex-col gap-y-1.5">
             <label className="text-sm font-medium" style={{ color: INK }}>
@@ -115,19 +110,17 @@ useEffect(() => {
               />
             </div>
           </div>
- 
+
           <Button
-  type="submit"
-  disabled={cooldown > 0}
-  className="h-11 rounded-xl text-white font-semibold text-base disabled:opacity-60 disabled:cursor-not-allowed"
-  style={{ backgroundColor: ACCENT }}
->
-  {cooldown > 0
-    ? `Resend in ${cooldown}s`
-    : "Send Email"}
-</Button>
+            type="submit"
+            disabled={cooldown > 0}
+            className="h-11 rounded-xl text-white font-semibold text-base disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ backgroundColor: ACCENT }}
+          >
+            {cooldown > 0 ? `Resend in ${cooldown}s` : "Send Email"}
+          </Button>
         </form>
- 
+
         <a
           href="/login"
           className="flex items-center justify-center gap-1.5 text-sm font-semibold mt-6 hover:underline"
@@ -138,5 +131,5 @@ useEffect(() => {
         </a>
       </div>
     </div>
-  )
+  );
 }

@@ -122,7 +122,7 @@ export default function CancellationPolicy() {
           {/* Account Termination */}
           <section>
             <h2 className="text-2xl font-semibold mb-4">
-              Account Termination by Crimson Castle Shop
+              Account Termination by Maroon Apron Shop
             </h2>
             <p className="text-muted-foreground mb-4">
               We may suspend or terminate accounts for violations of our terms,

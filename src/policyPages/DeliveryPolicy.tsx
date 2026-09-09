@@ -28,11 +28,11 @@ export default function DeliveryPolicy() {
                 1. Digital Service Delivery
               </h2>
               <p>
-                Crimson Castle Shop provides a fully digital
-                Software-as-a-Service (SaaS) platform. No physical goods are
-                shipped or delivered. Access to the service is provided
-                electronically through web and mobile applications immediately
-                after successful subscription activation.
+                Maroon Apron Shop provides a fully digital Software-as-a-Service
+                (SaaS) platform. No physical goods are shipped or delivered.
+                Access to the service is provided electronically through web and
+                mobile applications immediately after successful subscription
+                activation.
               </p>
             </section>
 
@@ -42,7 +42,7 @@ export default function DeliveryPolicy() {
                 2. Subscription-Based Access
               </h2>
               <p>
-                Active subscription is required to access Crimson Castle Shop
+                Active subscription is required to access Maroon Apron Shop
                 features, including order management, analytics, inventory
                 tools, and configuration settings. Subscription access remains
                 available for the duration of the paid billing period unless
@@ -69,11 +69,10 @@ export default function DeliveryPolicy() {
                 4. Service Availability
               </h2>
               <p>
-                Crimson Castle Shop strives to provide high service
-                availability. Temporary interruptions may occur due to
-                maintenance, updates, or unforeseen technical issues. Scheduled
-                maintenance will be communicated in advance whenever reasonably
-                possible.
+                Maroon Apron Shop strives to provide high service availability.
+                Temporary interruptions may occur due to maintenance, updates,
+                or unforeseen technical issues. Scheduled maintenance will be
+                communicated in advance whenever reasonably possible.
               </p>
             </section>
 
@@ -83,7 +82,7 @@ export default function DeliveryPolicy() {
                 5. Updates & Feature Enhancements
               </h2>
               <p>
-                As part of the SaaS model, Crimson Castle Shop continuously
+                As part of the SaaS model, Maroon Apron Shop continuously
                 improves its platform. Feature availability may vary by
                 subscription tier, and certain features may be modified or
                 discontinued with prior notice.
@@ -105,7 +104,7 @@ export default function DeliveryPolicy() {
                 <Link to="/cancellation-policy" className="text-primary">
                   Cancellation Policy
                 </Link>
-                . Crimson Castle Shop does not provide refunds outside the
+                . Maroon Apron Shop does not provide refunds outside the
                 conditions specified in those policies or where required by
                 applicable law.
               </p>
@@ -142,8 +141,8 @@ export default function DeliveryPolicy() {
                 9. Service Termination
               </h2>
               <p>
-                Crimson Castle Shop may suspend or terminate access for
-                violations of our{" "}
+                Maroon Apron Shop may suspend or terminate access for violations
+                of our{" "}
                 <Link to="/terms-and-conditions" className="text-primary">
                   Terms & Conditions
                 </Link>

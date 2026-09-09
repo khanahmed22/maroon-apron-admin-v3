@@ -240,7 +240,7 @@ export default function KnowledgeBase() {
           <div className="flex flex-col gap-4">
             <div>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1a1a1a] mb-2">
-                Crimson Castle
+                Maroon Apron
               </h1>
               <p className="text-[#666666] text-base sm:text-lg">
                 Complete guide to managing your restaurant

@@ -250,7 +250,7 @@ export default function ContactUs() {
       {/* Footer */}
       <footer className="py-12 border-t border-border mt-20">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          <p>&copy; 2026 Crimson Castle. All rights reserved.</p>
+          <p>&copy; 2026 Maroon Apron. All rights reserved.</p>
         </div>
       </footer>
     </div>

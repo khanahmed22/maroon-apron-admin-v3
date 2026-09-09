@@ -1,5 +1,5 @@
-import { Link, useLocation } from "react-router"
-import { useState } from "react"
+import { Link, useLocation } from "react-router";
+import { useState } from "react";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -13,12 +13,12 @@ import {
   MotorbikeIcon,
   TrendingUp,
   Ticket,
-} from "lucide-react"
-import NotificationPanel from "./NotificationPanel"
+} from "lucide-react";
+import NotificationPanel from "./NotificationPanel";
 
-const ACCENT = "#D6293F"
-const INK = "#171717"
-const BORDER = "#FFFFFF"
+const ACCENT = "#D6293F";
+const INK = "#171717";
+const BORDER = "#FFFFFF";
 
 const navLinks = [
   { label: "Home", link: "/dashboard", icon: LayoutDashboard },
@@ -30,19 +30,18 @@ const navLinks = [
   { label: "Coupons", link: "/coupon", icon: Ticket },
   { label: "Customers", link: "/customers", icon: Users },
   { label: "Settings", link: "/settings", icon: Settings },
-  
+
   { label: "Account", link: "/account", icon: User },
-  
-]
+];
 
 function NavItem({
   n,
   active,
   onClick,
 }: {
-  n: (typeof navLinks)[number]
-  active: boolean
-  onClick?: () => void
+  n: (typeof navLinks)[number];
+  active: boolean;
+  onClick?: () => void;
 }) {
   return (
     <Link
@@ -64,16 +63,15 @@ function NavItem({
       <n.icon className="w-5 h-5 shrink-0" />
       <span>{n.label}</span>
     </Link>
-  )
+  );
 }
 
 export default function SideBar() {
-  const location = useLocation()
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (link: string) =>
-    location.pathname === link ||
-    location.pathname.startsWith(link + "/")
+    location.pathname === link || location.pathname.startsWith(link + "/");
 
   return (
     <>
@@ -94,11 +92,8 @@ export default function SideBar() {
             />
           </div>
 
-          <span
-            className="font-bold text-base"
-            style={{ color: INK }}
-          >
-            Crimson Castle
+          <span className="font-bold text-base" style={{ color: INK }}>
+            Maroon Apron
           </span>
         </div>
 
@@ -122,9 +117,7 @@ export default function SideBar() {
       {/* ================= MOBILE DRAWER ================= */}
       <div
         className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ${
-          mobileOpen
-            ? "pointer-events-auto"
-            : "pointer-events-none"
+          mobileOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
         {/* Overlay */}
@@ -138,9 +131,7 @@ export default function SideBar() {
         {/* Drawer */}
         <div
           className={`relative h-full w-72 bg-white flex flex-col p-5 shadow-2xl transition-transform duration-300 ease-out ${
-            mobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full"
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex items-center justify-between mb-8">
@@ -156,11 +147,8 @@ export default function SideBar() {
                 />
               </div>
 
-              <span
-                className="font-bold text-lg"
-                style={{ color: INK }}
-              >
-                Crimson Castle
+              <span className="font-bold text-lg" style={{ color: INK }}>
+                Maroon Apron
               </span>
             </div>
 
@@ -204,11 +192,8 @@ export default function SideBar() {
             />
           </div>
 
-          <span
-            className="font-bold text-lg"
-            style={{ color: INK }}
-          >
-            Crimson Castle
+          <span className="font-bold text-lg" style={{ color: INK }}>
+            Maroon Apron
           </span>
 
           <div className="absolute right-0 -translate-y-1/2 w-9 h-9 flex items-center justify-center">
@@ -218,14 +203,10 @@ export default function SideBar() {
 
         <nav className="flex flex-col gap-2">
           {navLinks.map((n) => (
-            <NavItem
-              key={n.link}
-              n={n}
-              active={isActive(n.link)}
-            />
+            <NavItem key={n.link} n={n} active={isActive(n.link)} />
           ))}
         </nav>
       </div>
     </>
-  )
+  );
 }

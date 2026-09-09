@@ -403,6 +403,20 @@ export default function Home() {
         section[id] { scroll-margin-top: 90px; }
       `}</style>
 
+      <div className="w-full bg-red-700 px-4 py-2.5 text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-sm sm:gap-4">
+          <span className="font-semibold">
+            Maroon Apron is now Maroon Apron
+          </span>
+
+          <span className="hidden text-white/50 sm:inline">·</span>
+
+          <span className="hidden text-white/80 sm:inline">
+            Same mission, new name.
+          </span>
+        </div>
+      </div>
+
       {/* ================= NAVBAR ================= */}
       <header
         className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b"

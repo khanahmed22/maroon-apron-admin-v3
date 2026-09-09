@@ -71,7 +71,7 @@ export default function ForgotPassword() {
           className="w-9 h-9 rounded-lg flex items-center justify-center text-white"
           style={{ backgroundColor: ACCENT }}
         >
-          <img src="/cc.jpg" className="rounded-sm" alt="logo" />
+          <img src="/maroonapron-logo.png" className="rounded-sm" alt="logo" />
         </div>
         <span className="font-bold text-lg" style={{ color: INK }}>
           Maroon Apron

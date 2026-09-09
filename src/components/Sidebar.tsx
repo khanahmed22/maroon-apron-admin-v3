@@ -86,7 +86,7 @@ export default function SideBar() {
             style={{ backgroundColor: ACCENT }}
           >
             <img
-              src="/cc.jpg"
+              src="/maroonapron-logo.png"
               alt="logo"
               className="w-full h-full object-cover"
             />
@@ -141,7 +141,7 @@ export default function SideBar() {
                 style={{ backgroundColor: ACCENT }}
               >
                 <img
-                  src="/cc.jpg"
+                  src="/maroonapron-logo.png"
                   alt="logo"
                   className="w-full h-full object-cover"
                 />
@@ -186,7 +186,7 @@ export default function SideBar() {
             style={{ backgroundColor: ACCENT }}
           >
             <img
-              src="/cc.jpg"
+              src="/maroonapron-logo.png"
               alt="logo"
               className="w-full h-full object-cover"
             />

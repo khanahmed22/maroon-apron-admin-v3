@@ -1,11 +1,22 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../zustand/cartStore.ts";
 import { v4 as uuidv4 } from "uuid";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "../components/ui/button.tsx";
 import { Input } from "../components/ui/input.tsx";
-import { Plus, Minus, Trash2, ShoppingBag, Store, Truck, Package, Loader2, Tag, X } from "lucide-react"
+import {
+  Plus,
+  Minus,
+  Trash2,
+  ShoppingBag,
+  Store,
+  Truck,
+  Package,
+  Loader2,
+  Tag,
+  X,
+} from "lucide-react";
 import { UserAuth } from "../context/AuthContext.tsx";
 import {
   Select,
@@ -27,7 +38,7 @@ interface InventProps {
   description?: string;
   variants: VariantProps[];
   imageUrl: string;
-  stockAmount:number
+  stockAmount: number;
 }
 
 interface CustomerProps {
@@ -39,22 +50,19 @@ interface CustomerProps {
   recieveMethod: string;
   status: string;
   createdAt: Date;
-  
+
   orderTotal: number;
-  deliveryArea:string
-  deliveryFee:string
-  discountAmount: string,
-  isPreOrder:boolean,
-  scheduledDate: string | null,
-  scheduledWindow: string,
-  
+  deliveryArea: string;
+  deliveryFee: string;
+  discountAmount: string;
+  isPreOrder: boolean;
+  scheduledDate: string | null;
+  scheduledWindow: string;
 }
 
-interface RestResponse{
-  restId:string | null,
-  restName:string | null,
- 
-  
+interface RestResponse {
+  restId: string | null;
+  restName: string | null;
 }
 interface Selection {
   variantId?: string;
@@ -69,7 +77,6 @@ interface AreaProps {
   minOrder: string;
 }
 
-
 interface AppliedCoupon {
   code: string;
   couponId: string;
@@ -77,44 +84,51 @@ interface AppliedCoupon {
 }
 
 interface FixRate {
-  rate: number,
-  fixMode: boolean,
-  FixMinOrder: number
+  rate: number;
+  fixMode: boolean;
+  FixMinOrder: number;
 }
 
-export default function PlaceOrder({ restId ,restName}:RestResponse) {
+export default function PlaceOrder({ restId, restName }: RestResponse) {
   const { cart, addCart, clearCart, deleteCart } = useCart();
-const [selections, setSelections] = useState<Record<string, Selection>>({});
+  const [selections, setSelections] = useState<Record<string, Selection>>({});
 
-const {subdomain,deliveryWindows,pickUpWindows,preOrdersEnabled,preOrderMaxDays,preOrderMinHours,} = UserAuth()
- 
+  const {
+    subdomain,
+    deliveryWindows,
+    pickUpWindows,
+    preOrdersEnabled,
+    preOrderMaxDays,
+    preOrderMinHours,
+  } = UserAuth();
+
   function generateOrderNumber(): number {
     return Date.now();
   }
   const getSelection = (itemId: string): Selection =>
-  selections[itemId] ?? { quantity: 1 };
+    selections[itemId] ?? { quantity: 1 };
 
-const setItemVariant = (itemId: string, variantId: string) =>
-  setSelections((prev) => ({
-    ...prev,
-    [itemId]: {
-      ...getSelection(itemId),
-      variantId,
-    },
-  }));
+  const setItemVariant = (itemId: string, variantId: string) =>
+    setSelections((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...getSelection(itemId),
+        variantId,
+      },
+    }));
 
-const setItemQuantity = (
-  itemId: string,
-  quantity: number,
-  stockAmount: number
-) =>
-  setSelections((prev) => ({
-    ...prev,
-    [itemId]: {
-      ...getSelection(itemId),
-      quantity: Math.min(Math.max(1, quantity), stockAmount),
-    },
-  }));
+  const setItemQuantity = (
+    itemId: string,
+    quantity: number,
+    stockAmount: number,
+  ) =>
+    setSelections((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...getSelection(itemId),
+        quantity: Math.min(Math.max(1, quantity), stockAmount),
+      },
+    }));
 
   const subtotal = cart.reduce((prev, item) => prev + item.price, 0);
   const [custDetails, setCustDetails] = useState<CustomerProps>({
@@ -127,13 +141,12 @@ const setItemQuantity = (
     status: "pending",
     createdAt: new Date(),
     deliveryArea: "",
-    deliveryFee:"",
+    deliveryFee: "",
     orderTotal: 0,
     discountAmount: "",
     isPreOrder: false,
     scheduledDate: null,
     scheduledWindow: "",
-    
   });
 
   // ================= ADD TO CART MODAL =================
@@ -159,15 +172,14 @@ const setItemQuantity = (
     }
 
     const selectedVariant = item.variants.find(
-      (v) => v.id === selection.variantId
+      (v) => v.id === selection.variantId,
     );
 
     addCart({
       id: generateUUID(),
       dbId: item.id,
       name: item.name,
-      price:
-        (selectedVariant?.variantPrice ?? item.price) * selection.quantity,
+      price: (selectedVariant?.variantPrice ?? item.price) * selection.quantity,
       quantity: selection.quantity,
       variantId: selectedVariant?.id,
       variantName: selectedVariant?.variantName,
@@ -179,9 +191,10 @@ const setItemQuantity = (
     closeItemModal();
   };
 
-
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(
+    null,
+  );
   const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const handleApplyCoupon = async () => {
@@ -196,16 +209,19 @@ const setItemQuantity = (
 
     setApplyingCoupon(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/coupons/validate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code: trimmedCode,
-          cartTotal: subtotal,
-          userId: custDetails.custEmail,
-          restId,
-        }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/coupons/validate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            code: trimmedCode,
+            cartTotal: subtotal,
+            userId: custDetails.custEmail,
+            restId,
+          }),
+        },
+      );
 
       const data = await res.json();
 
@@ -233,87 +249,95 @@ const setItemQuantity = (
   };
 
   const fetchInventory = async () => {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory/${subdomain}`, {
-      credentials: "include",
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/inventory/${subdomain}`,
+      {
+        credentials: "include",
+      },
+    );
 
-    const result = await res.json()
-    return result?.data
+    const result = await res.json();
+    return result?.data;
   };
 
   const { data: InventQuery = [], isPending } = useQuery<InventProps[]>({
     queryKey: ["inventory"],
     queryFn: fetchInventory,
     staleTime: 5 * 60 * 1000, //5min
-    enabled:!!subdomain
+    enabled: !!subdomain,
   });
 
-  const availableWindows = (
-  custDetails.recieveMethod === "pickup" ? pickUpWindows : deliveryWindows
-)?.filter((window) =>
-  isWindowAvailable(custDetails.scheduledDate, window, preOrderMinHours ?? 0)
-) ?? [];
+  const availableWindows =
+    (custDetails.recieveMethod === "pickup"
+      ? pickUpWindows
+      : deliveryWindows
+    )?.filter((window) =>
+      isWindowAvailable(
+        custDetails.scheduledDate,
+        window,
+        preOrderMinHours ?? 0,
+      ),
+    ) ?? [];
 
-const noSlotsForSelectedDate =
-  !!custDetails.scheduledDate && availableWindows.length === 0;
+  const noSlotsForSelectedDate =
+    !!custDetails.scheduledDate && availableWindows.length === 0;
 
-
-const placeOrder = async () => {
-
-  // Basic customer details
-  if (
-    !custDetails.custName.trim() ||
-    !custDetails.custEmail.trim() ||
-    !custDetails.custPhone.trim() ||
-    !custDetails.recieveMethod
-  ) {
-    throw new Error("Please fill all customer details");
-  }
-
-  // Delivery-specific validation
-  if (custDetails.recieveMethod === "delivery") {
-    if (!custDetails.custAddress.trim()) {
-      throw new Error("Address is required for delivery");
-    }
-
-    if (!custDetails.deliveryArea) {
-      throw new Error("Please select a delivery area");
-    }
-
-    if (belowMinimumOrder) {
-      throw new Error(
-        fixRateM?.fixMode
-          ? `Minimum order is Rs.${minimumOrder}`
-          : `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`
-      );
-    }
-  }
-
-  
-  if (preOrdersEnabled) {
-    if (!custDetails.scheduledDate) {
-      throw new Error("Please select a date.");
-    }
-    if (!custDetails.scheduledWindow) {
-      throw new Error("Please select a time window.");
-    }
+  const placeOrder = async () => {
+    // Basic customer details
     if (
-      !isWindowAvailable(custDetails.scheduledDate, custDetails.scheduledWindow, preOrderMinHours ?? 0)
+      !custDetails.custName.trim() ||
+      !custDetails.custEmail.trim() ||
+      !custDetails.custPhone.trim() ||
+      !custDetails.recieveMethod
     ) {
-      throw new Error(
-        `That time slot is no longer available. Please pick another slot at least ${preOrderMinHours} hour(s) from now.`
-      );
+      throw new Error("Please fill all customer details");
     }
-  }
 
-  // Make sure there is something to order
-  if (!cart || cart.length === 0) {
-    throw new Error("Your cart is empty");
-  }
+    // Delivery-specific validation
+    if (custDetails.recieveMethod === "delivery") {
+      if (!custDetails.custAddress.trim()) {
+        throw new Error("Address is required for delivery");
+      }
 
-  const res = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/orders`,
-    {
+      if (!custDetails.deliveryArea) {
+        throw new Error("Please select a delivery area");
+      }
+
+      if (belowMinimumOrder) {
+        throw new Error(
+          fixRateM?.fixMode
+            ? `Minimum order is Rs.${minimumOrder}`
+            : `Minimum order for ${selectedArea?.areaName} is Rs.${minimumOrder}`,
+        );
+      }
+    }
+
+    if (preOrdersEnabled) {
+      if (!custDetails.scheduledDate) {
+        throw new Error("Please select a date.");
+      }
+      if (!custDetails.scheduledWindow) {
+        throw new Error("Please select a time window.");
+      }
+      if (
+        !isWindowAvailable(
+          custDetails.scheduledDate,
+          custDetails.scheduledWindow,
+          preOrderMinHours ?? 0,
+        )
+      ) {
+        throw new Error(
+          `That time slot is no longer available. Please pick another slot at least ${preOrderMinHours} hour(s) from now.`,
+        );
+      }
+    }
+
+    // Make sure there is something to order
+    if (!cart || cart.length === 0) {
+      throw new Error("Your cart is empty");
+    }
+
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/orders`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -325,13 +349,11 @@ const placeOrder = async () => {
           orderTotal: finalTotal,
           deliveryArea:
             custDetails.recieveMethod === "delivery"
-              ? selectedArea?.areaName ?? ""
+              ? (selectedArea?.areaName ?? "")
               : "",
 
           deliveryFee:
-            custDetails.recieveMethod === "delivery"
-              ? String(deliveryFee)
-              : "",
+            custDetails.recieveMethod === "delivery" ? String(deliveryFee) : "",
 
           restId,
           restName,
@@ -345,45 +367,39 @@ const placeOrder = async () => {
             }
           : null,
       }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+
+      throw new Error(data?.message || data?.error || "Failed to place order");
     }
-  );
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => null);
-
-    throw new Error(
-      data?.message || data?.error || "Failed to place order"
-    );
-  }
-
-  return res.json();
-}
-
+    return res.json();
+  };
 
   const { mutate: placeOrderM } = useMutation({
-  mutationKey: ["place-order"],
-  mutationFn: placeOrder,
+    mutationKey: ["place-order"],
+    mutationFn: placeOrder,
 
-  onSuccess: () => {
-    clearCart();
-    setAppliedCoupon(null);
-    setCouponCode("");
+    onSuccess: () => {
+      clearCart();
+      setAppliedCoupon(null);
+      setCouponCode("");
 
-    toast.success("Order placed successfully");
-  },
+      toast.success("Order placed successfully");
+    },
 
-  onError: (error) => {
-    toast.error(
-      error instanceof Error
-        ? error.message
-        : "Failed to place order"
-    );
-  },
-});
+    onError: (error) => {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to place order",
+      );
+    },
+  });
 
-  function handlePlaceOrder(e: React.FormEvent<HTMLFormElement>){
-    e.preventDefault()
-    placeOrderM()
+  function handlePlaceOrder(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    placeOrderM();
   }
 
   function generateUUID(): string {
@@ -391,45 +407,45 @@ const placeOrder = async () => {
   }
 
   const fetchDeliveryZones = async (): Promise<AreaProps[]> => {
-      const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/area-list/${restId}/view`
-      );
-  
-      if (!res.ok) {
-        throw new Error("Failed to fetch delivery zones");
-      }
-  
-      return res.json();
-    };
-  
-    const { data: deliveryList } = useQuery({
-      queryKey: ["deliveryZone", restId],
-      queryFn: fetchDeliveryZones,
-      enabled: !!restId,
-    });
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/area-list/${restId}/view`,
+    );
 
- 
+    if (!res.ok) {
+      throw new Error("Failed to fetch delivery zones");
+    }
+
+    return res.json();
+  };
+
+  const { data: deliveryList } = useQuery({
+    queryKey: ["deliveryZone", restId],
+    queryFn: fetchDeliveryZones,
+    enabled: !!restId,
+  });
+
   const selectedArea = deliveryList?.find(
-    (area) => area.areaId === custDetails.deliveryArea
+    (area) => area.areaId === custDetails.deliveryArea,
   );
 
-  const fetchFixRate = async()=>{
-   try{
-     const fixRate = await fetch(`${import.meta.env.VITE_BACKEND_URL}/fix-rate/${restId}/view`)
-     const data = await fixRate.json()
-     return data
-   }
-   catch(err){
-     console.log(err)
-   }
-  }
+  const fetchFixRate = async () => {
+    try {
+      const fixRate = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/fix-rate/${restId}/view`,
+      );
+      const data = await fixRate.json();
+      return data;
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-  const {data:fixRateM} = useQuery<FixRate>({
-   queryKey:['fixRates', restId],
-   queryFn: fetchFixRate,
-   enabled:!!restId,
-   staleTime: 5 * 60 * 1000, //5min
-  })
+  const { data: fixRateM } = useQuery<FixRate>({
+    queryKey: ["fixRates", restId],
+    queryFn: fetchFixRate,
+    enabled: !!restId,
+    staleTime: 5 * 60 * 1000, //5min
+  });
 
   // If fix rate mode is enabled, use the flat fixed rate for delivery.
   // Otherwise fall back to the area-based delivery fee.
@@ -452,7 +468,6 @@ const placeOrder = async () => {
   const discountAmount = appliedCoupon?.discount ?? 0;
   const finalTotal = Math.max(0, subtotal + deliveryFee - discountAmount);
 
-  
   const belowMinimumOrder =
     custDetails.recieveMethod === "delivery" &&
     (fixRateM?.fixMode || !!selectedArea) &&
@@ -466,89 +481,91 @@ const placeOrder = async () => {
     preOrdersEnabled &&
     (!custDetails.scheduledDate || !custDetails.scheduledWindow);
 
-  const ACCENT = "#D6293F"
-const INK = "#171717"
-const MUTE = "#6B7280"
-const BORDER = "#E7E5E4"
-const SOFT = "#FBF7F6"
-const SUCCESS = "#16A34A"
-
- 
+  const ACCENT = "#D6293F";
+  const INK = "#171717";
+  const MUTE = "#6B7280";
+  const BORDER = "#E7E5E4";
+  const SOFT = "#FBF7F6";
+  const SUCCESS = "#16A34A";
 
   const today = new Date();
 
-const minDate = today.toISOString().split("T")[0];
+  const minDate = today.toISOString().split("T")[0];
 
-const maxDate =
-  preOrderMaxDays !== null &&
-  preOrderMaxDays !== undefined 
-  
-    ? (() => {
-        const date = new Date(today);
-        date.setDate(date.getDate() + Number(preOrderMaxDays));
-        return date.toISOString().split("T")[0];
-      })()
-    : undefined;
+  const maxDate =
+    preOrderMaxDays !== null && preOrderMaxDays !== undefined
+      ? (() => {
+          const date = new Date(today);
+          date.setDate(date.getDate() + Number(preOrderMaxDays));
+          return date.toISOString().split("T")[0];
+        })()
+      : undefined;
 
   // ================= PRE-ORDER TIME WINDOW HELPERS =================
 
-function parseClockTime(raw: string): { hours: number; minutes: number } | null {
-  const trimmed = raw.trim().toLowerCase();
-  const match = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
-  if (!match) return null;
+  function parseClockTime(
+    raw: string,
+  ): { hours: number; minutes: number } | null {
+    const trimmed = raw.trim().toLowerCase();
+    const match = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+    if (!match) return null;
 
-  let hours = parseInt(match[1], 10);
-  const minutes = match[2] ? parseInt(match[2], 10) : 0;
-  const meridiem = match[3];
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2] ? parseInt(match[2], 10) : 0;
+    const meridiem = match[3];
 
-  if (meridiem === "pm" && hours !== 12) hours += 12;
-  if (meridiem === "am" && hours === 12) hours = 0;
+    if (meridiem === "pm" && hours !== 12) hours += 12;
+    if (meridiem === "am" && hours === 12) hours = 0;
 
-  if (hours > 23 || minutes > 59) return null;
-  return { hours, minutes };
-}
+    if (hours > 23 || minutes > 59) return null;
+    return { hours, minutes };
+  }
 
-// "7pm - 9pm" -> Date for the window's START time on the given date
-function getWindowStart(dateStr: string, window: string): Date | null {
-  const startRaw = window.split("-")[0];
-  if (!startRaw) return null;
+  // "7pm - 9pm" -> Date for the window's START time on the given date
+  function getWindowStart(dateStr: string, window: string): Date | null {
+    const startRaw = window.split("-")[0];
+    if (!startRaw) return null;
 
-  const parsed = parseClockTime(startRaw);
-  if (!parsed) return null;
+    const parsed = parseClockTime(startRaw);
+    if (!parsed) return null;
 
-  const [year, month, day] = dateStr.split("-").map(Number);
-  return new Date(year, month - 1, day, parsed.hours, parsed.minutes, 0, 0);
-}
+    const [year, month, day] = dateStr.split("-").map(Number);
+    return new Date(year, month - 1, day, parsed.hours, parsed.minutes, 0, 0);
+  }
 
-// Is this window still bookable given the minimum-notice requirement?
-function isWindowAvailable(
-  dateStr: string | null,
-  window: string,
-  minHours: number
-): boolean {
-  if (!dateStr) return true; 
-  const windowStart = getWindowStart(dateStr, window);
-  if (!windowStart) return true; 
+  // Is this window still bookable given the minimum-notice requirement?
+  function isWindowAvailable(
+    dateStr: string | null,
+    window: string,
+    minHours: number,
+  ): boolean {
+    if (!dateStr) return true;
+    const windowStart = getWindowStart(dateStr, window);
+    if (!windowStart) return true;
 
-  const cutoff = new Date(Date.now() + minHours * 60 * 60 * 1000);
-  return windowStart.getTime() >= cutoff.getTime();
-}
+    const cutoff = new Date(Date.now() + minHours * 60 * 60 * 1000);
+    return windowStart.getTime() >= cutoff.getTime();
+  }
 
-useEffect(() => {
-  if (!custDetails.scheduledDate || !custDetails.scheduledWindow) return;
+  useEffect(() => {
+    if (!custDetails.scheduledDate || !custDetails.scheduledWindow) return;
 
-  const stillValid = isWindowAvailable(
+    const stillValid = isWindowAvailable(
+      custDetails.scheduledDate,
+      custDetails.scheduledWindow,
+      preOrderMinHours ?? 0,
+    );
+
+    if (!stillValid) {
+      setCustDetails((prev) => ({ ...prev, scheduledWindow: "" }));
+    }
+  }, [
     custDetails.scheduledDate,
     custDetails.scheduledWindow,
-    preOrderMinHours ?? 0
-  );
+    preOrderMinHours,
+  ]);
 
-  if (!stillValid) {
-    setCustDetails((prev) => ({ ...prev, scheduledWindow: "" }));
-  }
-}, [custDetails.scheduledDate, custDetails.scheduledWindow, preOrderMinHours]);
-
-if (isPending) {
+  if (isPending) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-3"
@@ -557,15 +574,18 @@ if (isPending) {
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: ACCENT }} />
         <p className="text-sm font-medium">Loading Place Order…</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
-      <h1 className="text-3xl max-md:text-xl font-extrabold mb-6" style={{ color: INK }}>
+      <h1
+        className="text-3xl max-md:text-xl font-extrabold mb-6"
+        style={{ color: INK }}
+      >
         Place Order
       </h1>
- 
+
       <div className="grid lg:grid-cols-[1fr_420px] gap-6 items-start">
         {/* ================= MENU ================= */}
         <section>
@@ -578,44 +598,48 @@ if (isPending) {
                   style={{ borderColor: BORDER }}
                 >
                   <img
-                    src={f.imageUrl || "/cc.jpg"}
+                    src={f.imageUrl || "/maroonapron-logo.png"}
                     alt={f.name}
                     className="w-full h-40 object-cover"
                   />
- 
+
                   <div className="p-4 flex flex-col flex-1">
                     <div className="flex flex-col items-start justify-between gap-2 mb-2">
-                      <span className="text-lg font-bold" style={{ color: INK }}>
+                      <span
+                        className="text-lg font-bold"
+                        style={{ color: INK }}
+                      >
                         {f.name}
                       </span>
                       {f.variants?.length > 0 ? (
-  <div>
-    Starting from Rs.{" "}
-    {Math.min(...f.variants.map(v => v.variantPrice))}
-  </div>
-) : (
-  <span
-    className="text-lg font-bold shrink-0"
-    style={{ color: ACCENT }}
-  >
-    Rs: {f.price}
-  </span>
-)}
+                        <div>
+                          Starting from Rs.{" "}
+                          {Math.min(...f.variants.map((v) => v.variantPrice))}
+                        </div>
+                      ) : (
+                        <span
+                          className="text-lg font-bold shrink-0"
+                          style={{ color: ACCENT }}
+                        >
+                          Rs: {f.price}
+                        </span>
+                      )}
                       <p className="text-sm mt-2" style={{ color: MUTE }}>
-  Stock: {f.stockAmount}
-</p>
+                        Stock: {f.stockAmount}
+                      </p>
                     </div>
- 
+
                     <button
-  disabled={f.stockAmount === 0}
-  onClick={() => openItemModal(f)}
-  className="w-full text-base font-semibold text-white rounded-full py-2 px-4 mt-auto disabled:bg-gray-400 disabled:cursor-not-allowed"
-  style={{
-    backgroundColor: f.stockAmount === 0 ? "#9CA3AF" : ACCENT,
-  }}
->
-  {f.stockAmount === 0 ? "Out of Stock" : "Add to Cart"}
-</button>
+                      disabled={f.stockAmount === 0}
+                      onClick={() => openItemModal(f)}
+                      className="w-full text-base font-semibold text-white rounded-full py-2 px-4 mt-auto disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      style={{
+                        backgroundColor:
+                          f.stockAmount === 0 ? "#9CA3AF" : ACCENT,
+                      }}
+                    >
+                      {f.stockAmount === 0 ? "Out of Stock" : "Add to Cart"}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -632,32 +656,35 @@ if (isPending) {
             </div>
           )}
         </section>
- 
+
         {/* ================= CART + CUSTOMER DETAILS ================= */}
         <section className="flex flex-col gap-6">
-          <div className="bg-white rounded-2xl border p-5" style={{ borderColor: BORDER }}>
+          <div
+            className="bg-white rounded-2xl border p-5"
+            style={{ borderColor: BORDER }}
+          >
             <div className="flex items-center gap-2 mb-4">
               <ShoppingBag className="w-5 h-5" style={{ color: ACCENT }} />
               <h2 className="text-lg font-bold" style={{ color: INK }}>
                 Cart Details
               </h2>
             </div>
- 
+
             <p className="text-base mb-4" style={{ color: MUTE }}>
               Items in Cart: <span style={{ color: INK }}>{cart?.length}</span>
             </p>
- 
+
             <button
               className="mb-4 text-base font-semibold px-4 py-2 rounded-full border"
               style={{ borderColor: BORDER, color: INK }}
               onClick={() => {
-                clearCart()
-                handleRemoveCoupon()
+                clearCart();
+                handleRemoveCoupon();
               }}
             >
               Clear Cart
             </button>
- 
+
             {cart?.length > 0 ? (
               <div className="space-y-3">
                 {cart?.map((c) => {
@@ -668,23 +695,33 @@ if (isPending) {
                       style={{ borderColor: BORDER }}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <span className="font-semibold text-base" style={{ color: INK }}>
+                        <span
+                          className="font-semibold text-base"
+                          style={{ color: INK }}
+                        >
                           {c.name} x {c.quantity}
                         </span>
-                        <span className="font-semibold text-base shrink-0" style={{ color: INK }}>
+                        <span
+                          className="font-semibold text-base shrink-0"
+                          style={{ color: INK }}
+                        >
                           Rs. {c.price}
                         </span>
                       </div>
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-sm" style={{ color: MUTE }}>
-                          {c?.variantName} {c?.variantPrice ? `· Rs. ${c.variantPrice}` : ""}
+                          {c?.variantName}{" "}
+                          {c?.variantPrice ? `· Rs. ${c.variantPrice}` : ""}
                         </span>
-                        <button onClick={() => deleteCart(c.id)} aria-label={`Remove ${c.name}`}>
+                        <button
+                          onClick={() => deleteCart(c.id)}
+                          aria-label={`Remove ${c.name}`}
+                        >
                           <Trash2 className="w-4 h-4" style={{ color: MUTE }} />
                         </button>
                       </div>
                     </div>
-                  )
+                  );
                 })}
               </div>
             ) : (
@@ -695,8 +732,14 @@ if (isPending) {
 
             {/* ================= COUPON CODE ================= */}
             {cart?.length > 0 && (
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: BORDER }}>
-                <label className="text-sm font-semibold flex items-center gap-1.5" style={{ color: INK }}>
+              <div
+                className="mt-4 pt-4 border-t"
+                style={{ borderColor: BORDER }}
+              >
+                <label
+                  className="text-sm font-semibold flex items-center gap-1.5"
+                  style={{ color: INK }}
+                >
                   <Tag className="w-4 h-4" style={{ color: MUTE }} />
                   Coupon Code
                 </label>
@@ -706,7 +749,10 @@ if (isPending) {
                     className="flex items-center justify-between mt-1.5 rounded-xl border px-3 py-2.5"
                     style={{ borderColor: ACCENT, backgroundColor: SOFT }}
                   >
-                    <span className="text-sm font-semibold" style={{ color: ACCENT }}>
+                    <span
+                      className="text-sm font-semibold"
+                      style={{ color: ACCENT }}
+                    >
                       {appliedCoupon.code} · Rs. {appliedCoupon.discount} off
                     </span>
                     <button
@@ -721,7 +767,9 @@ if (isPending) {
                   <div className="flex gap-2 mt-1.5">
                     <Input
                       value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setCouponCode(e.target.value.toUpperCase())
+                      }
                       placeholder="e.g. SAVE20"
                       className="h-11 rounded-xl text-base uppercase"
                       style={{ borderColor: BORDER }}
@@ -733,13 +781,17 @@ if (isPending) {
                       className="h-11 rounded-xl text-white shrink-0 disabled:opacity-60"
                       style={{ backgroundColor: ACCENT }}
                     >
-                      {applyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                      {applyingCoupon ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
                     </Button>
                   </div>
                 )}
               </div>
             )}
- 
+
             <div
               className="flex items-center justify-between mt-4 pt-4 border-t text-base"
               style={{ borderColor: BORDER, color: INK }}
@@ -748,15 +800,16 @@ if (isPending) {
               <span>Rs. {subtotal || 0}</span>
             </div>
 
-            {custDetails.recieveMethod === "delivery" && (fixRateM?.fixMode || selectedArea) && (
-              <div
-                className="flex items-center justify-between mt-2 text-base"
-                style={{ color: INK }}
-              >
-                <span>Delivery Fee</span>
-                <span>Rs. {deliveryFee}</span>
-              </div>
-            )}
+            {custDetails.recieveMethod === "delivery" &&
+              (fixRateM?.fixMode || selectedArea) && (
+                <div
+                  className="flex items-center justify-between mt-2 text-base"
+                  style={{ color: INK }}
+                >
+                  <span>Delivery Fee</span>
+                  <span>Rs. {deliveryFee}</span>
+                </div>
+              )}
 
             {appliedCoupon && (
               <div
@@ -784,12 +837,15 @@ if (isPending) {
               </p>
             )}
           </div>
- 
-          <div className="bg-white rounded-2xl border p-5" style={{ borderColor: BORDER }}>
+
+          <div
+            className="bg-white rounded-2xl border p-5"
+            style={{ borderColor: BORDER }}
+          >
             <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
               Customer Details
             </h2>
- 
+
             <form onSubmit={handlePlaceOrder} className="flex flex-col gap-y-4">
               <div className="flex flex-col gap-y-1.5">
                 <label className="text-sm font-semibold" style={{ color: INK }}>
@@ -801,12 +857,15 @@ if (isPending) {
                   className="h-11 rounded-xl text-base"
                   style={{ borderColor: BORDER }}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setCustDetails({ ...custDetails, custName: e.target.value })
+                    setCustDetails({
+                      ...custDetails,
+                      custName: e.target.value,
+                    });
                   }}
                   required
                 />
               </div>
- 
+
               <div className="flex flex-col gap-y-1.5">
                 <label className="text-sm font-semibold" style={{ color: INK }}>
                   Email
@@ -817,12 +876,15 @@ if (isPending) {
                   className="h-11 rounded-xl text-base"
                   style={{ borderColor: BORDER }}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    setCustDetails({ ...custDetails, custEmail: e.target.value })
+                    setCustDetails({
+                      ...custDetails,
+                      custEmail: e.target.value,
+                    });
                   }}
                   required
                 />
               </div>
- 
+
               <div className="flex flex-col gap-y-1.5">
                 <label className="text-sm font-semibold" style={{ color: INK }}>
                   Phone
@@ -835,13 +897,13 @@ if (isPending) {
                     setCustDetails({
                       ...custDetails,
                       custPhone: e.target.value,
-                    })
+                    });
                   }}
                   type="number"
                   required
                 />
               </div>
- 
+
               <div className="flex flex-col gap-y-1.5">
                 <label className="text-sm font-semibold" style={{ color: INK }}>
                   Receive Method
@@ -872,16 +934,24 @@ if (isPending) {
                     />
                     <Store
                       className="w-[18px] h-[18px]"
-                      style={{ color: custDetails.recieveMethod === "pickup" ? ACCENT : MUTE }}
+                      style={{
+                        color:
+                          custDetails.recieveMethod === "pickup"
+                            ? ACCENT
+                            : MUTE,
+                      }}
                     />
                     <span
                       className="text-base font-medium"
-                      style={{ color: custDetails.recieveMethod === "pickup" ? ACCENT : INK }}
+                      style={{
+                        color:
+                          custDetails.recieveMethod === "pickup" ? ACCENT : INK,
+                      }}
                     >
                       Pickup
                     </span>
                   </label>
- 
+
                   <label
                     className="flex items-center gap-2 rounded-xl border p-3 cursor-pointer transition-colors"
                     style={
@@ -905,141 +975,160 @@ if (isPending) {
                     />
                     <Truck
                       className="w-[18px] h-[18px]"
-                      style={{ color: custDetails.recieveMethod === "delivery" ? ACCENT : MUTE }}
+                      style={{
+                        color:
+                          custDetails.recieveMethod === "delivery"
+                            ? ACCENT
+                            : MUTE,
+                      }}
                     />
                     <span
                       className="text-base font-medium"
-                      style={{ color: custDetails.recieveMethod === "delivery" ? ACCENT : INK }}
+                      style={{
+                        color:
+                          custDetails.recieveMethod === "delivery"
+                            ? ACCENT
+                            : INK,
+                      }}
                     >
                       Delivery
                     </span>
                   </label>
                 </div>
               </div>
- 
+
               {custDetails.recieveMethod === "delivery" && (
-  <div className="flex flex-col gap-y-4">
-    <div className="flex flex-col gap-y-1.5">
-      <label
-        className="text-sm font-semibold"
-        style={{ color: INK }}
-      >
-        Address
-      </label>
+                <div className="flex flex-col gap-y-4">
+                  <div className="flex flex-col gap-y-1.5">
+                    <label
+                      className="text-sm font-semibold"
+                      style={{ color: INK }}
+                    >
+                      Address
+                    </label>
 
-      <Input
-        value={custDetails.custAddress}
-        onChange={(e) =>
-          setCustDetails({
-            ...custDetails,
-            custAddress: e.target.value,
-          })
-        }
-        type="text"
-        placeholder="e.g: C-423, Block 1, Gulshan"
-        className="h-11 rounded-xl text-base"
-        style={{ borderColor: BORDER }}
-        required
-      />
-    </div>
+                    <Input
+                      value={custDetails.custAddress}
+                      onChange={(e) =>
+                        setCustDetails({
+                          ...custDetails,
+                          custAddress: e.target.value,
+                        })
+                      }
+                      type="text"
+                      placeholder="e.g: C-423, Block 1, Gulshan"
+                      className="h-11 rounded-xl text-base"
+                      style={{ borderColor: BORDER }}
+                      required
+                    />
+                  </div>
 
-    <div className="flex flex-col gap-y-1.5">
-      <label
-        className="text-sm font-semibold"
-        style={{ color: INK }}
-      >
-        Delivery Area
-      </label>
+                  <div className="flex flex-col gap-y-1.5">
+                    <label
+                      className="text-sm font-semibold"
+                      style={{ color: INK }}
+                    >
+                      Delivery Area
+                    </label>
 
-      <Select
-        value={custDetails.deliveryArea}
-        onValueChange={(value) =>
-          setCustDetails({
-            ...custDetails,
-            deliveryArea: value,
-          })
-        }
-      >
-        <SelectTrigger className="w-full h-11 rounded-xl">
-          <SelectValue placeholder="Select your delivery area" />
-        </SelectTrigger>
+                    <Select
+                      value={custDetails.deliveryArea}
+                      onValueChange={(value) =>
+                        setCustDetails({
+                          ...custDetails,
+                          deliveryArea: value,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full h-11 rounded-xl">
+                        <SelectValue placeholder="Select your delivery area" />
+                      </SelectTrigger>
 
-        <SelectContent>
-          {deliveryList?.map((area) => (
-            <SelectItem
-              key={area.areaId}
-              value={area.areaId}
-            >
-              {area.areaName} ({area.cityName}) 
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  </div>
-)}
- {preOrdersEnabled &&
-  (custDetails.recieveMethod === "pickup" ||
-    custDetails.recieveMethod === "delivery") && (
-  <div className="space-y-4 rounded-xl border p-4" style={{ borderColor: BORDER }}>
-    <p className="text-sm font-semibold" style={{ color: INK }}>
-      Schedule your Order
-    </p>
+                      <SelectContent>
+                        {deliveryList?.map((area) => (
+                          <SelectItem key={area.areaId} value={area.areaId}>
+                            {area.areaName} ({area.cityName})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
+              {preOrdersEnabled &&
+                (custDetails.recieveMethod === "pickup" ||
+                  custDetails.recieveMethod === "delivery") && (
+                  <div
+                    className="space-y-4 rounded-xl border p-4"
+                    style={{ borderColor: BORDER }}
+                  >
+                    <p className="text-sm font-semibold" style={{ color: INK }}>
+                      Schedule your Order
+                    </p>
 
-    <Input
-      type="date"
-      min={minDate}
-      max={maxDate}
-      required
-      value={custDetails.scheduledDate ?? ""}
-      onChange={(e) =>
-        setCustDetails({
-          ...custDetails,
-          scheduledDate: e.target.value,
-          scheduledWindow: "", // reset window when date changes
-        })
-      }
-    />
+                    <Input
+                      type="date"
+                      min={minDate}
+                      max={maxDate}
+                      required
+                      value={custDetails.scheduledDate ?? ""}
+                      onChange={(e) =>
+                        setCustDetails({
+                          ...custDetails,
+                          scheduledDate: e.target.value,
+                          scheduledWindow: "", // reset window when date changes
+                        })
+                      }
+                    />
 
-    {noSlotsForSelectedDate ? (
-      <p className="text-sm font-medium" style={{ color: ACCENT }}>
-        We can't {custDetails.recieveMethod === "pickup" ? "prepare pickup" : "deliver"} for
-        this date anymore - all time slots have passed. Please choose a later date.
-      </p>
-    ) : (
-      <Select
-        value={custDetails.scheduledWindow}
-        onValueChange={(value) =>
-          setCustDetails({
-            ...custDetails,
-            scheduledWindow: value,
-          })
-        }
-      >
-        <SelectTrigger>
-          <SelectValue
-            placeholder={
-              custDetails.recieveMethod === "pickup"
-                ? "Select Pickup Window"
-                : "Select Delivery Window"
-            }
-          />
-        </SelectTrigger>
+                    {noSlotsForSelectedDate ? (
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: ACCENT }}
+                      >
+                        We can't{" "}
+                        {custDetails.recieveMethod === "pickup"
+                          ? "prepare pickup"
+                          : "deliver"}{" "}
+                        for this date anymore - all time slots have passed.
+                        Please choose a later date.
+                      </p>
+                    ) : (
+                      <Select
+                        value={custDetails.scheduledWindow}
+                        onValueChange={(value) =>
+                          setCustDetails({
+                            ...custDetails,
+                            scheduledWindow: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              custDetails.recieveMethod === "pickup"
+                                ? "Select Pickup Window"
+                                : "Select Delivery Window"
+                            }
+                          />
+                        </SelectTrigger>
 
-        <SelectContent>
-          {availableWindows.map((window) => (
-            <SelectItem key={window} value={window}>
-              {window}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    )}
-  </div>
-)}
+                        <SelectContent>
+                          {availableWindows.map((window) => (
+                            <SelectItem key={window} value={window}>
+                              {window}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                )}
               <Button
                 type="submit"
-                disabled={deliveryAreaMissing || belowMinimumOrder || preOrderMissing}
+                disabled={
+                  deliveryAreaMissing || belowMinimumOrder || preOrderMissing
+                }
                 className="h-11 rounded-xl text-base font-semibold text-white mt-1 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{ backgroundColor: ACCENT }}
               >
@@ -1062,7 +1151,7 @@ if (isPending) {
           >
             <div className="relative">
               <img
-                src={modalItem.imageUrl || "/cc.jpg"}
+                src={modalItem.imageUrl || "/maroonapron-logo.png"}
                 alt={modalItem.name}
                 className="w-full h-48 object-cover rounded-t-2xl"
               />
@@ -1092,7 +1181,10 @@ if (isPending) {
 
               {modalItem.variants?.length > 0 ? (
                 <div className="mt-4">
-                  <p className="text-sm font-semibold mb-2" style={{ color: INK }}>
+                  <p
+                    className="text-sm font-semibold mb-2"
+                    style={{ color: INK }}
+                  >
                     Choose an option
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -1102,14 +1194,20 @@ if (isPending) {
                         className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-full border cursor-pointer"
                         style={
                           getSelection(modalItem.id).variantId === v.id
-                            ? { backgroundColor: SOFT, borderColor: ACCENT, color: ACCENT }
+                            ? {
+                                backgroundColor: SOFT,
+                                borderColor: ACCENT,
+                                color: ACCENT,
+                              }
                             : { borderColor: BORDER, color: MUTE }
                         }
                       >
                         <input
                           type="radio"
                           name={`modal-variant-${modalItem.id}`}
-                          checked={getSelection(modalItem.id).variantId === v.id}
+                          checked={
+                            getSelection(modalItem.id).variantId === v.id
+                          }
                           onChange={() => {
                             setItemVariant(modalItem.id, v.id);
                             setVariantError(false);
@@ -1121,7 +1219,10 @@ if (isPending) {
                     ))}
                   </div>
                   {variantError && (
-                    <p className="text-xs mt-2 font-medium" style={{ color: ACCENT }}>
+                    <p
+                      className="text-xs mt-2 font-medium"
+                      style={{ color: ACCENT }}
+                    >
                       Please select an option to continue
                     </p>
                   )}
@@ -1138,7 +1239,7 @@ if (isPending) {
                     setItemQuantity(
                       modalItem.id,
                       getSelection(modalItem.id).quantity - 1,
-                      modalItem.stockAmount
+                      modalItem.stockAmount,
                     )
                   }
                   className="w-8 h-8 flex items-center justify-center rounded-full border"
@@ -1147,17 +1248,22 @@ if (isPending) {
                   <Minus className="w-4 h-4" />
                 </button>
 
-                <span className="text-base font-semibold w-5 text-center" style={{ color: INK }}>
+                <span
+                  className="text-base font-semibold w-5 text-center"
+                  style={{ color: INK }}
+                >
                   {getSelection(modalItem.id).quantity}
                 </span>
 
                 <button
-                  disabled={getSelection(modalItem.id).quantity >= modalItem.stockAmount}
+                  disabled={
+                    getSelection(modalItem.id).quantity >= modalItem.stockAmount
+                  }
                   onClick={() =>
                     setItemQuantity(
                       modalItem.id,
                       getSelection(modalItem.id).quantity + 1,
-                      modalItem.stockAmount
+                      modalItem.stockAmount,
                     )
                   }
                   className="w-8 h-8 flex items-center justify-center rounded-full border disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1172,7 +1278,8 @@ if (isPending) {
                 onClick={() => confirmAddToCart(modalItem)}
                 className="w-full text-base font-semibold text-white rounded-full py-2.5 px-4 mt-5 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 style={{
-                  backgroundColor: modalItem.stockAmount === 0 ? "#9CA3AF" : ACCENT,
+                  backgroundColor:
+                    modalItem.stockAmount === 0 ? "#9CA3AF" : ACCENT,
                 }}
               >
                 {modalItem.stockAmount === 0 ? "Out of Stock" : "Add to Cart"}

@@ -3,8 +3,19 @@ import { UserAuth } from "../context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Pencil, Trash2, X, Package, ImagePlus,Loader2,ScanIcon, FileSpreadsheet } from "lucide-react"
-import { extractTextFromImage,extractTextFromPDF } from "../lib/scanMenu/ocr";
+import {
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Package,
+  ImagePlus,
+  Loader2,
+  ScanIcon,
+  FileSpreadsheet,
+} from "lucide-react";
+import { extractTextFromImage, extractTextFromPDF } from "../lib/scanMenu/ocr";
 import { parseMenuWithGemini } from "../lib/scanMenu/gemini";
 import {
   Dialog,
@@ -12,8 +23,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
- 
-} from "../components/ui/dialog"
+} from "../components/ui/dialog";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -23,7 +33,7 @@ interface ScannedItem {
   name: string;
   price: number;
   costPrice: string;
-  description:string
+  description: string;
   category: string;
   stockAmount: number;
 }
@@ -31,76 +41,83 @@ interface VariantProps {
   id: string;
   variantName: string;
   variantPrice: number;
-  variantCostPrice:number;
+  variantCostPrice: number;
 }
 
 interface InventProps {
-  id: string,
-  name: string,
-  price: number,
-  costPrice:string,
-  description:string
-  variants: VariantProps[],
-  imageUrl: string,
-  category:string,
-  stockAmount:number
-  
+  id: string;
+  name: string;
+  price: number;
+  costPrice: string;
+  description: string;
+  variants: VariantProps[];
+  imageUrl: string;
+  category: string;
+  stockAmount: number;
 }
 
-interface restProps{
-  restId: string | null,
-  restName: string | null
+interface restProps {
+  restId: string | null;
+  restName: string | null;
 }
 
-export default function Inventory({restId,restName}:restProps) {
+export default function Inventory({ restId, restName }: restProps) {
   const { session } = UserAuth();
   const [addMode, setAddMode] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
-  const [search,setSearch] = useState<string>("")
+  const [search, setSearch] = useState<string>("");
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
-const [scanPreviewOpen, setScanPreviewOpen] = useState<boolean>(false);
-const [isUnderstandingMenu, setIsUnderstandingMenu] = useState<boolean>(false);
-const [isSavingScan, setIsSavingScan] = useState<boolean>(false);
-const [scanProgress, setScanProgress] = useState<number>(0);
+  const [scanPreviewOpen, setScanPreviewOpen] = useState<boolean>(false);
+  const [isUnderstandingMenu, setIsUnderstandingMenu] =
+    useState<boolean>(false);
+  const [isSavingScan, setIsSavingScan] = useState<boolean>(false);
+  const [scanProgress, setScanProgress] = useState<number>(0);
 
-const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
+  const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
   const [csvPreviewItems, setCSVPreviewItems] = useState<ScannedItem[]>([]);
   const [isImportingCSV, setIsImportingCSV] = useState<boolean>(false);
   const [isSavingCSV, setIsSavingCSV] = useState<boolean>(false);
   const [csvProgress, setCSVProgress] = useState<number>(0);
-  
-  const [loading,setLoading]= useState(false)
+
+  const [loading, setLoading] = useState(false);
   const [addForm, setAddForm] = useState({
     name: "",
     price: 0,
-    costPrice:"",
-    description:"",
-    category:"",
-    stockAmount:0,
-    imageUrl:"",
-    variants: [] as { variantName: string; variantPrice: number; variantCostPrice:number }[],
+    costPrice: "",
+    description: "",
+    category: "",
+    stockAmount: 0,
+    imageUrl: "",
+    variants: [] as {
+      variantName: string;
+      variantPrice: number;
+      variantCostPrice: number;
+    }[],
   });
-  
-  const queryClient = useQueryClient()
+
+  const queryClient = useQueryClient();
 
   const [editMode, setEditMode] = useState<boolean>(false);
 
-  
   const [updateForm, setupdateForm] = useState({
     id: "",
     userId: session?.id,
     name: "",
     price: 0,
-    costPrice:"",
-    description:"",
-    category:"",
-    stockAmount:0,
-    imageUrl:"",
+    costPrice: "",
+    description: "",
+    category: "",
+    stockAmount: 0,
+    imageUrl: "",
 
-    variants: [] as { variantName: string; variantPrice: number,variantCostPrice:number }[],
+    variants: [] as {
+      variantName: string;
+      variantPrice: number;
+      variantCostPrice: number;
+    }[],
   });
 
   // generate/revoke a preview URL whenever a new local file is selected
@@ -113,86 +130,89 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
     setPreviewUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
-  
+
   const fetchInventory = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`,{
-        credentials:'include'
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
+        credentials: "include",
       });
       const result = await res.json();
 
-      return result?.data
+      return result?.data;
     } catch (err) {
       console.log(err);
-      toast.error('Could not fetch Inventory, please try again later')
+      toast.error("Could not fetch Inventory, please try again later");
     }
   };
 
   const { data: inventQuery = [], isPending } = useQuery<InventProps[]>({
-    queryKey: ["inventory",restId],
+    queryKey: ["inventory", restId],
     queryFn: fetchInventory,
-     staleTime: 5 * 60 * 1000, //5min
+    staleTime: 5 * 60 * 1000, //5min
   });
 
   const getPaymentStatus = async () => {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/paddle/account`, {
-      credentials: "include",
-    })
+    const res = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/paddle/account`,
+      {
+        credentials: "include",
+      },
+    );
     if (!res.ok) {
-      throw new Error("Failed to fetch account")
+      throw new Error("Failed to fetch account");
     }
-    return res.json()
-  }
+    return res.json();
+  };
 
-  const { data: merchantStatus} = useQuery({
+  const { data: merchantStatus } = useQuery({
     queryKey: ["account"],
     queryFn: getPaymentStatus,
     refetchOnWindowFocus: false,
-  })
+  });
 
   //add item
 
   const addItem = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
 
     if (merchantStatus?.plan === "free" && inventQuery.length >= 5) {
       toast.error("Only 5 items are allowed in the free plan.");
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
 
     if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
       toast.error("Pro plan only allows 100 items");
-      setLoading(false)
-      return
+      setLoading(false);
+      return;
     }
     try {
       let imageUrl = addForm.imageUrl;
       let publicId = "";
 
-
-
       if (file) {
-        const formData = new FormData(); 
+        const formData = new FormData();
         formData.append("image", file);
         formData.append("folder", "inventory");
 
-
-        const uploadRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/assets/upload`, {
-          method: "POST",
-          body: formData,
-        });
+        const uploadRes = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
 
         const imageData = await uploadRes.json();
 
         imageUrl = imageData.imageUrl;
         publicId = imageData.publicId;
-      
       }
 
-    
-      const cleanVariants = addForm.variants.filter(v => v.variantName.trim() !== "");
+      const cleanVariants = addForm.variants.filter(
+        (v) => v.variantName.trim() !== "",
+      );
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
         method: "POST",
@@ -214,61 +234,58 @@ const [csvPreviewOpen, setCSVPreviewOpen] = useState<boolean>(false);
       if (!res.ok) {
         throw new Error(data?.message || "Failed to add item");
       }
-   
 
       setAddMode(false);
-      setLoading(false)
+      setLoading(false);
       setFile(null);
       fetchInventory();
       setAddForm({
-    name: "",
-    price: 0,
-    costPrice:"",
-    description:"",
-    category:"",
-    stockAmount:0,
-    imageUrl:"",
-    variants: [],
-  })
+        name: "",
+        price: 0,
+        costPrice: "",
+        description: "",
+        category: "",
+        stockAmount: 0,
+        imageUrl: "",
+        variants: [],
+      });
     } catch (err) {
-      
       throw err;
     }
   };
 
-  const {mutate:addItemM}= useMutation({
-    mutationKey: ['additem'],
+  const { mutate: addItemM } = useMutation({
+    mutationKey: ["additem"],
     mutationFn: addItem,
-    onSuccess:()=>{
-    
-            toast.success('Item added')
-    
-  
-      queryClient.invalidateQueries({queryKey:['inventory']})
-      
+    onSuccess: () => {
+      toast.success("Item added");
+
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
     },
     onError: () => {
-    toast.error('Item was not added');
-    setAddMode(false)
-    setLoading(false)
-  },
-  })
+      toast.error("Item was not added");
+      setAddMode(false);
+      setLoading(false);
+    },
+  });
 
   const itemCount = inventQuery.length;
-const maxItems =
-  merchantStatus?.plan === "free"
-    ? 5
-    : merchantStatus?.plan === "pro"
-    ? 100
-    : 0;
+  const maxItems =
+    merchantStatus?.plan === "free"
+      ? 5
+      : merchantStatus?.plan === "pro"
+        ? 100
+        : 0;
 
-const isLimitReached =
-  !!merchantStatus?.plan && itemCount >= maxItems;
+  const isLimitReached = !!merchantStatus?.plan && itemCount >= maxItems;
 
   const addVariant = () => {
     setAddForm((prev) => ({
       ...prev,
-      variants: [...prev.variants, { variantName: "", variantPrice: 0,variantCostPrice:0 }],
+      variants: [
+        ...prev.variants,
+        { variantName: "", variantPrice: 0, variantCostPrice: 0 },
+      ],
     }));
   };
 
@@ -282,7 +299,10 @@ const isLimitReached =
   const addUpdateVariant = () => {
     setupdateForm((prev) => ({
       ...prev,
-      variants: [...prev.variants, { variantName: "", variantPrice: 0,variantCostPrice:0 }],
+      variants: [
+        ...prev.variants,
+        { variantName: "", variantPrice: 0, variantCostPrice: 0 },
+      ],
     }));
   };
 
@@ -306,261 +326,266 @@ const isLimitReached =
 
       const data = await res.json();
       if (!res.ok) {
-  throw new Error(data?.message || "Failed to delete item");
-}
+        throw new Error(data?.message || "Failed to delete item");
+      }
     } catch (err) {
       throw err;
     }
   };
 
-  const {mutate:deleteItemM} = useMutation({
-    mutationKey:['deleteItem'],
+  const { mutate: deleteItemM } = useMutation({
+    mutationKey: ["deleteItem"],
     mutationFn: deleteItem,
-    onSuccess:()=>{
-      toast.success('Item deleted')
-      queryClient.invalidateQueries({queryKey:['inventory']})
+    onSuccess: () => {
+      toast.success("Item deleted");
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
     },
-    onError:()=>{
-      toast.error('Item was not deleted')
-    }
-  })
-
+    onError: () => {
+      toast.error("Item was not deleted");
+    },
+  });
 
   // scan feature
 
   const handleScanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (merchantStatus?.plan === "free" && inventQuery.length >= 5) {
-    toast.error("Only 5 items are allowed in the free plan.");
-    return;
-  }
-  if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
-  toast.error("Pro plan only allows 100 items");
-  return
-}
+    if (merchantStatus?.plan === "free" && inventQuery.length >= 5) {
+      toast.error("Only 5 items are allowed in the free plan.");
+      return;
+    }
+    if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
+      toast.error("Pro plan only allows 100 items");
+      return;
+    }
 
-
-
-  const scanFile = e.target.files?.[0];
-   if (!scanFile) return;
+    const scanFile = e.target.files?.[0];
+    if (!scanFile) return;
 
     const maxSize = 5 * 1024 * 1024; // 5 MB
-  if (scanFile.size > maxSize) {
-    toast.error("File must be smaller than 5 MB.");
-    e.target.value = "";
-    return;
-  }
- 
-  setIsUnderstandingMenu(true);
-
-  try {
-    let rawText = "";
-
-    if (scanFile.type === "application/pdf") {
-      rawText = await extractTextFromPDF(scanFile);
-    } else {
-      rawText = await extractTextFromImage(scanFile);
+    if (scanFile.size > maxSize) {
+      toast.error("File must be smaller than 5 MB.");
+      e.target.value = "";
+      return;
     }
 
-    if (!rawText?.trim()) {
-      throw new Error("No text detected in file");
-    }
+    setIsUnderstandingMenu(true);
 
-    const structured = await parseMenuWithGemini(rawText);
-
-    if (!structured?.items?.length) {
-      toast.warning("No menu items could be detected.");
-    }
-
-    const items: ScannedItem[] = (structured.items || []).map((item: any) => ({
-      name: item.foodName || item.name || "",
-      price: Number(item.price) || 0,
-      costPrice: String(item.BaseCostPrice ?? item.costPrice ?? ""),
-      description:item.description || "",
-      category: item.category || "",
-      stockAmount: Number(item.stockAmount) || 0,
-    }));
-
-    setScannedItems(items);
-    setScanPreviewOpen(true);
-  } catch (err: any) {
-    console.error("Scan failed:", err);
-    toast.error(err?.message || "Failed to understand menu. Please try another image.");
-  } finally {
-    setIsUnderstandingMenu(false);
-    e.target.value = "";
-  }
-};
-
-const saveScannedItems = async () => {
-  if (merchantStatus?.plan === "free" && inventQuery.length + scannedItems.length > 5) {
-    toast.error("Only 5 items are allowed in the free plan.");
-    return;
-  }
-
-  setIsSavingScan(true);
-  setScanProgress(0);
-
-  let success = 0;
-  const total = scannedItems.length;
-
-  for (let i = 0; i < total; i++) {
-    const item = scannedItems[i];
     try {
-      await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          name: item.name || "Unnamed Item",
-          price: item.price,
-          costPrice: item.costPrice,
-          description:item.description,
-          category: item.category || "Uncategorized",
-          stockAmount: item.stockAmount,
-          variants: [],
-          imageUrl: "",
-          publicId: "",
-          restId,
-          restName,
+      let rawText = "";
+
+      if (scanFile.type === "application/pdf") {
+        rawText = await extractTextFromPDF(scanFile);
+      } else {
+        rawText = await extractTextFromImage(scanFile);
+      }
+
+      if (!rawText?.trim()) {
+        throw new Error("No text detected in file");
+      }
+
+      const structured = await parseMenuWithGemini(rawText);
+
+      if (!structured?.items?.length) {
+        toast.warning("No menu items could be detected.");
+      }
+
+      const items: ScannedItem[] = (structured.items || []).map(
+        (item: any) => ({
+          name: item.foodName || item.name || "",
+          price: Number(item.price) || 0,
+          costPrice: String(item.BaseCostPrice ?? item.costPrice ?? ""),
+          description: item.description || "",
+          category: item.category || "",
+          stockAmount: Number(item.stockAmount) || 0,
         }),
-      });
-      success++;
-    } catch (err) {
-      console.log(err);
-      setScanPreviewOpen(false)
-      toast.error('Something went wrong, try again later')
-    }
-    setScanProgress(Math.round(((i + 1) / total) * 100));
-  }
-
-  toast.success(`${success} item(s) added to inventory`);
-  setIsSavingScan(false);
-  setScanPreviewOpen(false);
-  setScannedItems([]);
-  queryClient.invalidateQueries({ queryKey: ["inventory"] });
-};
-
-
-  // csv import 
-
-
-  const headerMap = {
-  name: ["name", "item", "food name", "product name","item name"],
-  price: ["price", "selling price"],
-  costPrice: ["cost price", "cost"],
-  description: ["description"],
-  category: ["category"],
-  stockAmount: ["stock", "quantity", "qty"],
-};
-
-  function mapHeaders(row: Record<string, any>) {
-  const mapped: Record<string, any> = {};
-
-  for (const [target, aliases] of Object.entries(headerMap)) {
-    for (const alias of aliases) {
-      const key = Object.keys(row).find(
-        (k) => k.trim().toLowerCase() === alias.toLowerCase()
       );
 
-      if (key) {
-        mapped[target] = row[key];
-        break;
+      setScannedItems(items);
+      setScanPreviewOpen(true);
+    } catch (err: any) {
+      console.error("Scan failed:", err);
+      toast.error(
+        err?.message || "Failed to understand menu. Please try another image.",
+      );
+    } finally {
+      setIsUnderstandingMenu(false);
+      e.target.value = "";
+    }
+  };
+
+  const saveScannedItems = async () => {
+    if (
+      merchantStatus?.plan === "free" &&
+      inventQuery.length + scannedItems.length > 5
+    ) {
+      toast.error("Only 5 items are allowed in the free plan.");
+      return;
+    }
+
+    setIsSavingScan(true);
+    setScanProgress(0);
+
+    let success = 0;
+    const total = scannedItems.length;
+
+    for (let i = 0; i < total; i++) {
+      const item = scannedItems[i];
+      try {
+        await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            name: item.name || "Unnamed Item",
+            price: item.price,
+            costPrice: item.costPrice,
+            description: item.description,
+            category: item.category || "Uncategorized",
+            stockAmount: item.stockAmount,
+            variants: [],
+            imageUrl: "",
+            publicId: "",
+            restId,
+            restName,
+          }),
+        });
+        success++;
+      } catch (err) {
+        console.log(err);
+        setScanPreviewOpen(false);
+        toast.error("Something went wrong, try again later");
+      }
+      setScanProgress(Math.round(((i + 1) / total) * 100));
+    }
+
+    toast.success(`${success} item(s) added to inventory`);
+    setIsSavingScan(false);
+    setScanPreviewOpen(false);
+    setScannedItems([]);
+    queryClient.invalidateQueries({ queryKey: ["inventory"] });
+  };
+
+  // csv import
+
+  const headerMap = {
+    name: ["name", "item", "food name", "product name", "item name"],
+    price: ["price", "selling price"],
+    costPrice: ["cost price", "cost"],
+    description: ["description"],
+    category: ["category"],
+    stockAmount: ["stock", "quantity", "qty"],
+  };
+
+  function mapHeaders(row: Record<string, any>) {
+    const mapped: Record<string, any> = {};
+
+    for (const [target, aliases] of Object.entries(headerMap)) {
+      for (const alias of aliases) {
+        const key = Object.keys(row).find(
+          (k) => k.trim().toLowerCase() === alias.toLowerCase(),
+        );
+
+        if (key) {
+          mapped[target] = row[key];
+          break;
+        }
       }
     }
+
+    return mapped;
   }
 
-  return mapped;
-}
+  const handleCSVUpload = (file: File) => {
+    if (!file) return;
 
-const handleCSVUpload = (file: File) => {
-  if (!file) return;
+    setIsImportingCSV(true);
 
-  setIsImportingCSV(true);
+    Papa.parse<Record<string, string>>(file, {
+      header: true,
+      skipEmptyLines: true,
 
-  Papa.parse<Record<string, string>>(file, {
-    header: true,
-    skipEmptyLines: true,
+      complete: (results) => {
+        const rows = results.data.map(mapHeaders);
 
-    complete: (results) => {
-      const rows = results.data.map(mapHeaders);
+        const items: ScannedItem[] = rows.map((row: any) => ({
+          name: row.name || "",
+          price: Number(row.price) || 0,
+          costPrice: String(row.costPrice || ""),
+          description: row.description || "",
+          category: row.category || "",
+          stockAmount: Number(row.stockAmount) || 0,
+        }));
 
-      const items: ScannedItem[] = rows.map((row: any) => ({
-        name: row.name || "",
-        price: Number(row.price) || 0,
-        costPrice: String(row.costPrice || ""),
-        description: row.description || "",
-        category: row.category || "",
-        stockAmount: Number(row.stockAmount) || 0,
-      }));
+        setCSVPreviewItems(items);
+        setCSVPreviewOpen(true);
+        setIsImportingCSV(false);
+        console.log(isImportingCSV);
+      },
 
-      setCSVPreviewItems(items);
-      setCSVPreviewOpen(true);
-      setIsImportingCSV(false);
-      console.log(isImportingCSV)
-    },
+      error: () => {
+        toast.error("Failed to read CSV");
 
-    error: () => {
-      toast.error("Failed to read CSV");
-      
-      setIsImportingCSV(false);
-    },
-  });
-};
+        setIsImportingCSV(false);
+      },
+    });
+  };
 
-const saveCSVItems = async () => {
-  if (merchantStatus?.plan === "free" && inventQuery.length + csvPreviewItems.length > 5) {
-    toast.error("Only 5 items are allowed in the free plan.");
-    return;
-  }
-  if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
-  toast.error("Pro plan only allows 100 items")
-  return
-}
-
-  setIsSavingCSV(true);
-  setCSVProgress(0);
-
-  let success = 0;
-  const total = csvPreviewItems.length;
-
-  for (let i = 0; i < total; i++) {
-    const item = csvPreviewItems[i];
-    try {
-      await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          name: item.name || "Unnamed Item",
-          price: item.price,
-          costPrice: item.costPrice,
-          description: item.description,
-          category: item.category || "Uncategorized",
-          stockAmount: item.stockAmount,
-          variants: [],
-          imageUrl: "",
-          publicId: "",
-          restId,
-          restName,
-        }),
-      });
-      success++;
-    } catch (err) {
-      console.log(err);
+  const saveCSVItems = async () => {
+    if (
+      merchantStatus?.plan === "free" &&
+      inventQuery.length + csvPreviewItems.length > 5
+    ) {
+      toast.error("Only 5 items are allowed in the free plan.");
+      return;
     }
-    setCSVProgress(Math.round(((i + 1) / total) * 100));
-  }
+    if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
+      toast.error("Pro plan only allows 100 items");
+      return;
+    }
 
-  toast.success(`${success} item(s) imported to inventory`);
-  setIsSavingCSV(false);
-  setCSVPreviewOpen(false);
-  setCSVPreviewItems([]);
-  queryClient.invalidateQueries({ queryKey: ["inventory"] });
-};
+    setIsSavingCSV(true);
+    setCSVProgress(0);
+
+    let success = 0;
+    const total = csvPreviewItems.length;
+
+    for (let i = 0; i < total; i++) {
+      const item = csvPreviewItems[i];
+      try {
+        await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            name: item.name || "Unnamed Item",
+            price: item.price,
+            costPrice: item.costPrice,
+            description: item.description,
+            category: item.category || "Uncategorized",
+            stockAmount: item.stockAmount,
+            variants: [],
+            imageUrl: "",
+            publicId: "",
+            restId,
+            restName,
+          }),
+        });
+        success++;
+      } catch (err) {
+        console.log(err);
+      }
+      setCSVProgress(Math.round(((i + 1) / total) * 100));
+    }
+
+    toast.success(`${success} item(s) imported to inventory`);
+    setIsSavingCSV(false);
+    setCSVPreviewOpen(false);
+    setCSVPreviewItems([]);
+    queryClient.invalidateQueries({ queryKey: ["inventory"] });
+  };
 
   const updateItem = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
 
     try {
       let imageUrl = updateForm.imageUrl;
@@ -570,17 +595,22 @@ const saveCSVItems = async () => {
         const formData = new FormData();
         formData.append("image", file);
 
-        const uploadRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/assets/upload`, {
-          method: "POST",
-          body: formData,
-        });
+        const uploadRes = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
 
         const imageData = await uploadRes.json();
         imageUrl = imageData.imageUrl;
         publicId = imageData.publicId;
       }
 
-      const cleanVariants = updateForm.variants.filter(v => v.variantName.trim() !== "");
+      const cleanVariants = updateForm.variants.filter(
+        (v) => v.variantName.trim() !== "",
+      );
 
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/inventory`, {
         method: "PUT",
@@ -594,56 +624,50 @@ const saveCSVItems = async () => {
           imageUrl,
           publicId,
           restId,
-          restName
+          restName,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-  throw new Error(data?.message || "Failed to update item");
-}
+        throw new Error(data?.message || "Failed to update item");
+      }
 
       setEditMode(false);
-      setLoading(false)
+      setLoading(false);
       setFile(null);
       fetchInventory();
     } catch (err) {
-      throw err
+      throw err;
     }
   };
 
-  const {mutate:updateItemM} = useMutation({
-    mutationKey:['updateItem'],
+  const { mutate: updateItemM } = useMutation({
+    mutationKey: ["updateItem"],
     mutationFn: updateItem,
-    onSuccess:()=>{
-      toast.success('Item updated')
-      queryClient.invalidateQueries({queryKey:['inventory']})
+    onSuccess: () => {
+      toast.success("Item updated");
+      queryClient.invalidateQueries({ queryKey: ["inventory"] });
     },
-    onError:()=>{
-      toast.error('Item was not updated')
-     
-    setEditMode(false)
-    setLoading(false)
-    }
-  })
+    onError: () => {
+      toast.error("Item was not updated");
 
+      setEditMode(false);
+      setLoading(false);
+    },
+  });
 
-  const filterBySearch = inventQuery?.filter(i=>{
-    return i.name.toLowerCase().includes(search.toLowerCase())
-  })
+  const filterBySearch = inventQuery?.filter((i) => {
+    return i.name.toLowerCase().includes(search.toLowerCase());
+  });
 
-  const ACCENT = "#D6293F"
-const INK = "#171717"
-const MUTE = "#6B7280"
-const BORDER = "#E7E5E4"
-const SOFT = "#FBF7F6"
- 
+  const ACCENT = "#D6293F";
+  const INK = "#171717";
+  const MUTE = "#6B7280";
+  const BORDER = "#E7E5E4";
+  const SOFT = "#FBF7F6";
 
-
-
-
-
-if (isPending) {
+  if (isPending) {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-3"
@@ -652,13 +676,16 @@ if (isPending) {
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: ACCENT }} />
         <p className="text-sm font-medium">Loading inventory…</p>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
+        <h1
+          className="text-3xl max-md:text-xl font-extrabold"
+          style={{ color: INK }}
+        >
           Inventory{" "}
           <span className="text-lg max-md:text-sm font-medium bg-slate-200 p-2 rounded-lg">
             {inventQuery?.length || 0} items
@@ -694,8 +721,7 @@ if (isPending) {
               <div className="relative flex-1 sm:flex-none">
                 <input
                   type="file"
-                    accept="image/png,image/jpeg,image/webp,application/pdf"
-
+                  accept="image/png,image/jpeg,image/webp,application/pdf"
                   onChange={handleScanUpload}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                 />
@@ -898,130 +924,150 @@ if (isPending) {
 
       {/* ================= ITEM GRID ================= */}
       {/* ================= ITEM LIST ================= */}
-{filterBySearch?.length > 0 ? (
-  <div className="flex flex-col gap-2.5">
-    {filterBySearch?.map((inv) => (
-      <div
-        key={inv.id}
-        className="bg-white rounded-xl border overflow-hidden flex flex-row"
-        style={{ borderColor: BORDER }}
-      >
-        <img
-          src={inv?.imageUrl || "/cc.jpg"}
-          alt={inv.name}
-          className="w-20 h-20 sm:w-24 sm:h-24 object-cover shrink-0"
-        />
+      {filterBySearch?.length > 0 ? (
+        <div className="flex flex-col gap-2.5">
+          {filterBySearch?.map((inv) => (
+            <div
+              key={inv.id}
+              className="bg-white rounded-xl border overflow-hidden flex flex-row"
+              style={{ borderColor: BORDER }}
+            >
+              <img
+                src={inv?.imageUrl || "/maroonapron-logo.png"}
+                alt={inv.name}
+                className="w-20 h-20 sm:w-24 sm:h-24 object-cover shrink-0"
+              />
 
-        <div className="p-2.5 flex flex-col flex-1 min-w-0">
-          <div className="flex flex-col items-start gap-0.5 mb-1">
-            <div className="flex items-center justify-between w-full gap-2">
-              <span className="text-sm font-bold truncate" style={{ color: INK }}>
-                {inv.name}
-              </span>
-              <span className="text-xs font-semibold shrink-0" style={{ color: MUTE }}>
-                Stock: {inv.stockAmount || 0}
-              </span>
-            </div>
+              <div className="p-2.5 flex flex-col flex-1 min-w-0">
+                <div className="flex flex-col items-start gap-0.5 mb-1">
+                  <div className="flex items-center justify-between w-full gap-2">
+                    <span
+                      className="text-sm font-bold truncate"
+                      style={{ color: INK }}
+                    >
+                      {inv.name}
+                    </span>
+                    <span
+                      className="text-xs font-semibold shrink-0"
+                      style={{ color: MUTE }}
+                    >
+                      Stock: {inv.stockAmount || 0}
+                    </span>
+                  </div>
 
-            {inv.variants?.length > 0 ? (
-              <div className="text-xs" style={{ color: MUTE }}>
-                From Rs. {Math.min(...inv.variants.map((v) => v.variantPrice))}
+                  {inv.variants?.length > 0 ? (
+                    <div className="text-xs" style={{ color: MUTE }}>
+                      From Rs.{" "}
+                      {Math.min(...inv.variants.map((v) => v.variantPrice))}
+                    </div>
+                  ) : (
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: ACCENT }}
+                    >
+                      Rs: {inv.price}
+                    </span>
+                  )}
+
+                  <span
+                    className="text-xs line-clamp-1"
+                    style={{ color: MUTE }}
+                  >
+                    {inv.description || ""}
+                  </span>
+                  <span
+                    className="text-xs font-semibold"
+                    style={{ color: ACCENT }}
+                  >
+                    Cost: Rs {inv.costPrice || ""}
+                  </span>
+                </div>
+
+                {inv?.category && (
+                  <span className="inline-block w-fit text-xs font-medium px-2 py-0.5 rounded-full mb-1.5 bg-red-500 text-white">
+                    {inv.category}
+                  </span>
+                )}
+
+                {inv?.variants?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-1.5">
+                    {inv.variants.map((v) => (
+                      <span
+                        key={v.id}
+                        className="text-xs font-medium px-2 py-0.5 rounded-full border"
+                        style={{ borderColor: BORDER, color: MUTE }}
+                      >
+                        {v.variantName} · Rs.{v.variantPrice} · CP:
+                        {v.variantCostPrice}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex gap-2 mt-auto pt-1 max-w-xs">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 rounded-lg gap-1 text-xs h-8"
+                    onClick={() => {
+                      setEditMode(true);
+                      setFile(null);
+                      setupdateForm({
+                        id: inv.id,
+                        userId: session?.id,
+                        name: inv.name,
+                        price: inv.price,
+                        costPrice: inv.costPrice,
+                        description: inv.description,
+                        category: inv.category,
+                        stockAmount: inv.stockAmount,
+                        imageUrl: inv.imageUrl,
+                        variants: inv.variants.map((v) => ({
+                          variantName: v.variantName,
+                          variantPrice: v.variantPrice,
+                          variantCostPrice: v.variantCostPrice,
+                        })),
+                      });
+                    }}
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1 rounded-lg gap-1 text-xs h-8"
+                    onClick={() => deleteItemM(inv.id)}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </Button>
+                </div>
               </div>
-            ) : (
-              <span className="text-sm font-bold" style={{ color: ACCENT }}>
-                Rs: {inv.price}
-              </span>
-            )}
-
-            <span className="text-xs line-clamp-1" style={{ color: MUTE }}>
-              {inv.description || ""}
-            </span>
-            <span className="text-xs font-semibold" style={{ color: ACCENT }}>
-              Cost: Rs {inv.costPrice || ""}
-            </span>
-          </div>
-
-          {inv?.category && (
-            <span className="inline-block w-fit text-xs font-medium px-2 py-0.5 rounded-full mb-1.5 bg-red-500 text-white">
-              {inv.category}
-            </span>
-          )}
-
-          {inv?.variants?.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-1.5">
-              {inv.variants.map((v) => (
-                <span
-                  key={v.id}
-                  className="text-xs font-medium px-2 py-0.5 rounded-full border"
-                  style={{ borderColor: BORDER, color: MUTE }}
-                >
-                  {v.variantName} · Rs.{v.variantPrice} · CP:{v.variantCostPrice}
-                </span>
-              ))}
             </div>
-          )}
-
-          <div className="flex gap-2 mt-auto pt-1 max-w-xs">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 rounded-lg gap-1 text-xs h-8"
-              onClick={() => {
-                setEditMode(true);
-                setFile(null);
-                setupdateForm({
-                  id: inv.id,
-                  userId: session?.id,
-                  name: inv.name,
-                  price: inv.price,
-                  costPrice: inv.costPrice,
-                  description: inv.description,
-                  category: inv.category,
-                  stockAmount: inv.stockAmount,
-                  imageUrl: inv.imageUrl,
-                  variants: inv.variants.map((v) => ({
-                    variantName: v.variantName,
-                    variantPrice: v.variantPrice,
-                    variantCostPrice: v.variantCostPrice,
-                  })),
-                });
-              }}
-            >
-              <Pencil className="w-3.5 h-3.5" />
-              Edit
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="flex-1 rounded-lg gap-1 text-xs h-8"
-              onClick={() => deleteItemM(inv.id)}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Delete
-            </Button>
-          </div>
+          ))}
         </div>
-      </div>
-    ))}
-  </div>
-) : (
-  <div
-    className="bg-white rounded-2xl border flex flex-col items-center justify-center gap-2 py-20 text-center"
-    style={{ borderColor: BORDER, color: MUTE }}
-  >
-    <Package className="w-10 h-10" style={{ color: BORDER }} />
-    <h1 className="text-lg font-semibold" style={{ color: INK }}>
-      Add items to inventory
-    </h1>
-    <p className="text-base">Items you add will show up here.</p>
-  </div>
-)}
+      ) : (
+        <div
+          className="bg-white rounded-2xl border flex flex-col items-center justify-center gap-2 py-20 text-center"
+          style={{ borderColor: BORDER, color: MUTE }}
+        >
+          <Package className="w-10 h-10" style={{ color: BORDER }} />
+          <h1 className="text-lg font-semibold" style={{ color: INK }}>
+            Add items to inventory
+          </h1>
+          <p className="text-base">Items you add will show up here.</p>
+        </div>
+      )}
 
       {/* ================= ADD ITEM ================= */}
-      <Dialog open={addMode} onOpenChange={(open) => {
-        setAddMode(open);
-        if (!open) setFile(null);
-      }}>
+      <Dialog
+        open={addMode}
+        onOpenChange={(open) => {
+          setAddMode(open);
+          if (!open) setFile(null);
+        }}
+      >
         <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Add an Item</DialogTitle>
@@ -1137,7 +1183,9 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Image - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only</Label>
+              <Label>
+                Image - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only
+              </Label>
               {previewUrl && (
                 <img
                   src={previewUrl}
@@ -1413,10 +1461,13 @@ if (isPending) {
       </Dialog>
 
       {/* ================= UPDATE ITEM ================= */}
-      <Dialog open={editMode} onOpenChange={(open) => {
-        setEditMode(open);
-        if (!open) setFile(null);
-      }}>
+      <Dialog
+        open={editMode}
+        onOpenChange={(open) => {
+          setEditMode(open);
+          if (!open) setFile(null);
+        }}
+      >
         <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl">Update Item</DialogTitle>
@@ -1532,7 +1583,9 @@ if (isPending) {
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <Label>Image - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only</Label>
+              <Label>
+                Image - Max 5 MB - PNG, JPG, JPEG, and WebP images allowed only
+              </Label>
               {(previewUrl || updateForm.imageUrl) && (
                 <img
                   src={previewUrl || updateForm.imageUrl}

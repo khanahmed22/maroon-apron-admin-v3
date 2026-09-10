@@ -4,6 +4,8 @@ import { useQuery,useMutation } from "@tanstack/react-query"
 import { initPaddle } from "../lib/paddle"
 import { toast } from "sonner"
 import { useState } from "react"
+import { Capacitor } from "@capacitor/core"
+import { Purchases } from "@revenuecat/purchases-capacitor"
 import {
   Mail,
   LogOut,
@@ -31,12 +33,15 @@ const INK = "#171717"
 const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
+const GOOGLE_PLAY_ENTITLEMENT = "maroon_apron_pro"
 
 export default function Account() {
   const navigate = useNavigate()
   const { session, checkAuth } = UserAuth()
   const [loading, setLoading] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+
+  const isNative = Capacitor.isNativePlatform() // true inside the Android/iOS Capacitor shell, false on web
 
   const fetchLogout = async () => {
     try {
@@ -148,13 +153,71 @@ export default function Account() {
     }
   }
 
+  const handleGooglePlayPurchase = async () => {
+    try {
+      setLoading(true)
+
+      const eligibilityRes = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/google-play/eligibility`,
+        { credentials: "include" }
+      )
+
+      const eligibility = await eligibilityRes.json()
+
+      if (!eligibilityRes.ok || !eligibility.eligible) {
+        toast.error(eligibility.error || "Unable to subscribe through Google Play")
+        return
+      }
+
+      const offerings = await Purchases.getOfferings()
+      const currentOffering = offerings.current
+
+      if (!currentOffering || currentOffering.availablePackages.length === 0) {
+        toast.error("No subscription plans available right now")
+        return
+      }
+
+      await Purchases.purchasePackage({
+        aPackage: currentOffering.availablePackages[0],
+      })
+
+      // Confirm entitlement immediately instead of waiting on the webhook
+      const { customerInfo } = await Purchases.getCustomerInfo()
+
+      if (typeof customerInfo.entitlements.active[GOOGLE_PLAY_ENTITLEMENT] !== "undefined") {
+        toast.success("Subscribed! Refreshing your account...")
+        await checkAuth()
+      } else {
+        toast.error("Purchase completed but entitlement not found. Please contact support.")
+      }
+    } catch (err:any) {
+      if (err.userCancelled) return // don't show an error toast on user-cancelled purchase
+      console.error(err)
+      toast.error("Unable to complete purchase")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleChangePlan = () => {
     if (merchantStatus?.plan === "free") {
-      handlePaddleCheckout()
+      if (isNative) {
+        handleGooglePlayPurchase()
+      } else {
+        handlePaddleCheckout()
+      }
       return
     }
 
-    handleManageSubscription()
+    // Already subscribed — route to the right management surface
+    if (merchantStatus?.billingProvider === "googleplay") {
+      // Google Play subscriptions can't be managed via a custom portal —
+      // deep-link to the Play Store's own subscription management page
+      window.location.href = "https://play.google.com/store/account/subscriptions"
+      return
+    }
+
+    handleManageSubscription() // Paddle portal
   }
 
   const isPro = merchantStatus?.plan === "pro"

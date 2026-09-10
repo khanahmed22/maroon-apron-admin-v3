@@ -17,6 +17,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import ScrollToTop from "./lib/ScrollToTop";
 import useSound from "use-sound";
 import { notif } from "./zustand/notifStore";
+
+import { Capacitor } from '@capacitor/core';
+import { Purchases, LOG_LEVEL } from '@revenuecat/purchases-capacitor';
+
 const Login = lazy(() => import("./authPages/Login"));
 const Register = lazy(() => import("./authPages/Register"));
 const VerifyEmail = lazy(() => import("./authPages/VerifyEmail"));
@@ -104,7 +108,7 @@ function AuthLayout() {
 }
 
 function App() {
-  const { restId, restName } = UserAuth();
+  const { restId, restName ,session} = UserAuth();
   const queryClient = useQueryClient();
   const [playNewOrder] = useSound("/sound.wav", {
   volume: 0.7,
@@ -164,6 +168,21 @@ useEffect(() => {
       socket.off("newOrder");
     };
   }, [queryClient,playNewOrder]);
+
+  //revenue cat
+
+   useEffect(() => {
+    async function configurePurchases() {
+      if (!Capacitor.isNativePlatform()) return // skip entirely on web
+      if (!session?.id) return // wait until logged in
+
+      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG })
+
+      await Purchases.configure({ apiKey: import.meta.env.VITE_REVENUECAT_KEY })
+      await Purchases.logIn({ appUserID: session.id }) // ties RevenueCat to your userId
+    }
+    configurePurchases()
+  }, [session?.id])
 
   return (
     <>

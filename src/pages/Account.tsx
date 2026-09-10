@@ -158,7 +158,7 @@ export default function Account() {
       setLoading(true)
 
       const eligibilityRes = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/google-play/eligibility`,
+        `${import.meta.env.VITE_BACKEND_URL}/account-google/eligibility`,
         { credentials: "include" }
       )
 

@@ -3,6 +3,7 @@ import { initializeApp, type FirebaseApp } from "firebase/app";
 import {
   getMessaging,
   getToken,
+  deleteToken,
   onMessage,
   isSupported,
   type Messaging,
@@ -12,6 +13,8 @@ import { PushNotifications } from "@capacitor/push-notifications";
 
 // TODO: confirm this matches the env var your other fetch calls use for the API base URL
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+const LAST_FCM_TOKEN_KEY = "maroonapron_fcm_token";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDYC4eTX1p8Lk-dvR61tnWZk0aYyI6hgv8",
@@ -89,6 +92,8 @@ async function enableNotificationsNative(): Promise<string | undefined> {
     body: JSON.stringify({ fcmToken: token }),
   });
 
+  localStorage.setItem(LAST_FCM_TOKEN_KEY, token);
+
   return token;
 }
 
@@ -138,11 +143,49 @@ export const enableNotifications = async (): Promise<string | undefined> => {
       body: JSON.stringify({ fcmToken: token }),
     });
 
+    localStorage.setItem(LAST_FCM_TOKEN_KEY, token);
+
     return token;
   } catch (err) {
     console.error("❌ Failed to enable notifications:", err);
     throw err;
   }
+};
+
+/**
+ * Deletes the merchant's push subscription on the backend so no further
+ * notifications are sent to this device, and — on web — invalidates the
+ * FCM token client-side so it can't be silently reused.
+ *
+ * Note: this can't revoke OS/browser notification permission itself; the
+ * user (or a fresh uninstall/reinstall on native) controls that. This only
+ * stops delivery by removing the record the backend sends to.
+ */
+export const disableNotifications = async (): Promise<void> => {
+  const token = localStorage.getItem(LAST_FCM_TOKEN_KEY);
+
+  if (token) {
+    await apiFetch("/notifications/unsubscribe", {
+      method: "POST",
+      body: JSON.stringify({ fcmToken: token }),
+    });
+  }
+
+  if (!Capacitor.isNativePlatform()) {
+    try {
+      const messagingInstance = await getMessagingSafe();
+      await deleteToken(messagingInstance);
+    } catch (err) {
+      // Backend record is already gone, which is what actually matters —
+      // failing to invalidate client-side isn't worth surfacing as an error.
+      console.error("⚠️ Failed to delete FCM token client-side:", err);
+    }
+  }
+  // Native: @capacitor/push-notifications has no client-side token
+  // invalidation call — removing the backend subscription is sufficient
+  // since no more pushes will be routed to this token.
+
+  localStorage.removeItem(LAST_FCM_TOKEN_KEY);
 };
 
 /**

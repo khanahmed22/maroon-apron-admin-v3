@@ -50,7 +50,7 @@ import {
 } from "../components/ui/select";
 import Map from "./Map";
 import { Bell } from "lucide-react";
-import { enableNotifications, fetchNotificationStatus } from "../lib/firebase";
+import { enableNotifications, disableNotifications, fetchNotificationStatus } from "../lib/firebase";
 import { Switch } from "../components/ui/switch";
 
 const CRIMSON_BASE_DOMAIN = "crimsoncastle.shop";
@@ -946,6 +946,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   });
 
   const [enablingNotifs, setEnablingNotifs] = useState(false);
+  const [disablingNotifs, setDisablingNotifs] = useState(false);
 
   const handleEnableNotifications = async () => {
     setEnablingNotifs(true);
@@ -962,6 +963,20 @@ export default function Settings({ restId }: { restId: string | null }) {
       toast.error("Failed to enable notifications");
     } finally {
       setEnablingNotifs(false);
+    }
+  };
+
+  const handleDisableNotifications = async () => {
+    setDisablingNotifs(true);
+    try {
+      await disableNotifications();
+      toast.success("Notifications disabled");
+      queryClient.invalidateQueries({ queryKey: ["notificationStatus"] });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to disable notifications");
+    } finally {
+      setDisablingNotifs(false);
     }
   };
 
@@ -1239,17 +1254,17 @@ export default function Settings({ restId }: { restId: string | null }) {
               {restDetails?.getRest?.restName || "Your Restaurant"}
             </p>
             {restDetails?.getRest?.restSite && (
-              <div className="mb-2 ">
-                <a
-                  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs"
-                  href={restDetails?.getRest?.restSite}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="max-md:hidden">Visit Store</span>
-                  <span className="md:hidden">Store</span>
-                </a>
-              </div>
+              <div className="mb-2">
+  <a
+    className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs"
+    href={restDetails?.getRest?.restSite}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <span className="max-md:hidden">Visit Store</span>
+    <span className="md:hidden">Store</span>
+  </a>
+</div>
             )}
           </div>
         </div>
@@ -1819,11 +1834,12 @@ export default function Settings({ restId }: { restId: string | null }) {
                 </Button>
               ) : notificationsEnabled ? (
                 <Button
-                  disabled
+                  onClick={handleDisableNotifications}
+                  disabled={disablingNotifs}
                   variant="outline"
-                  className="rounded-xl min-w-40 text-green-600 border-green-300"
+                  className="rounded-xl min-w-40 text-red-600 border-red-300 hover:bg-red-50 disabled:opacity-60"
                 >
-                  ✓ Enabled
+                  {disablingNotifs ? "Disabling…" : "Disable Notifications"}
                 </Button>
               ) : (
                 <Button

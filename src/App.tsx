@@ -191,122 +191,72 @@ useEffect(() => {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public */}
-          <Route path="/" element={<Home />} />
+          <Route
+            path="/"
+            element={
+              Capacitor.isNativePlatform() ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Home />
+              )
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          
-          <Route
-            path="/verify-email/:role/:token"
-            element={<VerifyEmail />}
-          />
 
-          <Route
-            path="/contact"
-            element={<Contact/>}
-          />
-          <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-          />
-          <Route
-            path="/reset-password/:token"
-            element={<ResetPassword />}
-          />
+          <Route path="/verify-email/:role/:token" element={<VerifyEmail />} />
+
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Policies */}
-          <Route
-            path="/delivery-policy"
-            element={<DeliveryPolicy />}
-          />
-          <Route
-            path="/privacy-policy"
-            element={<PrivacyPolicy />}
-          />
-          <Route
-            path="/refund-policy"
-            element={<MerchantRefundPolicy />}
-          />
+          <Route path="/delivery-policy" element={<DeliveryPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/refund-policy" element={<MerchantRefundPolicy />} />
 
-          <Route
-            path="/cancellation-policy"
-            element={<Cancellation/>}
-          />
+          <Route path="/cancellation-policy" element={<Cancellation />} />
           <Route
             path="/terms-and-conditions"
             element={<MerchantTermsAndConditions />}
           />
 
-           <Route
-            path="/knowledge-base"
-            element={<KnowledgeBase />}
-          />
+          <Route path="/knowledge-base" element={<KnowledgeBase />} />
 
           {/* Protected */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AuthLayout />}>
-              <Route
-                path="/dashboard"
-                element={<Dashboard />}
-              />
-              <Route
-                path="/account"
-                element={<Account />}
-              />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/account" element={<Account />} />
+
+              <Route path="/support" element={<Support />} />
 
               <Route
-                path="/support"
-                element={<Support />}
-              />
-
-              
-
-
-               <Route
                 path="/delivery-zones"
                 element={<DeliveryZones restId={restId} />}
               />
-              <Route
-                path="/orders"
-                element={<Orders restId={restId} />}
-              />
+              <Route path="/orders" element={<Orders restId={restId} />} />
               <Route
                 path="/analytics"
                 element={<Analytics restId={restId} />}
               />
               <Route
                 path="/place-order"
-                element={
-                  <PlaceOrder
-                    restName={restName}
-                    restId={restId}
-                  />
-                }
+                element={<PlaceOrder restName={restName} restId={restId} />}
               />
               <Route
                 path="/inventory"
-                element={
-                  <Inventory
-                    restName={restName}
-                    restId={restId}
-                  />
-                }
+                element={<Inventory restName={restName} restId={restId} />}
               />
 
-              <Route
-                path="/coupon"
-                element={<Coupon restId={restId} />}
-              />
+              <Route path="/coupon" element={<Coupon restId={restId} />} />
               <Route
                 path="/customers"
                 element={<Customers restId={restId} />}
               />
-              <Route
-                path="/settings"
-                element={<Settings restId={restId} />}
-              />
-             
+              <Route path="/settings" element={<Settings restId={restId} />} />
             </Route>
-             <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
       </Suspense>

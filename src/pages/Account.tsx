@@ -12,6 +12,8 @@ import {
   Crown,
   Loader2,
   CreditCard,
+  Smartphone,
+  Globe,
 } from "lucide-react"
 
 import {
@@ -199,6 +201,16 @@ export default function Account() {
     }
   }
 
+  const isPro = merchantStatus?.plan === "pro"
+
+  // A user can access Pro features cross-platform regardless of where they
+  // paid — but managing/cancelling the subscription only works on the
+  // platform that sold it (Paddle portal vs. Play Store subscriptions page).
+  const managementMismatch =
+    isPro &&
+    ((merchantStatus?.billingProvider === "paddle" && isNative) ||
+      (merchantStatus?.billingProvider === "googleplay" && !isNative))
+
   const handleChangePlan = () => {
     if (merchantStatus?.plan === "free") {
       if (isNative) {
@@ -208,6 +220,8 @@ export default function Account() {
       }
       return
     }
+
+    if (managementMismatch) return // shouldn't be reachable — button is swapped out below
 
     // Already subscribed — route to the right management surface
     if (merchantStatus?.billingProvider === "googleplay") {
@@ -219,8 +233,6 @@ export default function Account() {
 
     handleManageSubscription() // Paddle portal
   }
-
-  const isPro = merchantStatus?.plan === "pro"
 
   // delete account 
 
@@ -401,26 +413,45 @@ const deleteAccountMutation = useMutation({
 
         {/* ================= ACTIONS ================= */}
         <div className="space-y-3">
-          <button
-            onClick={handleChangePlan}
-            disabled={loading || isPending}
-            className="w-full flex items-center justify-center gap-2 text-base font-semibold text-white rounded-xl py-3 hover:opacity-90 transition-opacity disabled:opacity-60"
-            style={{ backgroundColor: ACCENT }}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4.5 h-4.5 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-4.5 h-4.5" />
-                {isPro
-                  ? "Manage Subscription"
-                  : "Upgrade to Pro"}
-              </>
-            )}
-          </button>
+          {managementMismatch ? (
+            <div
+              className="w-full rounded-xl border p-4 flex items-start gap-3"
+              style={{ borderColor: BORDER, backgroundColor: "white" }}
+            >
+              <div className="shrink-0 mt-0.5" style={{ color: ACCENT }}>
+                {isNative ? <Globe className="w-5 h-5" /> : <Smartphone className="w-5 h-5" />}
+              </div>
+              <p className="text-sm" style={{ color: INK }}>
+                Your subscription was purchased through{" "}
+                <span className="font-semibold">
+                  {merchantStatus?.billingProvider === "paddle" ? "the web app" : "the Android app"}
+                </span>
+                . To manage or cancel it, please open Maroon Apron{" "}
+                {merchantStatus?.billingProvider === "paddle" ? "in your browser" : "on your Android device"}.
+              </p>
+            </div>
+          ) : (
+            <button
+              onClick={handleChangePlan}
+              disabled={loading || isPending}
+              className="w-full flex items-center justify-center gap-2 text-base font-semibold text-white rounded-xl py-3 hover:opacity-90 transition-opacity disabled:opacity-60"
+              style={{ backgroundColor: ACCENT }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-4.5 h-4.5" />
+                  {isPro
+                    ? "Manage Subscription"
+                    : "Upgrade to Pro"}
+                </>
+              )}
+            </button>
+          )}
         </div>
 
       </div>

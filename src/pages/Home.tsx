@@ -1295,7 +1295,7 @@ export default function Home() {
 
             <li>
               <a
-                href="https://linkedin.com/company/crimson-castle-pk"
+                href="https://www.linkedin.com/company/maroon-apron"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Maroon Apron LinkedIn Page"
@@ -1313,7 +1313,7 @@ export default function Home() {
 
             <li>
               <a
-                href="https://www.youtube.com/@crimsoncastle-o9e"
+                href="https://www.youtube.com/@maroon-apron"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Maroon Apron Youtube Page"

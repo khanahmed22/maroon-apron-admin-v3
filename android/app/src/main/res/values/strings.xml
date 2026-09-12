@@ -1,7 +1,7 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='utf-8' ?>
 <resources>
-    <string name="app_name">crimson-admin-android-v3</string>
-    <string name="title_activity_main">crimson-admin-android-v3</string>
-    <string name="package_name">com.crimson.app</string>
-    <string name="custom_url_scheme">com.crimson.app</string>
+    <string name="app_name">Maroon Apron</string>
+    <string name="title_activity_main">Maroon Apron</string>
+    <string name="package_name">com.maroonapron.app</string>
+    <string name="custom_url_scheme">com.maroonapron.app</string>
 </resources>

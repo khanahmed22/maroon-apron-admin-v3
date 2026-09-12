@@ -21,6 +21,7 @@ import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { Capacitor } from "@capacitor/core";
 
 const queryClient = new QueryClient();
 
@@ -36,7 +37,7 @@ L.Icon.Default.mergeOptions({
 // Call this once from main.tsx: registerServiceWorker();
 
 function registerServiceWorker(): void {
- 
+ if (Capacitor.isNativePlatform()) return;
 
   window.addEventListener("load", async () => {
     try {

@@ -7,6 +7,8 @@ import {
   isSupported,
   type Messaging,
 } from "firebase/messaging";
+import { Capacitor } from "@capacitor/core";
+import { PushNotifications } from "@capacitor/push-notifications";
 
 // TODO: confirm this matches the env var your other fetch calls use for the API base URL
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -56,6 +58,41 @@ async function getMessagingSafe(): Promise<Messaging> {
 }
 
 /**
+ * Native (Capacitor/Android) token registration path.
+ * Requests permission, registers with FCM via the native plugin, and
+ * posts the resulting token to the same subscribe endpoint the web
+ * flow uses. The backend doesn't need to know or care whether a stored
+ * token is a web push token or a native Android FCM token.
+ */
+async function enableNotificationsNative(): Promise<string | undefined> {
+  const perm = await PushNotifications.checkPermissions();
+  let receive = perm.receive;
+
+  if (receive === "prompt" || receive === "prompt-with-rationale") {
+    const req = await PushNotifications.requestPermissions();
+    receive = req.receive;
+  }
+
+  if (receive !== "granted") return undefined;
+
+  await PushNotifications.register();
+
+  const token = await new Promise<string | undefined>((resolve) => {
+    PushNotifications.addListener("registration", (t) => resolve(t.value));
+    PushNotifications.addListener("registrationError", () => resolve(undefined));
+  });
+
+  if (!token) return undefined;
+
+  await apiFetch("/notifications/subscribe", {
+    method: "POST",
+    body: JSON.stringify({ fcmToken: token }),
+  });
+
+  return token;
+}
+
+/**
  * Requests notification permission, grabs an FCM token, and registers it
  * against the merchant's account via the Express API.
  *
@@ -67,6 +104,10 @@ async function getMessagingSafe(): Promise<Messaging> {
  * logging/analytics.
  */
 export const enableNotifications = async (): Promise<string | undefined> => {
+  if (Capacitor.isNativePlatform()) {
+    return enableNotificationsNative();
+  }
+
   try {
     if (!("serviceWorker" in navigator)) {
       throw new Error("Service workers not supported");
@@ -111,9 +152,14 @@ export const enableNotifications = async (): Promise<string | undefined> => {
  * via Supabase. Call this from the Settings page's useQuery instead.
  */
 export const fetchNotificationStatus = async (): Promise<boolean> => {
-  // Browser permission is still the first gate — no server round trip needed.
-  if (Notification.permission !== "granted") {
-    return false;
+  if (Capacitor.isNativePlatform()) {
+    const perm = await PushNotifications.checkPermissions();
+    if (perm.receive !== "granted") return false;
+  } else {
+    // Browser permission is still the first gate — no server round trip needed.
+    if (Notification.permission !== "granted") {
+      return false;
+    }
   }
 
   const data = await apiFetch<{ enabled: boolean }>("/notifications/status");
@@ -121,11 +167,25 @@ export const fetchNotificationStatus = async (): Promise<boolean> => {
 };
 
 // 🔹 Foreground listener (call once AFTER app load)
-// When the tab is open and focused, FCM does NOT go through the service
-// worker's auto-display — it delivers here instead. Without this, orders
-// placed while the dashboard tab is open produce no notification tray
-// entry at all, even though the backend send succeeds.
+// When the tab/app is open and focused, FCM does NOT go through the
+// service worker's auto-display (web) or the OS tray (native) — it
+// delivers here instead. Without this, orders placed while the
+// dashboard is open produce no notification at all, even though the
+// backend send succeeds.
 export const listenForMessages = async (): Promise<void> => {
+  if (Capacitor.isNativePlatform()) {
+    PushNotifications.addListener("pushNotificationReceived", () => {
+      // App was open when it arrived — Android won't auto-show a tray
+      // entry in this case, so surface your own in-app toast here if desired.
+    });
+
+    PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
+      const link = action.notification?.data?.link;
+      if (link) window.location.href = link;
+    });
+    return;
+  }
+
   try {
     const messagingInstance = await getMessagingSafe();
     onMessage(messagingInstance, (payload) => {

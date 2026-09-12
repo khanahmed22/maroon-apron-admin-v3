@@ -5,15 +5,46 @@
   "lang": "en",
   "icons": [
     {
-      "src": "/cc192.png",
+      "src": "../icons/icon-48.webp",
       "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any"
+      "sizes": "48x48",
+      "purpose": "any maskable"
     },
     {
-      "src": "/cc512.png",
+      "src": "../icons/icon-72.webp",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "72x72",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-96.webp",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-128.webp",
+      "type": "image/png",
+      "sizes": "128x128",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-192.webp",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-256.webp",
+      "type": "image/png",
+      "sizes": "256x256",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "../icons/icon-512.webp",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
@@ -21,27 +52,27 @@
       "src": "/desktop.png",
       "sizes": "1280x720",
       "type": "image/png"
-      
     },
     {
-    "src": "/mobile.png",
-    "sizes": "720x1280",
-    "type": "image/png"
-    
-  }
+      "src": "/mobile.png",
+      "sizes": "720x1280",
+      "type": "image/png"
+    }
   ],
-  "categories": ["food", "shopping"],
-  
+  "categories": [
+    "food",
+    "shopping"
+  ],
   "start_url": "/dashboard",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#000000",
   "dir": "ltr",
   "display_override": [
-  "window-controls-overlay",
-  "standalone",
-  "browser"
-],
+    "window-controls-overlay",
+    "standalone",
+    "browser"
+  ],
   "background_color": "#f43f5e",
   "scope": "/",
   "id": "/"

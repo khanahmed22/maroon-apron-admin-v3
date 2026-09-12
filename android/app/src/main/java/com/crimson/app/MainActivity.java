@@ -1,4 +1,4 @@
-package com.crimson.app;
+package com.maroonapron.app;
 
 import com.getcapacitor.BridgeActivity;
 

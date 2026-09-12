@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "558981554645",
+    "project_id": "crimson-castle",
+    "storage_bucket": "crimson-castle.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558981554645:android:3c56007d7736444e795d5c",
+        "android_client_info": {
+          "package_name": "com.maroonapron.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558981554645-q4nmnammvk6cudl5tgrfv9s5nr7dop19.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvPi_TdJIuI1nQPDd8ieInJHI5Ef6AKUc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "558981554645-q4nmnammvk6cudl5tgrfv9s5nr7dop19.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

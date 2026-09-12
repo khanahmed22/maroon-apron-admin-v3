@@ -359,30 +359,30 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
 
   
   return (
-     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
+     <div className="min-h-screen p-3 sm:p-6" style={{ backgroundColor: SOFT }}>
       <div className="max-w-7xl mx-auto">
       
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <h1 className="text-3xl max-md:text-xl font-extrabold" style={{ color: INK }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-extrabold" style={{ color: INK }}>
             Analytics
           </h1>
           <Button
             variant="outline"
             onClick={fetchOrdersAndMenu}
             disabled={loading}
-            className="gap-2 w-fit rounded-xl h-11 text-base bg-white"
+            className="gap-2 w-fit rounded-xl h-9 sm:h-11 text-sm sm:text-base bg-white"
           >
             <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} style={{ color: ACCENT }} />
             Refresh
           </Button>
         </div>
  
-        <div className="bg-white rounded-2xl border p-4 sm:p-5 mb-8" style={{ borderColor: BORDER }}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
-            <div className="lg:col-span-3">
+        <div className="bg-white rounded-2xl border p-3 sm:p-5 mb-5 sm:mb-8" style={{ borderColor: BORDER }}>
+          <div className="grid grid-cols-2 lg:grid-cols-12 gap-2 sm:gap-3">
+            <div className="col-span-2 lg:col-span-3">
               <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>Range</div>
               <Select value={rangePreset} onValueChange={applyPreset}>
-                <SelectTrigger className="rounded-xl h-11 text-base" style={{ borderColor: BORDER }}>
+                <SelectTrigger className="rounded-xl h-10 sm:h-11 text-sm sm:text-base" style={{ borderColor: BORDER }}>
                   <SelectValue placeholder="Select range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -394,33 +394,33 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
               </Select>
             </div>
  
-            <div className="lg:col-span-3">
+            <div className="col-span-1 lg:col-span-3">
               <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>Start Date</div>
               <Input
                 type="date"
                 value={startDate}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStartDate(e.target.value)}
-                className="rounded-xl h-11 text-base"
+                className="rounded-xl h-10 sm:h-11 text-sm sm:text-base"
                 style={{ borderColor: BORDER }}
               />
             </div>
  
-            <div className="lg:col-span-3">
+            <div className="col-span-1 lg:col-span-3">
               <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>End Date</div>
               <Input
                 type="date"
                 value={endDate}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEndDate(e.target.value)}
-                className="rounded-xl h-11 text-base"
+                className="rounded-xl h-10 sm:h-11 text-sm sm:text-base"
                 style={{ borderColor: BORDER }}
               />
             </div>
  
-            <div className="lg:col-span-3 flex items-end">
+            <div className="col-span-2 lg:col-span-3 flex items-end">
               <Button
                 onClick={fetchOrdersAndMenu}
                 disabled={loading}
-                className="w-fit h-11 rounded-xl text-base text-white"
+                className="w-full lg:w-fit h-10 sm:h-11 rounded-xl text-sm sm:text-base text-white"
                 style={{ backgroundColor: ACCENT }}
               >
                 {loading ? "Loading..." : "Apply"}
@@ -434,7 +434,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
           )}
         </div>
  
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-6 mb-5 sm:mb-8">
           <KPICard
             title="Total Revenue"
             value={formatMoney(totalRevenue)}
@@ -469,31 +469,32 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
             icon={<DollarSign className="w-5 h-5" />}
             trend="Revenue - Cost of Making - Delivery Fees"
             bgColor={KPI_TINTS[4]}
+            
           />
         </div>
  
-        <Tabs defaultValue="revenue" className="space-y-6">
+        <Tabs defaultValue="revenue" className="space-y-4 sm:space-y-6">
           <TabsList
-  className="bg-white border p-1.5 rounded-xl h-auto gap-1 w-fit"
+  className="bg-white border p-1 sm:p-1.5 rounded-xl h-auto gap-1 w-full sm:w-fit overflow-x-auto"
   style={{ borderColor: BORDER }}
 >
   <TabsTrigger
     value="revenue"
-    className="rounded-lg px-5 py-2.5 text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+    className="rounded-lg px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white whitespace-nowrap"
   >
     Revenue
   </TabsTrigger>
 
   <TabsTrigger
     value="items"
-    className="rounded-lg px-5 py-2.5 text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+    className="rounded-lg px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white whitespace-nowrap"
   >
     Top Items
   </TabsTrigger>
 
   <TabsTrigger
     value="inventory"
-    className="rounded-lg px-5 py-2.5 text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+    className="rounded-lg px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base font-medium text-gray-500 data-[state=active]:bg-red-600 data-[state=active]:text-white whitespace-nowrap"
   >
     Inventory
   </TabsTrigger>
@@ -501,18 +502,18 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
  
           <TabsContent value="revenue">
             <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>
-              <CardHeader>
-                <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg font-bold" style={{ color: INK }}>
                   Revenue Over Time
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="w-full h-80 sm:h-96">
+              <CardContent className="px-2 sm:px-6">
+                <div className="w-full h-64 sm:h-96">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={revenueByDay}>
                       <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
-                      <XAxis dataKey="date" stroke={MUTE} style={{ fontSize: "12px" }} />
-                      <YAxis stroke={MUTE} style={{ fontSize: "12px" }} />
+                      <XAxis dataKey="date" stroke={MUTE} style={{ fontSize: "11px" }} />
+                      <YAxis stroke={MUTE} style={{ fontSize: "11px" }} width={40} />
                       <Tooltip
                         contentStyle={{ backgroundColor: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "12px" }}
                         labelStyle={{ color: INK }}
@@ -528,18 +529,18 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
  
           <TabsContent value="items">
             <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>
-              <CardHeader>
-                <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="text-base sm:text-lg font-bold" style={{ color: INK }}>
                   Top Selling Items
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="w-full h-80 sm:h-96">
+              <CardContent className="px-2 sm:px-6">
+                <div className="w-full h-64 sm:h-96">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topItems}>
                       <CartesianGrid strokeDasharray="3 3" stroke={BORDER} />
-                      <XAxis dataKey="name" stroke={MUTE} angle={-45} textAnchor="end" height={80} style={{ fontSize: "12px" }} />
-                      <YAxis stroke={MUTE} style={{ fontSize: "12px" }} />
+                      <XAxis dataKey="name" stroke={MUTE} angle={-45} textAnchor="end" height={70} style={{ fontSize: "11px" }} />
+                      <YAxis stroke={MUTE} style={{ fontSize: "11px" }} width={40} />
                       <Tooltip
                         contentStyle={{ backgroundColor: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: "12px" }}
                         labelStyle={{ color: INK }}
@@ -554,26 +555,26 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
           </TabsContent>
  
           <TabsContent value="inventory">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <div className="lg:col-span-1">
                 <Card className="bg-white rounded-2xl h-full" style={{ borderColor: BORDER }}>
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="text-base sm:text-lg font-bold" style={{ color: INK }}>
                       Stock Distribution
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="w-full h-80">
+                  <CardContent className="px-2 sm:px-6">
+                    <div className="w-full h-64 sm:h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
                             data={inventoryStatus.slice(0, 5)}
                             cx="50%"
                             cy="50%"
-                            outerRadius={90}
+                            outerRadius={70}
                             dataKey="stockAmount"
                             nameKey="name"
-                            label={({ name, value }) => `${String(name).slice(0, 10)}: ${value}`}
+                            label={({ name, value }) => `${String(name).slice(0, 8)}: ${value}`}
                           >
                             {inventoryStatus.slice(0, 5).map((_, index) => (
                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -592,29 +593,29 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
  
               <div className="lg:col-span-2">
                 <Card className="bg-white rounded-2xl" style={{ borderColor: BORDER }}>
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold" style={{ color: INK }}>
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="text-base sm:text-lg font-bold" style={{ color: INK }}>
                       Stock Levels
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 max-h-80 sm:max-h-96 overflow-y-auto">
+                  <CardContent className="px-3 sm:px-6">
+                    <div className="space-y-2 sm:space-y-3 max-h-72 sm:max-h-96 overflow-y-auto">
                       {inventoryStatus.map((item, index) => (
                         <div
                           key={index}
-                          className="rounded-xl p-4 border"
+                          className="rounded-xl p-3 sm:p-4 border"
                           style={{ borderColor: BORDER, backgroundColor: SOFT }}
                         >
-                          <div className="flex items-start justify-between mb-2">
-                            <div>
-                              <p className="font-semibold text-sm sm:text-base" style={{ color: INK }}>
+                          <div className="flex items-start justify-between mb-1.5 sm:mb-2 gap-2">
+                            <div className="min-w-0">
+                              <p className="font-semibold text-sm sm:text-base truncate" style={{ color: INK }}>
                                 {item.name}
                               </p>
                               <p className="text-xs sm:text-sm" style={{ color: MUTE }}>
                                 {item.category}
                               </p>
                             </div>
-                            <span className="font-bold text-sm sm:text-base" style={{ color: ACCENT }}>
+                            <span className="font-bold text-sm sm:text-base whitespace-nowrap" style={{ color: ACCENT }}>
                               {item.stockAmount} units
                             </span>
                           </div>

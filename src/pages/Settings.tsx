@@ -11,13 +11,6 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import type { LucideIcon } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/ui/dialog";
-import {
   Pencil,
   Phone,
   Mail,
@@ -327,12 +320,7 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   const isFreePlan = !merchantStatus?.plan || merchantStatus.plan === "free";
 
-  const slugify = (name: string) =>
-    name
-      .toLowerCase()
-      .normalize("NFKD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]/g, "");
+ 
 
   const isValidCustomDomain = (domain: string, sub?: string) => {
     if (!domain || !sub) return false;

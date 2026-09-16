@@ -172,7 +172,7 @@ export default function Account() {
       }
 
       const offerings = await Purchases.getOfferings()
-      const currentOffering = offerings.current
+      const currentOffering = offerings.current ?? offerings.all["pro_monthly_cat"]
 
       if (!currentOffering || currentOffering.availablePackages.length === 0) {
         toast.error("No subscription plans available right now")

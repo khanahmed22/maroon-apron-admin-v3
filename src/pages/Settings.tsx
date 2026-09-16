@@ -38,6 +38,13 @@ import {
   Bike,
   Handbag,
   Search,
+  PanelTop,
+  GlobeCheckIcon,
+  Megaphone,
+  Contact,
+  MessageCircle,
+  DatabaseSearch,
+  SunMoon,
 } from "lucide-react";
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes";
 import type { ThemeName } from "../lib/themes";
@@ -650,47 +657,7 @@ export default function Settings({ restId }: { restId: string | null }) {
     },
   });
 
-  // ================= FIRST-TIME SETUP =================
-  const [setupName, setSetupName] = useState("");
-  const [setupSubdomain, setSetupSubdomain] = useState("");
-
-  const isFirstTimeSetup =
-    !!restDetails?.getRest && !restDetails.getRest.subdomain;
-
-  const completeSetup = async ({
-    restName,
-    subdomain,
-  }: {
-    restName: string;
-    subdomain: string;
-  }) => {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/settings`, {
-      method: "PUT",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: restId, restName, subdomain }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error || "Failed to complete setup");
-    }
-
-    return res.json();
-  };
-
-  const { mutate: completeSetupM, isPending: setupSaving } = useMutation({
-    mutationKey: ["completeSetup"],
-    mutationFn: completeSetup,
-    onSuccess: () => {
-      toast.success("Store set up!");
-      queryClient.invalidateQueries({ queryKey: ["restDetails"] });
-      updateNetlifyAliasM({
-        newDomain: `${setupSubdomain}.${CRIMSON_BASE_DOMAIN}`,
-      });
-    },
-    onError: (err: Error) => toast.error(err.message),
-  });
+  
 
   const updatePreorderSettings = async (
     payload: PreorderPayload,
@@ -1061,58 +1028,7 @@ export default function Settings({ restId }: { restId: string | null }) {
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
       {/* ================= FIRST-TIME SETUP MODAL ================= */}
-      {isFirstTimeSetup && (
-        <Dialog open={true}>
-          <DialogContent
-            className="sm:max-w-md"
-            onInteractOutside={(e) => e.preventDefault()}
-            onEscapeKeyDown={(e) => e.preventDefault()}
-          >
-            <DialogHeader>
-              <DialogTitle>Set up your store</DialogTitle>
-              <DialogDescription>
-                Choose your restaurant name and store URL. These can't be
-                changed later - contact support if you need to.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div className="flex flex-col gap-y-1.5">
-                <FieldLabel icon={Store}>Restaurant Name</FieldLabel>
-                <Input
-                  value={setupName}
-                  className="h-11 rounded-xl text-base"
-                  style={{ borderColor: BORDER }}
-                  onChange={(e) => {
-                    setSetupName(e.target.value);
-                    setSetupSubdomain(slugify(e.target.value));
-                  }}
-                />
-              </div>
-              {setupSubdomain && (
-                <p className="text-xs" style={{ color: MUTE }}>
-                  Your store URL will be{" "}
-                  <span className="font-semibold" style={{ color: INK }}>
-                    {setupSubdomain}.{CRIMSON_BASE_DOMAIN}
-                  </span>
-                </p>
-              )}
-            </div>
-            <Button
-              className="w-full h-11 rounded-xl text-white disabled:opacity-60"
-              style={{ backgroundColor: ACCENT }}
-              disabled={!setupName.trim() || setupSaving}
-              onClick={() =>
-                completeSetupM({
-                  restName: setupName.trim(),
-                  subdomain: setupSubdomain,
-                })
-              }
-            >
-              {setupSaving ? "Setting up…" : "Continue"}
-            </Button>
-          </DialogContent>
-        </Dialog>
-      )}
+      
 
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between gap-4 mb-4">
@@ -1293,7 +1209,7 @@ export default function Settings({ restId }: { restId: string | null }) {
             {!domainEditMode ? (
               <>
                 <InfoRow
-                  icon={Globe}
+                  icon={PanelTop}
                   label="Store URL"
                   value={
                     restDetails?.getRest?.subdomain
@@ -1302,7 +1218,7 @@ export default function Settings({ restId }: { restId: string | null }) {
                   }
                 />
                 <InfoRow
-                  icon={Globe}
+                  icon={GlobeCheckIcon}
                   label="Custom Domain"
                   value={restDetails?.getRest?.customDomain}
                 />
@@ -1402,7 +1318,7 @@ export default function Settings({ restId }: { restId: string | null }) {
               <div className="flex items-center gap-2">
                 <PartyPopper className="w-5 h-5" style={{ color: ACCENT }} />
                 <h2 className="text-lg font-bold" style={{ color: INK }}>
-                  Announcement
+                  Announcement 
                 </h2>
               </div>
               {!announcementEditMode && (
@@ -1411,8 +1327,8 @@ export default function Settings({ restId }: { restId: string | null }) {
             </div>
             {!announcementEditMode ? (
               <InfoRow
-                icon={PartyPopper}
-                label="Announcement"
+                icon={Megaphone}
+                label="Announcement will appear on top of your store"
                 value={restDetails?.getRest?.restAnnouncement}
               />
             ) : (
@@ -1455,7 +1371,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           >
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
-                <Phone className="w-5 h-5" style={{ color: ACCENT }} />
+                <Contact className="w-5 h-5" style={{ color: ACCENT }} />
                 <h2 className="text-lg font-bold" style={{ color: INK }}>
                   Contact Details
                 </h2>
@@ -1550,7 +1466,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           >
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
-                <img src="/instagram.svg" className="w-5 h-5" />
+                <MessageCircle className="w-5 h-5" style={{ color: ACCENT }} />
                 <h2 className="text-lg font-bold" style={{ color: INK }}>
                   Socials
                 </h2>
@@ -1621,7 +1537,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           >
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
-                <Tag className="w-5 h-5" style={{ color: ACCENT }} />
+                <DatabaseSearch className="w-5 h-5" style={{ color: ACCENT }} />
                 <h2 className="text-lg font-bold" style={{ color: INK }}>
                   SEO
                 </h2>
@@ -1685,7 +1601,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           </div>
         )}
 
-        {/* ================= BRANDING & IMAGES ================= */}
+        {/* ================= THEME ================= */}
         {matchesSearch(["theme", "store theme", "appearance"]) && (
           <div
             className="bg-white rounded-2xl border p-6 mb-3"
@@ -1693,7 +1609,7 @@ export default function Settings({ restId }: { restId: string | null }) {
           >
             <div className="flex items-center justify-between gap-2 mb-1">
               <div className="flex items-center gap-2">
-                <Palette className="w-5 h-5" style={{ color: ACCENT }} />
+                <SunMoon className="w-5 h-5" style={{ color: ACCENT }} />
                 <h2 className="text-lg font-bold" style={{ color: INK }}>
                   Store Theme
                 </h2>

@@ -117,7 +117,7 @@ const cldImage = (id: string, w: number = 1400): string =>
 const NAV_LINKS: NavLink[] = [
   { label: "Features", href: "#features" },
   { label: "Our Product", href: "#product" },
-  { label: "Why Crimson?", href: "#why" },
+  { label: "Why Maroon Apron?", href: "#why" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
 ];
@@ -315,20 +315,28 @@ function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  center = true,
+ 
 }: SectionHeadingProps) {
   return (
-    <div className={`max-w-xl ${center ? "mx-auto text-center" : ""} mb-12`}>
-      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <h2 className="text-3xl font-bold leading-[1.2]" style={{ color: INK }}>
-        {title}
-      </h2>
-      {subtitle && (
-        <p className="mt-4 text-[15px] leading-[1.7]" style={{ color: MUTE }}>
-          {subtitle}
-        </p>
-      )}
-    </div>
+    <div className="max-w-xl mx-auto mb-12 text-center">
+  {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+
+  <h2
+    className="text-3xl max-md:text-xl font-bold leading-[1.2]"
+    style={{ color: INK }}
+  >
+    {title}
+  </h2>
+
+  {subtitle && (
+    <p
+      className="mt-4 text-[15px] leading-[1.7]"
+      style={{ color: MUTE }}
+    >
+      {subtitle}
+    </p>
+  )}
+</div>
   );
 }
 
@@ -534,7 +542,7 @@ export default function Home() {
             </h1>
 
             <p
-              className="mt-6 text-[17px] leading-[1.7]"
+              className="mt-6 text-lg max-md:text-sm leading-[1.7]"
               style={{ color: MUTE }}
             >
               Maroon Apron replaces WhatsApp, Instagram, and Facebook
@@ -570,7 +578,7 @@ export default function Home() {
         >
           <Reveal>
             <SectionHeading
-              eyebrow=" The problem"
+              eyebrow="The problem"
               title="What running a home kitchen on chat apps looks like"
               center={false}
             />
@@ -607,156 +615,198 @@ export default function Home() {
         </section>
 
         {/* ================= WHATSAPP VS Maroon Apron ================= */}
-        <section
-          className="max-w-6xl mx-auto px-6 py-24 border-t"
+        {/* ================= WHATSAPP VS Maroon Apron ================= */}
+<section
+  className="max-w-6xl mx-auto px-6 py-24 border-t"
+  style={{ borderColor: BORDER }}
+>
+  <Reveal>
+    <SectionHeading
+      eyebrow=" The difference"
+      title="From scattered messages to one organized business"
+      subtitle="Every order starts as a message. Maroon Apron turns it into a complete workflow."
+    />
+  </Reveal>
+
+  <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-10 items-stretch">
+    {/* LEFT */}
+    <div
+      className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
+      style={{ borderColor: BORDER }}
+    >
+      <div className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl">
+        💬
+      </div>
+
+      <h3
+        className="text-sm sm:text-xl font-bold mb-4 sm:mb-8"
+        style={{ color: MUTE }}
+      >
+        WhatsApp &amp; Social Media
+      </h3>
+
+      <div className="space-y-2.5 sm:space-y-5 flex-1">
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
           style={{ borderColor: BORDER }}
         >
-          <Reveal>
-            <SectionHeading
-              eyebrow=" The difference"
-              title="From scattered messages to one organized business"
-              subtitle="Every order starts as a message. Maroon Apron turns it into a complete workflow."
-            />
-          </Reveal>
-
-          <div className="mt-16 grid lg:grid-cols-2 gap-10 items-center">
-            {/* LEFT */}
-            <div
-              className="rounded-3xl border p-8 relative overflow-hidden"
-              style={{ borderColor: BORDER }}
+          <svg
+            className="h-4 w-4 sm:h-5 sm:w-5 shrink-0"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path d="M12.04 2C6.54 2 2.08 6.46 2.08 11.96c0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.92 9.92 0 004.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm0 18.12a8.13 8.13 0 01-4.14-1.13l-.3-.18-3.08.81.82-3-.2-.31a8.1 8.1 0 01-1.25-4.35c0-4.49 3.66-8.15 8.15-8.15 2.18 0 4.23.85 5.77 2.39a8.1 8.1 0 012.38 5.76c0 4.49-3.66 8.16-8.15 8.16zm4.47-6.12c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06a6.64 6.64 0 01-1.95-1.2 7.34 7.34 0 01-1.35-1.68c-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.48-.4-.42-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.52.58.18 1.1.16 1.52.1.46-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z" />
+          </svg>
+          <div>
+            <p className="text-[11px] sm:text-base" style={{ color: INK }}>
+              Hi, is biryani available?
+            </p>
+            <p
+              className="text-[10px] sm:text-sm mt-1"
+              style={{ color: MUTE }}
             >
-              <div className="absolute right-6 top-6 opacity-10 text-8xl">
-                💬
-              </div>
-
-              <h3 className="text-xl font-bold mb-8" style={{ color: MUTE }}>
-                WhatsApp &amp; Social Media
-              </h3>
-
-              <div className="space-y-5">
-                <div
-                  className="rounded-xl border p-4 flex gap-4 items-start"
-                  style={{ borderColor: BORDER }}
-                >
-                  <svg
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12.04 2C6.54 2 2.08 6.46 2.08 11.96c0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.92 9.92 0 004.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm0 18.12a8.13 8.13 0 01-4.14-1.13l-.3-.18-3.08.81.82-3-.2-.31a8.1 8.1 0 01-1.25-4.35c0-4.49 3.66-8.15 8.15-8.15 2.18 0 4.23.85 5.77 2.39a8.1 8.1 0 012.38 5.76c0 4.49-3.66 8.16-8.15 8.16zm4.47-6.12c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06a6.64 6.64 0 01-1.95-1.2 7.34 7.34 0 01-1.35-1.68c-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.48-.4-.42-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.52.58.18 1.1.16 1.52.1.46-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z" />
-                  </svg>
-                  <div>
-                    <p style={{ color: INK }}>Hi, is biryani available?</p>
-                    <p className="text-sm mt-1" style={{ color: MUTE }}>
-                      Customer asks in WhatsApp
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown className="mx-auto" style={{ color: "#D1D5DB" }} />
-
-                <div
-                  className="rounded-xl border p-4 flex gap-4 items-start"
-                  style={{ borderColor: BORDER }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    fill="none"
-                    stroke="#000000"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37m1.5-4.87h.01" />
-                  </svg>
-                  <div>
-                    <p style={{ color: INK }}>
-                      Another customer orders from Instagram
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown className="mx-auto" style={{ color: "#D1D5DB" }} />
-
-                <div
-                  className="rounded-xl border p-4 flex gap-4 items-start"
-                  style={{ borderColor: BORDER }}
-                >
-                  <StickyNote size={20} style={{ color: "#9CA3AF" }} />
-                  <div>
-                    <p style={{ color: INK }}>Write everything manually...</p>
-                    <p className="text-sm mt-2" style={{ color: MUTE }}>
-                      Easy to miss orders or forget payments.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT */}
-            <div
-              className="rounded-3xl border p-8 relative overflow-hidden"
-              style={{ borderColor: BORDER }}
-            >
-              <div
-                className="absolute right-6 top-6 opacity-10 text-8xl font-black"
-                style={{ color: ACCENT }}
-              >
-                ✓
-              </div>
-
-              <h3 className="text-xl font-bold mb-8" style={{ color: ACCENT }}>
-                Maroon Apron
-              </h3>
-
-              <div className="space-y-5">
-                <div
-                  className="rounded-xl border p-4 flex gap-4 items-center"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Store size={20} style={{ color: ACCENT }} />
-                  <div>
-                    <p style={{ color: INK }}>
-                      Customer orders from your store
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown className="mx-auto" style={{ color: ACCENT }} />
-
-                <div
-                  className="rounded-xl border p-4 flex gap-4 items-center"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Package size={20} style={{ color: ACCENT }} />
-                  <div>
-                    <p style={{ color: INK }}>
-                      Order appears instantly in dashboard
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown className="mx-auto" style={{ color: ACCENT }} />
-
-                <div
-                  className="rounded-xl border p-4 flex gap-4 items-center"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Wallet size={20} style={{ color: ACCENT }} />
-                  <div>
-                    <p style={{ color: INK }}>
-                      Track payments, customers and sales
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              Customer asks in WhatsApp
+            </p>
           </div>
-        </section>
+        </div>
+
+        <ArrowDown
+          className="mx-auto"
+          size={16}
+          style={{ color: "#D1D5DB" }}
+        />
+
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
+          style={{ borderColor: BORDER }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            className="sm:w-6 sm:h-6 shrink-0"
+            fill="none"
+            stroke="#000000"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37m1.5-4.87h.01" />
+          </svg>
+          <div>
+            <p className="text-[11px] sm:text-base" style={{ color: INK }}>
+              Another customer orders from Instagram
+            </p>
+          </div>
+        </div>
+
+        <ArrowDown
+          className="mx-auto"
+          size={16}
+          style={{ color: "#D1D5DB" }}
+        />
+
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
+          style={{ borderColor: BORDER }}
+        >
+          <StickyNote
+            size={16}
+            className="shrink-0 sm:!w-5 sm:!h-5"
+            style={{ color: "#9CA3AF" }}
+          />
+          <div>
+            <p className="text-[11px] sm:text-base" style={{ color: INK }}>
+              Write everything manually...
+            </p>
+            <p
+              className="text-[10px] sm:text-sm mt-1 sm:mt-2"
+              style={{ color: MUTE }}
+            >
+              Easy to miss orders or forget payments.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* RIGHT */}
+    <div
+      className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
+      style={{ borderColor: BORDER }}
+    >
+      <div
+        className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl font-black"
+        style={{ color: ACCENT }}
+      >
+        ✓
+      </div>
+
+      <h3
+        className="text-sm sm:text-xl font-bold mb-4 sm:mb-8"
+        style={{ color: ACCENT }}
+      >
+        Maroon Apron
+      </h3>
+
+      <div className="space-y-2.5 sm:space-y-5 flex-1">
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center"
+          style={{ borderColor: BORDER }}
+        >
+          <Store
+            size={16}
+            className="shrink-0 sm:!w-5 sm:!h-5"
+            style={{ color: ACCENT }}
+          />
+          <div>
+            <p className="text-[11px] sm:text-base" style={{ color: INK }}>
+              Customer orders from your store
+            </p>
+          </div>
+        </div>
+
+        <ArrowDown className="mx-auto" size={16} style={{ color: ACCENT }} />
+
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center"
+          style={{ borderColor: BORDER }}
+        >
+          <Package
+            size={16}
+            className="shrink-0 sm:!w-5 sm:!h-5"
+            style={{ color: ACCENT }}
+          />
+          <div>
+            <p className="text-[11px] sm:text-base" style={{ color: INK }}>
+              Order appears instantly in dashboard
+            </p>
+          </div>
+        </div>
+
+        <ArrowDown className="mx-auto" size={16} style={{ color: ACCENT }} />
+
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center"
+          style={{ borderColor: BORDER }}
+        >
+          <Wallet
+            size={16}
+            className="shrink-0 sm:!w-5 sm:!h-5"
+            style={{ color: ACCENT }}
+          />
+          <div>
+            <p className="text-[11px] sm:text-base" style={{ color: INK }}>
+              Track payments, customers and sales
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* ================= OUR PRODUCT ================= */}
         <section
@@ -1256,79 +1306,63 @@ export default function Home() {
             </ul>
           </div>
 
-          <ul className="flex items-center gap-x-3 sm:gap-x-5 text-muted-foreground">
-            <li>
-              <a
-                href="https://www.instagram.com/maroonapron.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron Instagram Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M7.75 2C4.574 2 2 4.574 2 7.75v8.5C2 19.426 4.574 22 7.75 22h8.5C19.426 22 22 19.426 22 16.25v-8.5C22 4.574 19.426 2 16.25 2h-8.5zm0 1.8h8.5a3.95 3.95 0 013.95 3.95v8.5a3.95 3.95 0 01-3.95 3.95h-8.5a3.95 3.95 0 01-3.95-3.95v-8.5A3.95 3.95 0 017.75 3.8zm8.95 1.35a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1zM12 7a5 5 0 100 10 5 5 0 000-10zm0 1.8A3.2 3.2 0 1112 15.2 3.2 3.2 0 0112 8.8z" />
-                </svg>
-              </a>
-            </li>
+          <ul className="flex flex-row items-center gap-x-3 sm:gap-x-5 mt-9 text-muted-foreground">
+  <li>
+    <a
+      href="https://www.instagram.com/maroonapron.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron Instagram Page"
+      className="transition-colors hover:text-[#B1111C]"
+    >
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7.75 2C4.574 2 2 4.574 2 7.75v8.5C2 19.426 4.574 22 7.75 22h8.5C19.426 22 22 19.426 22 16.25v-8.5C22 4.574 19.426 2 16.25 2h-8.5zm0 1.8h8.5a3.95 3.95 0 013.95 3.95v8.5a3.95 3.95 0 01-3.95 3.95h-8.5a3.95 3.95 0 01-3.95-3.95v-8.5A3.95 3.95 0 017.75 3.8zm8.95 1.35a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1zM12 7a5 5 0 100 10 5 5 0 000-10zm0 1.8A3.2 3.2 0 1112 15.2 3.2 3.2 0 0112 8.8z" />
+      </svg>
+    </a>
+  </li>
 
-            <li>
-              <a
-                href="https://www.facebook.com/profile.php?id=61570768106092"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron Facebook Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.25.2 2.25.2v2.46H15.2c-1.25 0-1.64.77-1.64 1.57V12h2.8l-.45 2.89h-2.35v6.99A10 10 0 0022 12z" />
-                </svg>
-              </a>
-            </li>
+  <li>
+    <a
+      href="https://www.facebook.com/profile.php?id=61570768106092"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron Facebook Page"
+      className="transition-colors hover:text-[#B1111C]"
+    >
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.25.2 2.25.2v2.46H15.2c-1.25 0-1.64.77-1.64 1.57V12h2.8l-.45 2.89h-2.35v6.99A10 10 0 0022 12z" />
+      </svg>
+    </a>
+  </li>
 
-            <li>
-              <a
-                href="https://www.linkedin.com/company/maroon-apron"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron LinkedIn Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6A2.5 2.5 0 010 3.5 2.5 2.5 0 012.49 1a2.5 2.5 0 012.49 2.5zM.5 8h4V23h-4V8zm7 0h3.83v2.05h.05c.53-1.01 1.84-2.08 3.79-2.08 4.05 0 4.8 2.66 4.8 6.12V23h-4v-7.79c0-1.86-.03-4.26-2.6-4.26-2.6 0-3 2.03-3 4.13V23h-4V8z" />
-                </svg>
-              </a>
-            </li>
+  <li>
+    <a
+      href="https://www.linkedin.com/company/maroon-apron"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron LinkedIn Page"
+      className="transition-colors hover:text-[#B1111C]"
+    >
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6A2.5 2.5 0 010 3.5 2.5 2.5 0 012.49 1a2.5 2.5 0 012.49 2.5zM.5 8h4V23h-4V8zm7 0h3.83v2.05h.05c.53-1.01 1.84-2.08 3.79-2.08 4.05 0 4.8 2.66 4.8 6.12V23h-4v-7.79c0-1.86-.03-4.26-2.6-4.26-2.6 0-3 2.03-3 4.13V23h-4V8z" />
+      </svg>
+    </a>
+  </li>
 
-            <li>
-              <a
-                href="https://www.youtube.com/@maroon-apron"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron Youtube Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M23.5 6.2a3.02 3.02 0 00-2.12-2.13C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.57A3.02 3.02 0 00.5 6.2 31.72 31.72 0 000 12a31.72 31.72 0 00.5 5.8 3.02 3.02 0 002.12 2.13c1.88.57 9.38.57 9.38.57s7.5 0 9.38-.57a3.02 3.02 0 002.12-2.13A31.72 31.72 0 0024 12a31.72 31.72 0 00-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
-                </svg>
-              </a>
-            </li>
-          </ul>
+  <li>
+    <a
+      href="https://www.youtube.com/@maroon-apron"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron YouTube Page"
+      className="transition-colors hover:text-[#B1111C]"
+    >
+      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.5 6.2a3.02 3.02 0 00-2.12-2.13C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.57A3.02 3.02 0 00.5 6.2 31.72 31.72 0 000 12a31.72 31.72 0 00.5 5.8 3.02 3.02 0 002.12 2.13c1.88.57 9.38.57 9.38.57s7.5 0 9.38-.57a3.02 3.02 0 002.12-2.13A31.72 31.72 0 0024 12a31.72 31.72 0 00-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
+      </svg>
+    </a>
+  </li>
+</ul>
         </div>
         <div
           className="border-t py-6 text-center text-xs"

@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select.tsx";
+import { Link } from "react-router";
 interface VariantProps {
   id: string;
   variantName: string;
@@ -564,6 +565,56 @@ export default function PlaceOrder({ restId, restName }: RestResponse) {
     custDetails.scheduledWindow,
     preOrderMinHours,
   ]);
+
+const ifsubdomainNull = subdomain
+if (ifsubdomainNull === null) {
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6"
+      style={{ backgroundColor: SOFT }}
+    >
+      <div
+        className="w-full max-w-md bg-white rounded-2xl border p-6 sm:p-8 text-center"
+        style={{ borderColor: BORDER }}
+      >
+        <div
+          className="mx-auto mb-5 w-14 h-14 rounded-full flex items-center justify-center"
+          style={{ backgroundColor: SOFT }}
+        >
+          <Store
+            className="w-7 h-7"
+            style={{ color: ACCENT }}
+          />
+        </div>
+
+        <h1
+          className="text-2xl font-extrabold"
+          style={{ color: INK }}
+        >
+          Complete your store setup
+        </h1>
+
+        <p
+          className="text-sm sm:text-base mt-2 leading-relaxed"
+          style={{ color: MUTE }}
+        >
+          Your store isn't ready yet. Complete your store setup in
+          Settings before you can place an order.
+        </p>
+
+        <Link
+          to="/settings"
+          className="inline-flex items-center justify-center w-full mt-6 h-11 rounded-xl text-sm sm:text-base font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: ACCENT }}
+        >
+          Go to Settings
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+
 
   if (isPending) {
     return (

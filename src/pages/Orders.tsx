@@ -311,6 +311,7 @@ function formatPreorderDate(date: string | Date): string {
 
 
 
+
 if (isPending) {
     return (
       <div
@@ -438,7 +439,12 @@ function MethodBadge({ method }: { method: string }) {
 }
   
   return (
-    <div className="p-4 sm:p-6" style={{ backgroundColor: SOFT, minHeight: "100vh" }}>
+    
+  
+    <div
+      className="p-4 sm:p-6"
+      style={{ backgroundColor: SOFT, minHeight: "100vh" }}
+    >
       <h1 className="text-3xl max-md:text-xl font-extrabold mb-6" style={{ color: INK }}>
         Orders
       </h1>
@@ -643,6 +649,8 @@ function MethodBadge({ method }: { method: string }) {
           </tbody>
         </table>
       </div>
+      
     </div>
+      
   );
 }

@@ -71,6 +71,7 @@ export default function Login() {
     >
       <form
         onSubmit={loginUser}
+        autoComplete="on"
         className="flex flex-col gap-y-5 bg-white p-8 rounded-2xl w-full max-w-sm border shadow-sm"
         style={{ borderColor: BORDER }}
       >
@@ -92,6 +93,8 @@ export default function Login() {
             <input
               required
               type="email"
+              name="username"
+              autoComplete="username"
               className="w-full pl-10 pr-3 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 transition-shadow"
               style={{
                 borderColor: BORDER,
@@ -118,6 +121,8 @@ export default function Login() {
             />
             <input
               required
+              name="password"
+              autoComplete="current-password"
               type={showPassword ? "text" : "password"}
               className="w-full pl-10 pr-10 py-2.5 border rounded-xl text-sm outline-none focus:ring-2 transition-shadow"
               style={{

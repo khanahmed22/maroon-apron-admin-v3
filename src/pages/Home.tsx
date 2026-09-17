@@ -1295,14 +1295,19 @@ export default function Home() {
                 <Phone size={14} /> 0334-8204806
               </li>
               <li className="flex items-center gap-2">
-                <HeartPulse size={15} />
-                <a
-                  href="https://stats.uptimerobot.com/8JRK0mdcG0"
-                  target="_blank"
-                  className="hover:underline hover:text-red-500"
-                >
-                  System Status
-                </a>
+                
+<a
+  href="https://stats.uptimerobot.com/hG7ogJGcqE?utm_source=status_badge&utm_medium=referral"
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <img
+    src="https://badge.uptimerobot.com/psp/b9e5a69cff155e037aa18450b15f3ca5.svg?style=logo&theme=light"
+    alt="Maroon Apron"
+  />
+</a>
+
+
               </li>
             </ul>
           </div>

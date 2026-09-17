@@ -348,10 +348,12 @@ export default function Inventory({ restId, restName }: restProps) {
   // scan feature
 
   const handleScanUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (merchantStatus?.plan === "free" && inventQuery.length >= 5) {
-      toast.error("Only 5 items are allowed in the free plan.");
+    if (merchantStatus?.plan === "free") {
+      toast.error("Upgrade to Pro to use AI menu scanning.");
+      e.target.value = "";
       return;
     }
+
     if (merchantStatus?.plan === "pro" && inventQuery.length >= 100) {
       toast.error("Pro plan only allows 100 items");
       return;
@@ -413,6 +415,11 @@ export default function Inventory({ restId, restName }: restProps) {
   };
 
   const saveScannedItems = async () => {
+    if (merchantStatus?.plan === "free") {
+      toast.error("Upgrade to Pro to use AI menu scanning.");
+      return;
+    }
+
     if (
       merchantStatus?.plan === "free" &&
       inventQuery.length + scannedItems.length > 5
@@ -723,16 +730,26 @@ export default function Inventory({ restId, restName }: restProps) {
                   type="file"
                   accept="image/png,image/jpeg,image/webp,application/pdf"
                   onChange={handleScanUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  disabled={merchantStatus?.plan === "free"}
+                  className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
                 />
 
                 <Button
                   variant="outline"
-                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none"
+                  disabled={merchantStatus?.plan === "free"}
+                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none disabled:opacity-60"
                   style={{ borderColor: BORDER }}
                 >
                   <ScanIcon className="w-4.5 h-4.5" />
                   Scan Menu
+                  {merchantStatus?.plan === "free" && (
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full text-white"
+                      style={{ backgroundColor: ACCENT }}
+                    >
+                      Pro
+                    </span>
+                  )}
                 </Button>
               </div>
 

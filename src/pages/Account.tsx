@@ -14,6 +14,9 @@ import {
   CreditCard,
   Smartphone,
   Globe,
+  Check,
+  Sparkles,
+
 } from "lucide-react"
 
 import {
@@ -28,6 +31,11 @@ import {
   AlertDialogTrigger,
 } from "../components/ui/alert-dialog";
 
+import {
+  Dialog,
+  DialogContent,
+} from "../components/ui/dialog";
+
 import { Input } from "../components/ui/input";
 
 const ACCENT = "#D6293F"
@@ -37,11 +45,21 @@ const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
 const GOOGLE_PLAY_ENTITLEMENT = "maroon_apron_pro"
 
+const PRO_BENEFITS = [
+  "100 products",
+  "Advanced order management",
+  "Custom domain",
+  "Import menus with AI",
+  "No 'Powered by Maroon Apron' branding on your store",
+  "Priority support",
+]
+
 export default function Account() {
   const navigate = useNavigate()
   const { session, checkAuth } = UserAuth()
   const [loading, setLoading] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
 
   const isNative = Capacitor.isNativePlatform() // true inside the Android/iOS Capacitor shell, false on web
 
@@ -211,13 +229,17 @@ export default function Account() {
     ((merchantStatus?.billingProvider === "paddle" && isNative) ||
       (merchantStatus?.billingProvider === "googleplay" && !isNative))
 
+  const startCheckout = () => {
+    if (isNative) {
+      handleGooglePlayPurchase()
+    } else {
+      handlePaddleCheckout()
+    }
+  }
+
   const handleChangePlan = () => {
     if (merchantStatus?.plan === "free") {
-      if (isNative) {
-        handleGooglePlayPurchase()
-      } else {
-        handlePaddleCheckout()
-      }
+      setUpgradeModalOpen(true)
       return
     }
 
@@ -232,6 +254,11 @@ export default function Account() {
     }
 
     handleManageSubscription() // Paddle portal
+  }
+
+  const handleConfirmUpgrade = () => {
+    setUpgradeModalOpen(false)
+    startCheckout()
   }
 
   // delete account 
@@ -455,6 +482,87 @@ const deleteAccountMutation = useMutation({
         </div>
 
       </div>
+
+      {/* ================= UPGRADE TO PRO MODAL ================= */}
+      <Dialog open={upgradeModalOpen} onOpenChange={setUpgradeModalOpen}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 gap-0 rounded-2xl">
+          {/* Header banner */}
+          <div
+            className="relative px-6 pt-8 pb-10 text-center overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${ACCENT} 0%, #8B1526 100%)`,
+            }}
+          >
+            {/* decorative sparkles */}
+            <Sparkles className="absolute top-4 left-6 w-5 h-5 text-white/30" />
+            <Sparkles className="absolute bottom-6 right-8 w-4 h-4 text-white/20" />
+            <Sparkles className="absolute top-10 right-10 w-3 h-3 text-white/25" />
+
+            
+
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-3 border border-white/20">
+              <Crown className="w-7 h-7 text-white" />
+            </div>
+
+            <h2 className="text-2xl font-extrabold text-white">
+              Go Pro
+            </h2>
+            <p className="text-sm text-white/80 mt-1 max-w-xs mx-auto">
+              Unlock everything you need to run a bigger, faster,
+              better-looking store.
+            </p>
+          </div>
+
+          {/* Benefits list */}
+          <div className="px-6 pt-5 pb-6 bg-white">
+            <ul className="space-y-3 mb-6">
+              {PRO_BENEFITS.map((benefit) => (
+                <li key={benefit} className="flex items-start gap-3">
+                  <span
+                    className="mt-0.5 shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: "#FEE2E2", color: ACCENT }}
+                  >
+                    <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                  </span>
+                  <span
+                    className="text-sm font-medium leading-tight pt-0.5"
+                    style={{ color: INK }}
+                  >
+                    {benefit}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={handleConfirmUpgrade}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 text-base font-semibold text-white rounded-xl py-3.5 hover:opacity-90 transition-opacity disabled:opacity-60"
+              style={{ backgroundColor: ACCENT }}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <Crown className="w-4.5 h-4.5" />
+                  Upgrade to Pro
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={() => setUpgradeModalOpen(false)}
+              className="w-full text-center text-sm font-medium mt-3 py-1"
+              style={{ color: MUTE }}
+            >
+              Maybe later
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div
   className="max-w-md w-full mx-auto rounded-2xl border bg-white p-5 sm:p-6 mt-44"

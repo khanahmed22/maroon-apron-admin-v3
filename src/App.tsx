@@ -11,7 +11,6 @@ import { notif } from "./zustand/notifStore";
 
 import { Capacitor } from "@capacitor/core";
 import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
-import FirstTimeSetup from "./pages/FirstTimeSetup";
 
 const Login = lazy(() => import("./authPages/Login"));
 const Register = lazy(() => import("./authPages/Register"));
@@ -40,6 +39,7 @@ const MerchantRefundPolicy = lazy(() => import("./policyPages/RefundPolicy"));
 const MerchantTermsAndConditions = lazy(
   () => import("./policyPages/TermsConditions"),
 );
+const FirstTimeSetup = lazy(()=> import("./pages/FirstTimeSetup"))
 
 const Cancellation = lazy(() => import("./policyPages/CancellationPolicy"));
 
@@ -59,11 +59,12 @@ function PageLoader() {
 }
 
 function ProtectedRoute() {
-  const { session, loading } = UserAuth();
+  const { session, loading,restLoading } = UserAuth();
 
-  if (loading) {
-    return <PageLoader />;
-  }
+ if (loading || restLoading) {
+     return <PageLoader />;
+   }
+
 
   if (!session) {
     return <Navigate to="/login" replace />;

@@ -226,14 +226,15 @@ const PLANS: Plan[] = [
     name: "Pro",
     price: "Rs. 1,399",
     tag: "For scaling up",
-    badge: "Most popular",
+   
     features: [
       "100 products",
       "Advanced order management",
 
       "Custom domain",
+      "Import menus with AI",
+      "No 'Powered by Maroon Apron' branding on your store",
       "Priority support",
-      "No Maroon Apron branding",
     ],
     highlighted: true,
   },

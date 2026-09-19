@@ -43,7 +43,6 @@ const INK = "#171717"
 const MUTE = "#6B7280"
 const BORDER = "#E7E5E4"
 const SOFT = "#FBF7F6"
-const GOOGLE_PLAY_ENTITLEMENT = "maroon_apron_pro"
 
 const PRO_BENEFITS = [
   "100 products",
@@ -101,7 +100,7 @@ export default function Account() {
     return res.json()
   }
 
-  const { data: merchantStatus, isPending } = useQuery({
+  const { data: merchantStatus, isPending, refetch } = useQuery({
     queryKey: ["account"],
     queryFn: getPaymentStatus,
     refetchOnWindowFocus: false,
@@ -201,14 +200,27 @@ export default function Account() {
         aPackage: currentOffering.availablePackages[0],
       })
 
-      // Confirm entitlement immediately instead of waiting on the webhook
-      const { customerInfo } = await Purchases.getCustomerInfo()
+      // The backend is the source of truth for the plan (set by the
+      // RevenueCat webhook). The webhook arrives asynchronously, so poll
+      // the account endpoint briefly instead of trusting client entitlements.
+      let upgraded = false
 
-      if (typeof customerInfo.entitlements.active[GOOGLE_PLAY_ENTITLEMENT] !== "undefined") {
-        toast.success("Subscribed! Refreshing your account...")
+      for (let i = 0; i < 10; i++) {
+        const { data } = await refetch()
+        if (data?.plan === "pro") {
+          upgraded = true
+          break
+        }
+        await new Promise((r) => setTimeout(r, 1500))
+      }
+
+      if (upgraded) {
+        toast.success("Subscribed! Your account is now Pro.")
         await checkAuth()
       } else {
-        toast.error("Purchase completed but entitlement not found. Please contact support.")
+        toast.info(
+          "Purchase received. Your plan may take a minute to update, so refresh shortly."
+        )
       }
     } catch (err:any) {
       if (err.userCancelled) return // don't show an error toast on user-cancelled purchase

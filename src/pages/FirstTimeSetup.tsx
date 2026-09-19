@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "../components/ui/button";
 import { Loader2 } from "lucide-react";
+import confetti from "@hiseb/confetti";
+
 interface RestProps {
   restId: string | null;
 }
@@ -142,7 +144,13 @@ export default function FirstTimeSetup({ restId }: RestProps) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err?.error || "Failed to complete setup");
     }
-
+    confetti({
+      count: 100,
+      size: 1,
+      velocity: 200,
+      fade: false,
+      color: ["#D6293F", "#171717", "#FBF7F6"],
+    });
     return res.json();
   };
 

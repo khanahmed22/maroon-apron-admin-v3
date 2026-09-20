@@ -16,6 +16,9 @@ import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Button } from "../components/ui/button";
 import jsPDF from "jspdf";
 import { Search, RefreshCw, Printer, Eye, Receipt, Store, Truck ,Loader2} from "lucide-react"
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Printer as PrintMobile} from "@capgo/capacitor-printer";
 
 interface CartItem {
   id: string;
@@ -139,8 +142,7 @@ const filterOrders = orderQuery?.filter((o) => {
 
 
 
-//print receipt
-
+// print receipt
 const handlePrint = async (orderNumber: string) => {
   try {
     const res = await fetch(
@@ -172,6 +174,7 @@ const handlePrint = async (orderNumber: string) => {
     y += 6;
 
     doc.setFont("courier", "normal");
+
     doc.text(`Invoice: ${receipt.orderNumber}`, 29, y, {
       align: "center",
     });
@@ -196,6 +199,7 @@ const handlePrint = async (orderNumber: string) => {
     y += 5;
 
     doc.setFont("courier", "bold");
+
     doc.text("Your Order", 29, y, {
       align: "center",
     });
@@ -203,13 +207,14 @@ const handlePrint = async (orderNumber: string) => {
     y += 6;
 
     doc.setFont("courier", "normal");
+
     doc.text("----------------------------", 29, y, {
       align: "center",
     });
 
     y += 5;
 
-    const items:InvoiceItem[] =
+    const items: InvoiceItem[] =
       typeof receipt.orderDetails === "string"
         ? JSON.parse(receipt.orderDetails)
         : receipt.orderDetails ?? [];
@@ -253,11 +258,13 @@ const handlePrint = async (orderNumber: string) => {
 
     // Grand Total
     doc.setFont("courier", "bold");
+
     doc.text("Grand Total", 5, y);
 
     y += 5;
 
     doc.setFont("courier", "normal");
+
     doc.text(String(receipt.orderTotal), 5, y);
 
     y += 8;
@@ -272,16 +279,44 @@ const handlePrint = async (orderNumber: string) => {
       align: "center",
     });
 
-    const blob = doc.output("blob");
-    const url = URL.createObjectURL(blob);
+    // =========================
+    // PRINT
+    // =========================
 
-    const win = window.open(url);
+    if (Capacitor.isNativePlatform()) {
+      // Android / iOS
+      const base64 = doc.output("datauristring").split(",")[1];
 
-    if (win) {
-      win.onload = () => {
-        win.focus();
-        win.print();
-      };
+      const fileName = `receipt-${orderNumber}.pdf`;
+
+      await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: Directory.Cache,
+      });
+
+      const { uri } = await Filesystem.getUri({
+        path: fileName,
+        directory: Directory.Cache,
+      });
+
+      await PrintMobile.printPdf({
+        name: `Receipt ${orderNumber}`,
+        path: uri,
+      });
+    } else {
+      // Browser / PC
+      const blob = doc.output("blob");
+      const url = URL.createObjectURL(blob);
+
+      const win = window.open(url);
+
+      if (win) {
+        win.onload = () => {
+          win.focus();
+          win.print();
+        };
+      }
     }
   } catch (err) {
     console.error(err);

@@ -38,6 +38,7 @@ import {
   MessageCircle,
   DatabaseSearch,
   SunMoon,
+  LocateFixed
 } from "lucide-react";
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes";
 import type { ThemeName } from "../lib/themes";
@@ -52,7 +53,8 @@ import Map from "./Map";
 import { Bell } from "lucide-react";
 import { enableNotifications, disableNotifications, fetchNotificationStatus } from "../lib/firebase";
 import { Switch } from "../components/ui/switch";
-
+import { Geolocation } from "@capacitor/geolocation";
+import { Capacitor } from "@capacitor/core";
 const CRIMSON_BASE_DOMAIN = "crimsoncastle.shop";
 
 const ACCENT = "#D6293F";
@@ -269,7 +271,7 @@ export default function Settings({ restId }: { restId: string | null }) {
 
   const getPaymentStatus = async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/paddle/account`,
+      `${import.meta.env.VITE_BACKEND_URL}/account/paddle`,
       {
         credentials: "include",
       },
@@ -934,9 +936,14 @@ export default function Settings({ restId }: { restId: string | null }) {
       setDisablingNotifs(false);
     }
   };
+ const DEFAULT_LAT = 24.8607; // Karachi, adjust to wherever makes sense for your merchants
+ const DEFAULT_LONG = 67.0011;
 
-  const lat = restDetails?.getRest?.lat || 0;
-  const long = restDetails?.getRest?.long || 0;
+ 
+
+   const hasSavedLocation = !!(restDetails?.getRest?.lat && restDetails?.getRest?.long);
+  const lat = restDetails?.getRest?.lat || DEFAULT_LAT;
+const long = restDetails?.getRest?.long || DEFAULT_LONG;
 
   // ================= PICKUP LOCATION (VIEW MODE MAP EDIT) =================
   const [pendingLocation, setPendingLocation] = useState<{
@@ -989,6 +996,64 @@ export default function Settings({ restId }: { restId: string | null }) {
     setPendingLocation(null);
     setLocationResetToken((t) => t + 1);
   };
+
+  const [locatingUser, setLocatingUser] = useState(false);
+
+const handleUseCurrentLocation = async () => {
+  setLocatingUser(true);
+
+  try {
+    if (Capacitor.isNativePlatform()) {
+      const permStatus = await Geolocation.checkPermissions();
+
+      if (permStatus.location !== "granted") {
+        const requested = await Geolocation.requestPermissions();
+        if (requested.location !== "granted") {
+          toast.error("Location permission denied");
+          return;
+        }
+      }
+
+      const position = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+      });
+
+      setPendingLocation({
+        lat: position.coords.latitude,
+        long: position.coords.longitude,
+      });
+    } else {
+      if (!navigator.geolocation) {
+        toast.error("Geolocation isn't supported in this browser");
+        return;
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setPendingLocation({
+              lat: position.coords.latitude,
+              long: position.coords.longitude,
+            });
+            resolve();
+          },
+          (err) => reject(err),
+          { enableHighAccuracy: true, timeout: 10000 },
+        );
+      });
+    }
+  } catch (err: any) {
+    console.error(err);
+    if (err?.code === 1) {
+      toast.error("Location permission denied");
+    } else {
+      toast.error("Couldn't get your location");
+    }
+  } finally {
+    setLocatingUser(false);
+  }
+};
 
   function isValidTimeWindow(value: string): boolean {
     const timePattern = /^(\d{1,2})(:\d{2})?\s*(am|pm)?$/i;
@@ -1846,6 +1911,7 @@ export default function Settings({ restId }: { restId: string | null }) {
               </div>
 
               {/* Pickup location editor */}
+                            {/* Pickup location editor */}
               {pickupLocEditMode && (
                 <div
                   className="bg-white rounded-2xl border p-6"
@@ -1877,15 +1943,32 @@ export default function Settings({ restId }: { restId: string | null }) {
                           onClick={() => updateLocationM(pendingLocation)}
                         >
                           {locationSaving ? "Saving…" : "Save Location"}
+
+
                         </Button>
                       </div>
                     )}
+                    
                   </div>
+                  
 
-                  <p className="text-xs mb-3" style={{ color: MUTE }}>
-                    Click on the map, or drag the pin, to update your pickup
-                    location
+                  
+
+               
+                 <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                   <p className="text-xs" style={{ color: MUTE }}>
+                    {hasSavedLocation ?"Click on the map, or drag the pin, to update your pickup location":"No pickup location set yet — click the map, drag the pin, or use your current location below"}
+                    
                   </p>
+                  <Button
+                   variant="outline"
+                     disabled={locatingUser}
+                     onClick={handleUseCurrentLocation}
+                    className="h-8 rounded-lg text-xs px-3 gap-1.5 shrink-0"                    >
+                    {locatingUser ? (                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                     ) : (                       <LocateFixed className="w-3.5 h-3.5" style={{ color: ACCENT }} />
+                    )}                    Use my current location                   </Button>
+                </div>
 
                   <Map
                     latitude={pendingLocation?.lat ?? lat}

@@ -153,7 +153,7 @@ export default function Inventory({ restId, restName }: restProps) {
 
   const getPaymentStatus = async () => {
     const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/paddle/account`,
+      `${import.meta.env.VITE_BACKEND_URL}/account/paddle`,
       {
         credentials: "include",
       },
@@ -168,6 +168,9 @@ export default function Inventory({ restId, restName }: restProps) {
     queryKey: ["account"],
     queryFn: getPaymentStatus,
     refetchOnWindowFocus: false,
+    enabled:!session?.id,
+    staleTime: 5 * 60 * 1000,
+
   });
 
   //add item

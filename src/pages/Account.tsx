@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router"
 import { UserAuth } from "../context/AuthContext"
-import { useQuery,useMutation } from "@tanstack/react-query"
+import { useQuery,useMutation,useQueryClient } from "@tanstack/react-query"
 import { initPaddle } from "../lib/paddle"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -56,6 +56,7 @@ const PRO_BENEFITS = [
 export default function Account() {
   const navigate = useNavigate()
   const { session, checkAuth } = UserAuth()
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false)
@@ -79,6 +80,7 @@ export default function Account() {
       console.log(data)
 
       await checkAuth()
+      queryClient.clear()
       navigate("/login")
     } catch (err) {
       console.log(err)
@@ -104,6 +106,8 @@ export default function Account() {
     queryKey: ["account"],
     queryFn: getPaymentStatus,
     refetchOnWindowFocus: false,
+    enabled: !!session?.id,
+    staleTime: 5 * 60 * 1000,
   })
 
   const handleManageSubscription = async () => {

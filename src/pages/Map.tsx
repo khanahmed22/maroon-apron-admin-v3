@@ -79,11 +79,22 @@ export default function Map({
   return (
     <MapContainer center={position} zoom={15} style={{ width: "100%", height: "400px" }}>
       <TileLayer
-        attribution="&copy; OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+       
+         attribution="Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ"
+      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+      maxZoom={19}
       />
       <LocationMarker position={position} editable={editable} onLocationChange={handleChange} />
       <RecenterOnChange position={position} />
+      <InvalidateSizeOnMount />
     </MapContainer>
   );
 }
+
+function InvalidateSizeOnMount() {
+  const map = useMap();
+  useEffect(() => {
+    const id = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(id);
+  }, [map]);
+  return null;}

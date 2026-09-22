@@ -15,10 +15,11 @@ import { Input } from "../components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Button } from "../components/ui/button";
 import jsPDF from "jspdf";
-import { Search, RefreshCw, Printer, Eye, Receipt, Store, Truck ,Loader2} from "lucide-react"
+import { Search, RefreshCw, Printer, Eye, Receipt, Store, Truck ,Loader2,Share2} from "lucide-react"
 import { Capacitor } from "@capacitor/core";
 import { Filesystem, Directory } from "@capacitor/filesystem";
 import { Printer as PrintMobile} from "@capgo/capacitor-printer";
+import { Share } from "@capacitor/share";
 
 interface CartItem {
   id: string;
@@ -323,6 +324,64 @@ const handlePrint = async (orderNumber: string) => {
     toast.error("Failed to print receipt");
   }
 };
+
+//share order
+
+const handleShareOrder = async (o: OrderProps) => {
+  try {
+    const items = o.orderDetails
+      .map((item) => {
+        const quantity = item.quantity ?? 1;
+        const price = item.variantPrice ?? item.price ?? 0;
+
+        return `${quantity}x ${item.name}${
+          item.variantName ? ` (${item.variantName})` : ""
+        } - Rs. ${price * quantity}`;
+      })
+      .join("\n");
+
+    const message = [
+      `Order #${o.orderNumber}`,
+      `Customer: ${o.custName}`,
+      `Phone: ${o.custPhone}`,
+      "",
+      "Items:",
+      items,
+      "",
+      o.deliveryFee ? `Delivery Fee: Rs. ${o.deliveryFee}` : "",
+      `Total: Rs. ${o.orderTotal}`,
+      "",
+      o.custAddress ? `Delivery Address: ${o.custAddress}` : "",
+      o.deliveryArea ? `Delivery Area: ${o.deliveryArea}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    if (Capacitor.isNativePlatform()) {
+      await Share.share({
+        title: `Order #${o.orderNumber}`,
+        text: message,
+        dialogTitle: "Share Order",
+      });
+    } else if (navigator.share) {
+      await navigator.share({
+        title: `Order #${o.orderNumber}`,
+        text: message,
+      });
+    } else {
+      await navigator.clipboard.writeText(message);
+      toast.success("Order details copied to clipboard");
+    }
+  } catch (err) {
+    console.error(err);
+    
+    // User cancelling the share sheet isn't really an error
+    if ((err as Error)?.name !== "AbortError") {
+      toast.error("Failed to share order");
+    }
+  }
+};
+
 const ACCENT = "#D6293F"
 const INK = "#171717"
 const MUTE = "#6B7280"
@@ -584,15 +643,27 @@ function MethodBadge({ method }: { method: string }) {
                 
                 <div className="flex items-center gap-4">
                   <OrderDetailsDialog o={o} />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handlePrint(o.orderNumber)}
-                    className="rounded-lg gap-1.5 text-base"
-                  >
-                    <Printer className="w-4 h-4" />
-                    Print
-                  </Button>
+                 <OrderDetailsDialog o={o} />
+
+<Button
+  variant="outline"
+  size="sm"
+  onClick={() => handleShareOrder(o)}
+  className="rounded-lg gap-1.5 text-base"
+>
+  <Share2 className="w-4 h-4" />
+  Share
+</Button>
+
+<Button
+  variant="outline"
+  size="sm"
+  onClick={() => handlePrint(o.orderNumber)}
+  className="rounded-lg gap-1.5 text-base"
+>
+  <Printer className="w-4 h-4" />
+  Print
+</Button>
                 </div>
               </div>
             </div>
@@ -663,14 +734,24 @@ function MethodBadge({ method }: { method: string }) {
  
                   <td className="p-4">
                     <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePrint(o.orderNumber)}
-                      className="rounded-lg gap-1.5 text-base"
-                    >
-                      <Printer className="w-4 h-4" />
-                      Print
-                    </Button>
+  variant="outline"
+  size="sm"
+  onClick={() => handleShareOrder(o)}
+  className="rounded-lg gap-1.5 text-base"
+>
+  <Share2 className="w-4 h-4" />
+  Share
+</Button>
+
+<Button
+  variant="outline"
+  size="sm"
+  onClick={() => handlePrint(o.orderNumber)}
+  className="rounded-lg gap-1.5 text-base"
+>
+  <Printer className="w-4 h-4" />
+  Print
+</Button>
                   </td>
                 </tr>
               ))

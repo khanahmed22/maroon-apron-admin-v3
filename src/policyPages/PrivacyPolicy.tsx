@@ -138,6 +138,10 @@ export default function PrivacyPolicy() {
                 Umami Cloud (privacy-focused website usage analytics)
               </li>
               <li>
+                <span className="font-medium text-foreground">Analytics:</span>{" "}
+                PostHog (product analytics and usage insights)
+              </li>
+              <li>
                 <span className="font-medium text-foreground">
                   Uptime monitoring:
                 </span>{" "}
@@ -157,7 +161,7 @@ export default function PrivacyPolicy() {
             <p className="text-muted-foreground">
               Merchant data may be processed or stored outside your country of
               residence, including by service providers such as Paddle, Resend,
-              Sentry, Umami Cloud, and UptimeRobot, which may operate
+              Sentry, Umami Cloud, PostHog and UptimeRobot, which may operate
               infrastructure in the United States, European Union, or other
               jurisdictions. Where international transfers occur, appropriate
               safeguards are applied to protect your information.

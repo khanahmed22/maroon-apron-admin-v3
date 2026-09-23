@@ -22,6 +22,8 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { Capacitor } from "@capacitor/core";
+import { PostHogProvider } from '@posthog/react'
+
 
 const queryClient = new QueryClient();
 
@@ -74,16 +76,27 @@ const root = createRoot(container, {
   }),
 });
 
+//posthog
+
+const options = {
+  api_host: import.meta.env.VITE_POSTHOG_HOST,
+  defaults: '2026-05-30',
+} as const
+
+
 root.render(
   <StrictMode>
+    <PostHogProvider apiKey={import.meta.env.VITE_POSTHOG_PROJECT_TOKEN} options={options}>
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <BrowserRouter>
+
           <App />
         </BrowserRouter>
       </AuthContextProvider>
 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
+    </PostHogProvider>
   </StrictMode>
 );

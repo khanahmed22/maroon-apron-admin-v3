@@ -1,15 +1,29 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import jsPDF from "jspdf";
+import { Capacitor } from "@capacitor/core";
+import { Filesystem, Directory } from "@capacitor/filesystem";
+import { Share } from "@capacitor/share";
 
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from "recharts";
 
-import { TrendingUp, Package, DollarSign, ShoppingCart, RefreshCcw } from "lucide-react";
+import { TrendingUp, Package, DollarSign, ShoppingCart, RefreshCcw, Download, Loader2 } from "lucide-react";
 
 interface AnalyticsProps {
   restId: string | null;
@@ -76,6 +90,17 @@ interface InventoryStatus {
   price: number;
 }
 
+interface InventoryResponse {
+  status: string;
+  source: string;
+  data: InventProps[];
+}
+
+interface AnalyticsQueryResult {
+  orders: OrderProps[];
+  menuItems: InventProps[];
+}
+
 function isoDayKey(d: Date): string {
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -111,6 +136,13 @@ function formatMoney(amount: number): string {
   })}`;
 }
 
+function formatDisplayDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 function getUnitCost(cartItem: CartItemSnapshot, menuItem?: InventProps): number {
   if (!menuItem) return 0;
@@ -127,18 +159,98 @@ function getUnitCost(cartItem: CartItemSnapshot, menuItem?: InventProps): number
   return toNumber(menuItem.costPrice);
 }
 
+// Pulled out of the component so both the live dashboard (via useMemo) and
+// the on-demand PDF report generator can compute the same figures for
+// whatever date range each of them needs, without duplicating the logic.
+function computeAnalytics(orders: OrderProps[], menuItems: InventProps[]) {
+  const menuById: Record<string, InventProps> = {};
+  menuItems.forEach((item) => {
+    menuById[item.id] = item;
+  });
+
+  let totalRevenue = 0;
+  let totalCostMaking = 0;
+  let totalDeliveryFees = 0;
+  const dailyRevenueMap: Record<string, number> = {};
+  const itemSales: Record<string, TopItem> = {};
+
+  orders.forEach((order) => {
+    const dayKey = isoDayKey(new Date(order.createdAt));
+
+    const orderRevenue = toNumber(order.orderTotal);
+    const deliveryFee = toNumber(order.deliveryFee);
+
+    totalRevenue += orderRevenue;
+    totalDeliveryFees += deliveryFee;
+
+    if (!dailyRevenueMap[dayKey]) dailyRevenueMap[dayKey] = 0;
+    dailyRevenueMap[dayKey] += orderRevenue;
+
+    let details: CartItemSnapshot[] = [];
+    if (typeof order.orderDetails === "string") {
+      try { details = JSON.parse(order.orderDetails); } catch { details = []; }
+    } else if (Array.isArray(order.orderDetails)) {
+      details = order.orderDetails;
+    }
+
+    details.forEach((item) => {
+      const menuItem = menuById[item.dbId];
+      const name = item.variantName ? `${item.name} (${item.variantName})` : (item.name || "Unknown Item");
+      const qty = Math.max(1, toNumber(item.quantity));
+      const itemRevenue = toNumber(item.price);
+
+      const unitCost = getUnitCost(item, menuItem);
+      const itemCost = unitCost * qty;
+      totalCostMaking += itemCost;
+
+      if (!itemSales[name]) itemSales[name] = { name, quantity: 0, revenue: 0 };
+      itemSales[name].quantity += qty;
+      itemSales[name].revenue += itemRevenue;
+    });
+  });
+
+  const profit = totalRevenue - totalCostMaking - totalDeliveryFees;
+  const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+
+  const totalOrders = orders?.length || 0;
+  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  const topItems: TopItem[] = Object.values(itemSales)
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 10)
+    .map((x) => ({ ...x, revenue: parseFloat(x.revenue.toFixed(2)) }));
+
+  const revenueByDay: RevenueByDay[] = Object.entries(dailyRevenueMap)
+    .map(([date, revenue]) => ({ date, revenue: parseFloat(revenue.toFixed(2)) }))
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const inventoryStatus: InventoryStatus[] = menuItems?.map((item) => ({
+    name: item.name || "Unnamed",
+    category: item.category || "",
+    stockAmount: toNumber(item.stockAmount),
+    status: toNumber(item.stockAmount) > 0 ? "In Stock" : "Out of Stock",
+    costPrice: toNumber(item.costPrice),
+    price: toNumber(item.price),
+  })) || [];
+
+  return {
+    totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+    totalOrders,
+    averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
+    profit: parseFloat(profit.toFixed(2)),
+    profitMargin: parseFloat(profitMargin.toFixed(2)),
+    topItems,
+    revenueByDay,
+    inventoryStatus,
+  };
+}
+
 interface KPICardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
   trend?: string;
   bgColor: string;
-}
-
-interface InventoryResponse {
-  status: string;
-  source: string;
-  data: InventProps[];
 }
 
 const ACCENT = "#D6293F"
@@ -170,6 +282,8 @@ function KPICard({ title, value, icon, trend, bgColor }: KPICardProps) {
 
 export default function Analytics({ restId }: AnalyticsProps) {
 
+  const queryClient = useQueryClient();
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const [rangePreset, setRangePreset] = useState<string>("7d");
   const [startDate, setStartDate] = useState<string>(() => {
@@ -179,56 +293,94 @@ export default function Analytics({ restId }: AnalyticsProps) {
   });
   const [endDate, setEndDate] = useState<string>(() => isoDayKey(new Date()));
 
+  // Today, in the same yyyy-mm-dd shape as the date inputs use — the hard
+  // ceiling for both the dashboard range and the report range.
+  const todayKey = isoDayKey(new Date());
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [orders, setOrders] = useState<OrderProps[]>([]);
-  const [menuItems, setMenuItems] = useState<InventProps[]>([]);
-  const [error, setError] = useState<string>("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportStart, setReportStart] = useState<string>(startDate);
+  const [reportEnd, setReportEnd] = useState<string>(todayKey);
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportError, setReportError] = useState<string>("");
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  // ---- Orders + inventory for the dashboard's selected range ----
+  const fetchOrdersAndMenu = async (): Promise<AnalyticsQueryResult> => {
+    if (!restId) throw new Error("Missing restaurant");
 
+    const from = startOfDay(new Date(startDate)).toISOString();
+    const to = endOfDay(new Date(endDate)).toISOString();
 
-  const fetchOrdersAndMenu = async () => {
-    if (!restId) {
-      setError("Missing restaurant");
-      return;
-    }
-    setLoading(true);
-    setError("");
-    try {
-      const from = startOfDay(new Date(startDate)).toISOString();
-      const to = endOfDay(new Date(endDate)).toISOString();
+    const [ordersRes, menuRes] = await Promise.all([
+      fetch(`${BACKEND_URL}/analytics/orders/${restId}?from=${from}&to=${to}`, {
+        credentials: "include",
+      }),
+      fetch(`${BACKEND_URL}/inventory`, {
+        credentials: "include",
+      }),
+    ]);
 
-      const [ordersRes, menuRes] = await Promise.all([
-  fetch(`${BACKEND_URL}/analytics/orders/${restId}?from=${from}&to=${to}`, {
-    credentials: "include",
-  }),
-  fetch(`${BACKEND_URL}/inventory`, {
-    credentials: "include",
-  }),
-]);
+    if (!ordersRes.ok) throw new Error("Failed to load orders");
+    if (!menuRes.ok) throw new Error("Failed to load inventory");
 
-      if (!ordersRes.ok) throw new Error("Failed to load orders");
-      if (!menuRes.ok) throw new Error("Failed to load inventory");
+    const ordersData: OrderProps[] = await ordersRes.json();
+    const menuData: InventoryResponse = await menuRes.json();
 
-      const ordersData: OrderProps[] = await ordersRes.json();
-     const menuData: InventoryResponse = await menuRes.json();
-
-
-
-      setOrders(Array.isArray(ordersData) ? ordersData : []);
-setMenuItems(menuData.data ?? []);    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load analytics data");
-      console.error("[Analytics] Fetch error:", e);
-    } finally {
-      setLoading(false);
-    }
+    return {
+      orders: Array.isArray(ordersData) ? ordersData : [],
+      menuItems: menuData.data ?? [],
+    };
   };
 
-  useEffect(() => {
-    if (restId) fetchOrdersAndMenu();
-  }, [restId, startDate, endDate]);
+  const {
+    data: analyticsQueryData,
+    isPending: loading,
+    isError,
+    error: queryError,
+    refetch,
+  } = useQuery<AnalyticsQueryResult>({
+    queryKey: ["analytics", restId, startDate, endDate],
+    queryFn: fetchOrdersAndMenu,
+    enabled: !!restId,
+    staleTime: 5 * 60 * 1000,
+  });
 
+  const orders = analyticsQueryData?.orders ?? [];
+  const menuItems = analyticsQueryData?.menuItems ?? [];
+  const error = isError
+    ? queryError instanceof Error
+      ? queryError.message
+      : "Failed to load analytics data"
+    : "";
+
+  // ---- Earliest order date, used as the floor for the report's picker ----
+  const fetchEarliestOrderDate = async (): Promise<string | null> => {
+    if (!restId) return null;
+    const from = new Date(2015, 0, 1).toISOString();
+    const to = endOfDay(new Date()).toISOString();
+    const res = await fetch(
+      `${BACKEND_URL}/analytics/orders/${restId}?from=${from}&to=${to}`,
+      { credentials: "include" }
+    );
+    if (!res.ok) throw new Error("Failed to determine sales history");
+
+    const allOrders: OrderProps[] = await res.json();
+    if (!Array.isArray(allOrders) || allOrders.length === 0) return null;
+
+    const earliest = allOrders.reduce(
+      (min, o) => Math.min(min, new Date(o.createdAt).getTime()),
+      Infinity
+    );
+    return Number.isFinite(earliest) ? isoDayKey(new Date(earliest)) : null;
+  };
+
+  const { data: earliestOrderDate = null } = useQuery<string | null>({
+    queryKey: ["earliestOrderDate", restId],
+    queryFn: fetchEarliestOrderDate,
+    enabled: !!restId,
+    // The first-ever order date only ever moves forward once new sales
+    // history exists; there's no need to refetch this often.
+    staleTime: 30 * 60 * 1000,
+  });
 
   const applyPreset = (preset: string) => {
     setRangePreset(preset);
@@ -261,92 +413,18 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
     }
   };
 
-  
-  const analyticsData = useMemo(() => {
+  // Manual refresh: invalidate rather than just refetch, so every cached
+  // date-range variation of this restaurant's analytics (and the earliest-
+  // order lookup) is marked stale and refetched, not just the active one.
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ["analytics", restId] });
+    queryClient.invalidateQueries({ queryKey: ["earliestOrderDate", restId] });
+  };
 
-   
-    const menuById: Record<string, InventProps> = {};
-    menuItems.forEach((item) => {
-      menuById[item.id] = item;
-    });
-
-    let totalRevenue = 0;
-    let totalCostMaking = 0;
-    let totalDeliveryFees = 0;
-    const dailyRevenueMap: Record<string, number> = {};
-    const itemSales: Record<string, TopItem> = {};
-
-    orders.forEach((order) => {
-      const dayKey = isoDayKey(new Date(order.createdAt));
-
-      const orderRevenue = toNumber(order.orderTotal);
-      const deliveryFee = toNumber(order.deliveryFee);
-
-      totalRevenue += orderRevenue;
-      totalDeliveryFees += deliveryFee;
-
-      if (!dailyRevenueMap[dayKey]) dailyRevenueMap[dayKey] = 0;
-      dailyRevenueMap[dayKey] += orderRevenue;
-
-      let details: CartItemSnapshot[] = [];
-      if (typeof order.orderDetails === "string") {
-        try { details = JSON.parse(order.orderDetails); } catch { details = []; }
-      } else if (Array.isArray(order.orderDetails)) {
-        details = order.orderDetails;
-      }
-
-      details.forEach((item) => {
-        const menuItem = menuById[item.dbId];
-        const name = item.variantName ? `${item.name} (${item.variantName})` : (item.name || "Unknown Item");
-        const qty = Math.max(1, toNumber(item.quantity));
-        const itemRevenue = toNumber(item.price);
-
-       
-        const unitCost = getUnitCost(item, menuItem);
-        const itemCost = unitCost * qty;
-        totalCostMaking += itemCost;
-
-        if (!itemSales[name]) itemSales[name] = { name, quantity: 0, revenue: 0 };
-        itemSales[name].quantity += qty;
-        itemSales[name].revenue += itemRevenue;
-      });
-    });
-
-    const profit = totalRevenue - totalCostMaking - totalDeliveryFees;
-    const profitMargin = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
-
-    const totalOrders = orders?.length || 0;
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-    const topItems: TopItem[] = Object.values(itemSales)
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 10)
-      .map((x) => ({ ...x, revenue: parseFloat(x.revenue.toFixed(2)) }));
-
-    const revenueByDay: RevenueByDay[] = Object.entries(dailyRevenueMap)
-      .map(([date, revenue]) => ({ date, revenue: parseFloat(revenue.toFixed(2)) }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const inventoryStatus: InventoryStatus[] = menuItems?.map((item) => ({
-      name: item.name || "Unnamed",
-      category: item.category || "",
-      stockAmount: toNumber(item.stockAmount),
-      status: toNumber(item.stockAmount) > 0 ? "In Stock" : "Out of Stock",
-      costPrice: toNumber(item.costPrice),
-      price: toNumber(item.price),
-    })) || [];
-
-    return {
-      totalRevenue: parseFloat(totalRevenue.toFixed(2)),
-      totalOrders,
-      averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
-      profit: parseFloat(profit.toFixed(2)),
-      profitMargin: parseFloat(profitMargin.toFixed(2)),
-      topItems,
-      revenueByDay,
-      inventoryStatus,
-    };
-  }, [orders, menuItems]);
+  const analyticsData = useMemo(
+    () => computeAnalytics(orders, menuItems),
+    [orders, menuItems]
+  );
 
   const {
     totalRevenue = 0, totalOrders = 0, averageOrderValue = 0,
@@ -356,8 +434,194 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
   const COLORS = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"];
   const INK = "#171717"
 
+  // Report data for an arbitrary merchant-picked range is fetched through
+  // the query client too (not a plain fetch), so it benefits from the same
+  // cache/dedupe as the dashboard and stays consistent with it — a range
+  // that matches what's already on screen won't refire the request.
+  const fetchReportOrders = async (from: string, to: string): Promise<OrderProps[]> => {
+    if (!restId) throw new Error("Missing restaurant");
+    const res = await fetch(
+      `${BACKEND_URL}/analytics/orders/${restId}?from=${from}&to=${to}`,
+      { credentials: "include" }
+    );
+    if (!res.ok) throw new Error("Failed to load report data");
+    const data: OrderProps[] = await res.json();
+    return Array.isArray(data) ? data : [];
+  };
+
+  const handleDownloadReport = async () => {
+    if (!restId) return;
+    setReportLoading(true);
+    setReportError("");
+    try {
+      const from = startOfDay(new Date(reportStart)).toISOString();
+      const to = endOfDay(new Date(reportEnd)).toISOString();
+
+      const reportOrders = await queryClient.fetchQuery({
+        queryKey: ["reportOrders", restId, reportStart, reportEnd],
+        queryFn: () => fetchReportOrders(from, to),
+        staleTime: 5 * 60 * 1000,
+      });
+
+      const report = computeAnalytics(reportOrders, menuItems);
+
+      const doc = new jsPDF({ unit: "mm", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 15;
+      let y = 20;
+
+      const checkPageBreak = (needed = 10) => {
+        if (y + needed > pageHeight - 15) {
+          doc.addPage();
+          y = 20;
+        }
+      };
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("Sales Report", pageWidth / 2, y, { align: "center" });
+      y += 8;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(107, 114, 128);
+      doc.text(
+        `${formatDisplayDate(reportStart)} - ${formatDisplayDate(reportEnd)}`,
+        pageWidth / 2,
+        y,
+        { align: "center" }
+      );
+      y += 5;
+      doc.text(`Generated on ${new Date().toLocaleString()}`, pageWidth / 2, y, {
+        align: "center",
+      });
+      y += 10;
+      doc.setTextColor(23, 23, 23);
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("Summary", marginX, y);
+      y += 7;
+
+      const kpis: [string, string][] = [
+        ["Total Revenue", formatMoney(report.totalRevenue)],
+        ["Total Orders", String(report.totalOrders)],
+        ["Average Order Value", formatMoney(report.averageOrderValue)],
+        ["Profit Margin", `${report.profitMargin.toFixed(1)}%`],
+        ["Actual Profit", formatMoney(report.profit)],
+      ];
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      kpis.forEach(([label, value]) => {
+        checkPageBreak(8);
+        doc.text(label, marginX, y);
+        doc.text(value, pageWidth - marginX, y, { align: "right" });
+        y += 7;
+      });
+      y += 5;
+
+      checkPageBreak(15);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("Revenue by Day", marginX, y);
+      y += 7;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("Date", marginX, y);
+      doc.text("Revenue", pageWidth - marginX, y, { align: "right" });
+      y += 5;
+      doc.setDrawColor(231, 229, 228);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 5;
+
+      doc.setFont("helvetica", "normal");
+      if (report.revenueByDay.length === 0) {
+        doc.text("No orders in this range", marginX, y);
+        y += 6;
+      } else {
+        report.revenueByDay.forEach((row) => {
+          checkPageBreak(7);
+          doc.text(row.date, marginX, y);
+          doc.text(formatMoney(row.revenue), pageWidth - marginX, y, { align: "right" });
+          y += 6;
+        });
+      }
+      y += 6;
+
+      checkPageBreak(15);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("Top Selling Items", marginX, y);
+      y += 7;
+
+      doc.setFontSize(10);
+      doc.text("Item", marginX, y);
+      doc.text("Qty", pageWidth - marginX - 35, y, { align: "right" });
+      doc.text("Revenue", pageWidth - marginX, y, { align: "right" });
+      y += 5;
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 5;
+
+      doc.setFont("helvetica", "normal");
+      if (report.topItems.length === 0) {
+        doc.text("No items sold in this range", marginX, y);
+        y += 6;
+      } else {
+        report.topItems.forEach((item) => {
+          checkPageBreak(7);
+          const label = item.name.length > 40 ? item.name.slice(0, 40) + "…" : item.name;
+          doc.text(label, marginX, y);
+          doc.text(String(item.quantity), pageWidth - marginX - 35, y, { align: "right" });
+          doc.text(formatMoney(item.revenue), pageWidth - marginX, y, { align: "right" });
+          y += 6;
+        });
+      }
+
+      const fileName = `sales-report-${reportStart}-to-${reportEnd}.pdf`;
+
+      if (Capacitor.isNativePlatform()) {
+        // There's no OS "Downloads" folder API on native without an extra
+        // plugin, so mirror the print flow in Orders.tsx: write to cache,
+        // then hand off to the native share sheet so the merchant can save
+        // it to Files, Drive, email, etc.
+        const base64 = doc.output("datauristring").split(",")[1];
+
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64,
+          directory: Directory.Cache,
+        });
+
+        const { uri } = await Filesystem.getUri({
+          path: fileName,
+          directory: Directory.Cache,
+        });
+
+        await Share.share({
+          title: "Sales Report",
+          text: `Sales report ${reportStart} to ${reportEnd}`,
+          url: uri,
+          dialogTitle: "Save or Share Report",
+        });
+      } else {
+        // Browser / PC — normal download.
+        doc.save(fileName);
+      }
+
+      setReportOpen(false);
+    } catch (e) {
+      console.error("[Analytics] Failed to generate report:", e);
+      setReportError(e instanceof Error ? e.message : "Failed to generate report");
+    } finally {
+      setReportLoading(false);
+    }
+  };
 
   
+
   return (
      <div className="min-h-screen p-3 sm:p-6" style={{ backgroundColor: SOFT }}>
       <div className="max-w-7xl mx-auto">
@@ -366,15 +630,106 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
           <h1 className="text-2xl sm:text-3xl font-extrabold" style={{ color: INK }}>
             Analytics
           </h1>
-          <Button
-            variant="outline"
-            onClick={fetchOrdersAndMenu}
-            disabled={loading}
-            className="gap-2 w-fit rounded-xl h-9 sm:h-11 text-sm sm:text-base bg-white"
-          >
-            <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} style={{ color: ACCENT }} />
-            Refresh
-          </Button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setReportStart(earliestOrderDate ?? todayKey);
+                    setReportEnd(todayKey);
+                    setReportError("");
+                  }}
+                  className="gap-2 w-fit rounded-xl h-9 sm:h-11 text-sm sm:text-base bg-white"
+                >
+                  <Download className="h-4 w-4" style={{ color: ACCENT }} />
+                  Download Report
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md rounded-xl">
+                <DialogHeader>
+                  <DialogTitle>Download Sales Report</DialogTitle>
+                  <DialogDescription>
+                    Choose a date range to include in the PDF report.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="grid grid-cols-2 gap-3 py-2">
+                  <div>
+                    <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>
+                      Start Date
+                    </div>
+                    <Input
+                      type="date"
+                      value={reportStart}
+                      min={earliestOrderDate ?? undefined}
+                      max={reportEnd}
+                      onChange={(e) => setReportStart(e.target.value)}
+                      className="rounded-xl h-10 text-sm"
+                      style={{ borderColor: BORDER }}
+                    />
+                  </div>
+                  <div>
+                    <div className="text-xs font-medium mb-1.5" style={{ color: MUTE }}>
+                      End Date
+                    </div>
+                    <Input
+                      type="date"
+                      value={reportEnd}
+                      min={reportStart}
+                      max={todayKey}
+                      onChange={(e) => setReportEnd(e.target.value)}
+                      className="rounded-xl h-10 text-sm"
+                      style={{ borderColor: BORDER }}
+                    />
+                  </div>
+                </div>
+
+                {!earliestOrderDate && (
+                  <p className="text-xs" style={{ color: MUTE }}>
+                    No sales history found yet — showing today by default.
+                  </p>
+                )}
+                {reportError && (
+                  <p className="text-xs font-medium" style={{ color: ACCENT }}>
+                    {reportError}
+                  </p>
+                )}
+
+                <DialogFooter>
+                  <Button
+                    onClick={handleDownloadReport}
+                    disabled={reportLoading}
+                    className="w-full sm:w-fit rounded-xl text-white gap-2"
+                    style={{ backgroundColor: ACCENT }}
+                  >
+                    {reportLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        Generate PDF
+                      </>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Button
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="gap-2 w-fit rounded-xl h-9 sm:h-11 text-sm sm:text-base bg-white"
+            >
+              <RefreshCcw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} style={{ color: ACCENT }} />
+              Refresh
+            </Button>
+          </div>
         </div>
  
         <div className="bg-white rounded-2xl border p-3 sm:p-5 mb-5 sm:mb-8" style={{ borderColor: BORDER }}>
@@ -418,7 +773,7 @@ setMenuItems(menuData.data ?? []);    } catch (e) {
  
             <div className="col-span-2 lg:col-span-3 flex items-end">
               <Button
-                onClick={fetchOrdersAndMenu}
+                onClick={() => refetch()}
                 disabled={loading}
                 className="w-full lg:w-fit h-10 sm:h-11 rounded-xl text-sm sm:text-base text-white"
                 style={{ backgroundColor: ACCENT }}

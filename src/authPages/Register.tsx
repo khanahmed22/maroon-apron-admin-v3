@@ -3,7 +3,7 @@ import { UserAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
 import { useNavigate } from "react-router";
-import { usePostHog } from "@posthog/react";
+import { usePostHog } from "../lib/posthog";
 
 export default function Register(){
   const [name,setName] = useState<string>("")

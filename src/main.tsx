@@ -22,8 +22,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { Capacitor } from "@capacitor/core";
-import { PostHogProvider } from '@posthog/react'
-
+import { initPostHog } from "./lib/posthog.ts";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +55,20 @@ registerServiceWorker()
 
 listenForMessages()
 
+//posthog
+
+function deferPostHog() {
+  const start = () => void initPostHog();
+ const schedule = () =>
+   "requestIdleCallback" in window
+     ? requestIdleCallback(start, { timeout: 4000 })
+    : setTimeout(start, 2000); // Safari fallback
+
+ if (document.readyState === "complete") schedule();  else window.addEventListener("load", schedule, { once: true });
+}
+
+deferPostHog();
+
 const container = document.getElementById("root");
 
 if (!container) {
@@ -76,17 +89,12 @@ const root = createRoot(container, {
   }),
 });
 
-//posthog
 
-const options = {
-  api_host: import.meta.env.VITE_POSTHOG_HOST,
-  defaults: '2026-05-30',
-} as const
 
 
 root.render(
   <StrictMode>
-    <PostHogProvider apiKey={import.meta.env.VITE_POSTHOG_PROJECT_TOKEN} options={options}>
+  
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <BrowserRouter>
@@ -97,6 +105,6 @@ root.render(
 
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-    </PostHogProvider>
+
   </StrictMode>
 );

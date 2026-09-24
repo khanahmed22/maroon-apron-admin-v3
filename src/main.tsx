@@ -14,25 +14,11 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import * as Sentry from "@sentry/react";
 import "../SentryConfig.ts";
-
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { Capacitor } from "@capacitor/core";
 import { initPostHog } from "./lib/posthog.ts";
 
 const queryClient = new QueryClient();
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
 
 // src/serviceWorkerRegistration.ts
 // Call this once from main.tsx: registerServiceWorker();

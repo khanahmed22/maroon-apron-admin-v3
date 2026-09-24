@@ -15,7 +15,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import * as Sentry from "@sentry/react";
 import "../SentryConfig.ts";
 import { Capacitor } from "@capacitor/core";
-import { initPostHog } from "./lib/posthog.ts";
+//import { initPostHog } from "./lib/posthog.ts";
 
 const queryClient = new QueryClient();
 
@@ -43,17 +43,17 @@ listenForMessages()
 
 //posthog
 
-function deferPostHog() {
-  const start = () => void initPostHog();
- const schedule = () =>
-   "requestIdleCallback" in window
-     ? requestIdleCallback(start, { timeout: 4000 })
-    : setTimeout(start, 2000); // Safari fallback
+//function deferPostHog() {
+ // const start = () => void initPostHog();
+ //const schedule = () =>
+ //  "requestIdleCallback" in window
+  //   ? requestIdleCallback(start, { timeout: 4000 })
+  //  : setTimeout(start, 2000); // Safari fallback
 
- if (document.readyState === "complete") schedule();  else window.addEventListener("load", schedule, { once: true });
-}
+ //if (document.readyState === "complete") schedule();  else window.addEventListener("load", schedule, { once: true });
+//}
 
-deferPostHog();
+//deferPostHog();
 
 const container = document.getElementById("root");
 

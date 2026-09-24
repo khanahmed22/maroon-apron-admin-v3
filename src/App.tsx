@@ -8,9 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import ScrollToTop from "./lib/ScrollToTop";
 import useSound from "use-sound";
 import { notif } from "./zustand/notifStore";
-
 import { Capacitor } from "@capacitor/core";
-import { Purchases, LOG_LEVEL } from "@revenuecat/purchases-capacitor";
 
 const Login = lazy(() => import("./authPages/Login"));
 const Register = lazy(() => import("./authPages/Register"));
@@ -96,6 +94,31 @@ function App() {
   preload: false,
  });
 
+ useEffect(() => {
+  async function configurePurchases() {
+    if (!Capacitor.isNativePlatform()) return;
+    if (!session?.id) return;
+
+    const { Purchases, LOG_LEVEL } = await import(
+      "@revenuecat/purchases-capacitor"
+    );
+
+    await Purchases.setLogLevel({
+      level: LOG_LEVEL.DEBUG,
+    });
+
+    await Purchases.configure({
+      apiKey: import.meta.env.VITE_REVENUECAT_KEY,
+    });
+
+    await Purchases.logIn({
+      appUserID: session.id,
+    });
+  }
+
+  configurePurchases();
+}, [session?.id]);
+
 // fetch the file on the first user interaction instead of at page load
 useEffect(() => {
   if (!sound) return;
@@ -169,22 +192,7 @@ useEffect(() => {
     };
   }, [queryClient, playNewOrder]);
 
-  //revenue cat
 
-  useEffect(() => {
-    async function configurePurchases() {
-      if (!Capacitor.isNativePlatform()) return; // skip entirely on web
-      if (!session?.id) return; // wait until logged in
-
-      await Purchases.setLogLevel({ level: LOG_LEVEL.DEBUG });
-
-      await Purchases.configure({
-        apiKey: import.meta.env.VITE_REVENUECAT_KEY,
-      });
-      await Purchases.logIn({ appUserID: session.id }); // ties RevenueCat to your userId
-    }
-    configurePurchases();
-  }, [session?.id]);
 
   return (
     <>

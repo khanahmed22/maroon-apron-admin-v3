@@ -28,7 +28,6 @@ import {
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { HTMLMotionProps } from "motion/react";
-import { UserAuth } from "../context/AuthContext";
 import type { Variants } from "motion/react";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useNavigate } from "react-router";
@@ -383,7 +382,6 @@ function FeaturePreview({ imageId, title }: FeaturePreviewProps) {
 export default function Home() {
   const [openFaq, setOpenFaq] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { session } = UserAuth();
   const navigate = useNavigate();
 
   const handleNavClick =
@@ -461,15 +459,11 @@ export default function Home() {
             ))}
           </nav>
 
-          {session ? (
-            <a href="/dashboard" className="hidden md:block">
-              <SecondaryButton>Dashboard</SecondaryButton>
-            </a>
-          ) : (
+          
             <a href="/login" className="hidden md:block">
               <SecondaryButton>Sign In</SecondaryButton>
             </a>
-          )}
+          
 
           <button
             className="md:hidden p-2 -mr-2"
@@ -497,15 +491,11 @@ export default function Home() {
               </a>
             ))}
             <div className="pt-2">
-              {session ? (
-                <a href="/dashboard" className="">
-                  <SecondaryButton>Dashboard</SecondaryButton>
-                </a>
-              ) : (
+              
                 <a href="/login" className="">
                   <SecondaryButton>Sign In</SecondaryButton>
                 </a>
-              )}
+              
             </div>
           </div>
         )}

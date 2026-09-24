@@ -90,10 +90,21 @@ function AuthLayout() {
 function App() {
   const { restId, restName, session, subdomain } = UserAuth();
   const queryClient = useQueryClient();
-  const [playNewOrder] = useSound("/sound.wav", {
-    volume: 0.7,
-    interrupt: true,
-  });
+  const [playNewOrder, { sound }] = useSound("/sound.webm", {
+   volume: 0.7,
+   interrupt: true,
+  preload: false,
+ });
+
+// fetch the file on the first user interaction instead of at page load
+useEffect(() => {
+  if (!sound) return;
+  const load = () => {
+   if (sound.state() === "unloaded") sound.load();
+  };
+  window.addEventListener("pointerdown", load, { once: true });
+  return () => window.removeEventListener("pointerdown", load);
+}, [sound]);
 
   useEffect(() => {
     const unlock = () => {
@@ -120,12 +131,14 @@ function App() {
 
   // Connect once, for the life of the session — not tied to restId
 useEffect(() => {
+  if(!session?.id) return;
+
   socket.connect();
 
   return () => {
     socket.disconnect();
   };
-}, []);
+}, [session?.id]);
 
 // Join/leave the restaurant room as restId changes, without touching the connection
 useEffect(() => {

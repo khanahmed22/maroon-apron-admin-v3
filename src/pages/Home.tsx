@@ -375,7 +375,7 @@ function FeaturePreview({ imageId, title }: FeaturePreviewProps) {
       src={cldImage(imageId)}
       alt={title}
       className="w-full h-72 object-contain"
-      loading="eager"
+      loading="lazy"
     />
   );
 }
@@ -848,6 +848,7 @@ export default function Home() {
                   className="mt-auto w-full rounded-xl border object-contain h-72"
                   style={{ borderColor: BORDER }}
                   alt="demo store"
+                  loading="lazy"
                 />
               </div>
             </Reveal>
@@ -1021,7 +1022,7 @@ export default function Home() {
                   src={cldImage("Storefront_kwawka")}
                   alt="demo store"
                   className="w-full h-full object-fit"
-                  loading="eager"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -1225,7 +1226,7 @@ export default function Home() {
                   src={cldImage("MaroonApron-logo")}
                   alt="Maroon Apron logo"
                   className="w-full h-full object-cover"
-                  loading="eager"
+                  loading="lazy"
                 />
               </div>
               <span className="font-bold text-[15px]">Maroon Apron</span>
@@ -1304,6 +1305,7 @@ export default function Home() {
   <img
     src="https://badge.uptimerobot.com/psp/b9e5a69cff155e037aa18450b15f3ca5.svg?style=logo&theme=light"
     alt="Maroon Apron"
+    loading="lazy"
   />
 </a>
 

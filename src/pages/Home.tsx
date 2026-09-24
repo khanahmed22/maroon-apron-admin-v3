@@ -399,16 +399,12 @@ export default function Home() {
     <div
       className="w-full min-h-screen antialiased"
       style={{
-        fontFamily: "'Inter', ui-sans-serif, system-ui",
+       
         color: INK,
         backgroundColor: "#FFFFFF",
       }}
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        html { scroll-behavior: smooth; }
-        section[id] { scroll-margin-top: 90px; }
-      `}</style>
+     
 
       <div className="w-full bg-red-700 px-4 py-2.5 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-sm sm:gap-4">
@@ -552,7 +548,7 @@ export default function Home() {
             </div>
           </Reveal>
 
-          <div className="flex-1 flex justify-center relative">
+          <div className="flex-1 flex justify-center relative aspect-[16/12]">
             <DotLottieReact
               src="/Cooking.lottie"
               loop

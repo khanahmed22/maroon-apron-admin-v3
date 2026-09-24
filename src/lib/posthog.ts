@@ -12,11 +12,11 @@ export function initPostHog() {
       api_host: import.meta.env.VITE_POSTHOG_HOST,
       defaults: "2026-05-30",
       // turn off the heavy stuff you don't need:
-      // autocapture: false,
-      // disable_session_recording: true,
-      // capture_heatmaps: false,
-      // capture_dead_clicks: false,
-      // disable_surveys: true,
+       autocapture: false,
+       disable_session_recording: true,
+       capture_heatmaps: false,
+       capture_dead_clicks: false,
+       disable_surveys: true,
     });
     client = posthog;
     queue.splice(0).forEach((fn) => fn(posthog)); // flush calls made before load

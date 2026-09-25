@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,lazy, Suspense, } from "react";
 import { motion } from "motion/react";
 import {
   Menu,
@@ -28,7 +28,6 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import type { HTMLMotionProps } from "motion/react";
 import type { Variants } from "motion/react";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useNavigate } from "react-router";
 interface NavLink {
   label: string;
@@ -402,6 +401,8 @@ export default function Home() {
         el.scrollIntoView({ behavior: "smooth" });
       }
     };
+
+    const LottieAnimation = lazy(()=>import("../lib/LottieAnimation"))
   return (
     <div
       className="w-full min-h-screen antialiased"
@@ -556,13 +557,17 @@ export default function Home() {
           </Reveal>
 
           <div className="flex-1 flex justify-center relative aspect-[16/12]">
-            <DotLottieReact
-              src="/Cooking.lottie"
-              loop
-              autoplay
-              className="w-full max-w-125 h-125 max-md:w-80 max-md:h-80 relative z-10"
-            />
-          </div>
+  <Suspense
+    fallback={
+      <div
+        className="w-full max-w-125 h-125 max-md:w-80 max-md:h-80"
+        aria-hidden="true"
+      />
+    }
+  >
+    <LottieAnimation />
+  </Suspense>
+</div>
         </section>
 
         {/* ================= PROBLEM ================= */}

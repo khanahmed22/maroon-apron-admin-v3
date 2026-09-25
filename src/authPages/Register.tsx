@@ -3,7 +3,7 @@ import { UserAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
 import { useNavigate } from "react-router";
-//import { usePostHog } from "../lib/posthog";
+import { usePostHog } from "../lib/posthog";
 
 export default function Register(){
   const [name,setName] = useState<string>("")
@@ -23,12 +23,12 @@ const SOFT = "#FBF7F6"
 
   const {session} = UserAuth()
 
-      //const posthog = usePostHog()
+      const posthog = usePostHog()
 
 
   const registerUser = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
-  //posthog.capture('button_clicked', { button_name: 'signup' })
+  posthog.capture('button_clicked', { button_name: 'signup' })
 
 
   const passwordRegex =

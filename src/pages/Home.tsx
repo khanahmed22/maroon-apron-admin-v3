@@ -410,7 +410,7 @@ export default function Home() {
 
           <span className="hidden text-white/50 sm:inline">·</span>
 
-          <span className="hidden text-white/80 sm:inline">
+          <span className="hidden text-white sm:inline">
             Same mission, new name.
           </span>
         </div>

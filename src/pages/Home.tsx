@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import { motion } from "motion/react";
 import {
@@ -110,8 +109,8 @@ const DEMO_STORE_URL = "https://pizzatown.crimsoncastle.shop";
 
 const CLOUD_NAME = "dgmfm08s8";
 
-const cldImage = (id: string, w: number = 1400): string =>
-  `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/q_auto,f_auto,c_fill,w_${w}/${id}`;
+const cldImage = (id: string, width: number = 800): string =>
+  `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/q_auto,f_auto,w_${width}/${id}`;
 
 const NAV_LINKS: NavLink[] = [
   { label: "Features", href: "#features" },
@@ -371,10 +370,18 @@ function SecondaryButton({ children, className = "", ...props }: ButtonProps) {
 function FeaturePreview({ imageId, title }: FeaturePreviewProps) {
   return (
     <img
-      src={cldImage(imageId)}
+      src={cldImage(imageId, 800)}
+      srcSet={`
+        ${cldImage(imageId, 400)} 400w,
+        ${cldImage(imageId, 600)} 600w,
+        ${cldImage(imageId, 800)} 800w,
+        ${cldImage(imageId, 1200)} 1200w
+      `}
+      sizes="(max-width: 640px) 100vw, 50vw"
       alt={title}
       className="w-full h-72 object-contain"
       loading="lazy"
+      decoding="async"
     />
   );
 }
@@ -830,12 +837,20 @@ export default function Home() {
                   place orders directly, without going through a chat.
                 </p>
                 <img
-                  src={cldImage("Storefront_kwawka")}
-                  className="mt-auto w-full rounded-xl border object-contain h-72"
-                  style={{ borderColor: BORDER }}
-                  alt="demo store"
-                  loading="lazy"
-                />
+  src={cldImage("Storefront_kwawka", 800)}
+  srcSet={`
+    ${cldImage("Storefront_kwawka", 400)} 400w,
+    ${cldImage("Storefront_kwawka", 600)} 600w,
+    ${cldImage("Storefront_kwawka", 800)} 800w,
+    ${cldImage("Storefront_kwawka", 1200)} 1200w
+  `}
+  sizes="(max-width: 640px) 100vw, 50vw"
+  alt="Maroon Apron demo storefront"
+  className="mt-auto w-full rounded-xl border object-contain h-72"
+  style={{ borderColor: BORDER }}
+  loading="lazy"
+  decoding="async"
+/>
               </div>
             </Reveal>
             <Reveal delay={0.05}>
@@ -857,13 +872,21 @@ export default function Home() {
                   Where you manage orders, stock, customers, and dispatching -
                   the day-to-day operations of the business, in one screen.
                 </p>
-                <img
-                  src={cldImage("dashboard_nsmx8x")}
-                  alt="Maroon Apron admin dashboard"
-                  className="mt-auto w-full h-72 rounded-xl border object-contain "
-                  style={{ borderColor: BORDER }}
-                  loading="lazy"
-                />
+               <img
+  src={cldImage("dashboard_nsmx8x", 800)}
+  srcSet={[
+    `${cldImage("dashboard_nsmx8x", 400)} 400w`,
+    `${cldImage("dashboard_nsmx8x", 600)} 600w`,
+    `${cldImage("dashboard_nsmx8x", 800)} 800w`,
+    `${cldImage("dashboard_nsmx8x", 1200)} 1200w`,
+  ].join(", ")}
+  sizes="(max-width: 640px) 100vw, 50vw"
+  alt="Maroon Apron admin dashboard"
+  className="mt-auto w-full h-72 rounded-xl border object-contain"
+  style={{ borderColor: BORDER }}
+  loading="lazy"
+  decoding="async"
+/>
               </div>
             </Reveal>
           </div>
@@ -1004,12 +1027,19 @@ export default function Home() {
                   </span>
                 </div>
                 {/* Swap this for a real storefront screenshot once you have one */}
-                <img
-                  src={cldImage("Storefront_kwawka")}
-                  alt="demo store"
-                  className="w-full h-full object-fit"
-                  loading="lazy"
-                />
+               <img
+  src={cldImage("Storefront_kwawka", 1200)}
+  srcSet={`
+    ${cldImage("Storefront_kwawka", 600)} 600w,
+    ${cldImage("Storefront_kwawka", 900)} 900w,
+    ${cldImage("Storefront_kwawka", 1200)} 1200w,
+    ${cldImage("Storefront_kwawka", 1600)} 1600w
+  `}
+  sizes="(max-width: 768px) 100vw, 1152px"
+  alt="Maroon Apron demo storefront"
+  loading="lazy"
+  decoding="async"
+/>
               </div>
             </div>
           </Reveal>

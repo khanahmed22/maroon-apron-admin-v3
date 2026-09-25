@@ -64,7 +64,7 @@ export const AuthContextProvider = ({children}:AuthProviderProps)=>{
 
   const [session, setSession] = useState<UserProps | null>(null);
   const [loading, setLoading] = useState(true);
-   const { data, isLoading: restLoading } = useQuery({
+   const { data, isPending: restLoading } = useQuery({
      queryKey: ["restId"],
      queryFn: fetchRestId,
      enabled: !!session?.id,

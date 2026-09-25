@@ -1,6 +1,6 @@
 import { Route, Routes, Navigate, Outlet } from "react-router";
 import { lazy, Suspense, useEffect } from "react";
-
+import Home from "./pages/Home";
 import { UserAuth } from "./context/AuthContext";
 import { toast, Toaster } from "sonner";
 import { socket } from "./lib/socket";
@@ -16,7 +16,6 @@ const VerifyEmail = lazy(() => import("./authPages/VerifyEmail"));
 const ForgotPassword = lazy(() => import("./authPages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./authPages/ResetPassword"));
 
-const Home = lazy(() => import("./pages/Home"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Account = lazy(() => import("./pages/Account"));
 const Orders = lazy(() => import("./pages/Orders"));
@@ -194,102 +193,140 @@ useEffect(() => {
 
 
 
-  return (
-    <>
-      <ScrollToTop />
+ return (
+  <>
+    <ScrollToTop />
 
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Public */}
-          <Route
-            path="/"
-            element={
-              Capacitor.isNativePlatform() ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <Home />
-              )
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    {/* Non-lazy root route */}
+    <Routes>
+      <Route
+        path="/"
+        element={
+          Capacitor.isNativePlatform() ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Home />
+          )
+        }
+      />
+    </Routes>
 
-          <Route path="/verify-email/:role/:token" element={<VerifyEmail />} />
+    {/* Lazy-loaded routes */}
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Public */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route
+          path="/verify-email/:role/:token"
+          element={<VerifyEmail />}
+        />
 
-          {/* Policies */}
-          <Route path="/delivery-policy" element={<DeliveryPolicy />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/refund-policy" element={<MerchantRefundPolicy />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          <Route path="/cancellation-policy" element={<Cancellation />} />
-          <Route
-            path="/terms-and-conditions"
-            element={<MerchantTermsAndConditions />}
-          />
+        {/* Policies */}
+        <Route path="/delivery-policy" element={<DeliveryPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/refund-policy" element={<MerchantRefundPolicy />} />
+        <Route path="/cancellation-policy" element={<Cancellation />} />
 
-          <Route path="/knowledge-base" element={<KnowledgeBase />} />
+        <Route
+          path="/terms-and-conditions"
+          element={<MerchantTermsAndConditions />}
+        />
 
-          {/* Protected */}
-          <Route element={<ProtectedRoute />}>
-              {restName && subdomain ? (<Route element={<AuthLayout />}>
-        
-             
+        <Route path="/knowledge-base" element={<KnowledgeBase />} />
+
+        {/* Protected */}
+        <Route element={<ProtectedRoute />}>
+          {restName && subdomain ? (
+            <Route element={<AuthLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/account" element={<Account />} />
-
               <Route path="/support" element={<Support />} />
 
               <Route
                 path="/delivery-zones"
                 element={<DeliveryZones restId={restId} />}
               />
-              <Route path="/orders" element={<Orders restId={restId} />} />
+
+              <Route
+                path="/orders"
+                element={<Orders restId={restId} />}
+              />
+
               <Route
                 path="/analytics"
                 element={<Analytics restId={restId} />}
               />
+
               <Route
                 path="/place-order"
-                element={<PlaceOrder restName={restName} restId={restId} />}
-              />
-              <Route
-                path="/inventory"
-                element={<Inventory restName={restName} restId={restId} />}
+                element={
+                  <PlaceOrder
+                    restName={restName}
+                    restId={restId}
+                  />
+                }
               />
 
-              <Route path="/coupon" element={<Coupon restId={restId} />} />
+              <Route
+                path="/inventory"
+                element={
+                  <Inventory
+                    restName={restName}
+                    restId={restId}
+                  />
+                }
+              />
+
+              <Route
+                path="/coupon"
+                element={<Coupon restId={restId} />}
+              />
+
               <Route
                 path="/customers"
                 element={<Customers restId={restId} />}
               />
-              <Route path="/settings" element={<Settings restId={restId} />} />
+
+              <Route
+                path="/settings"
+                element={<Settings restId={restId} />}
+              />
+
               <Route
                 path="/first-time-setup"
                 element={<Navigate to="/dashboard" replace />}
               />
-            </Route>):(<Route path="/first-time-setup" element={<FirstTimeSetup restId={restId}/>}></Route>)}
-            
+            </Route>
+          ) : (
             <Route
-              path="*"
-              element={
-                restName && subdomain ? (
-                  <NotFound />
-                ) : (
-                  <Navigate to="/first-time-setup" replace />
-                )
-              }
+              path="/first-time-setup"
+              element={<FirstTimeSetup restId={restId} />}
             />
-          </Route>
-        </Routes>
-      </Suspense>
+          )}
 
-      <Toaster richColors position="top-center" />
-    </>
-  );
+          {/* Catch-all */}
+          <Route
+            path="*"
+            element={
+              restName && subdomain ? (
+                <NotFound />
+              ) : (
+                <Navigate to="/first-time-setup" replace />
+              )
+            }
+          />
+        </Route>
+      </Routes>
+    </Suspense>
+
+    <Toaster richColors position="top-center" />
+  </>
+);
 }
-
-export default App;
+export default App

@@ -23,7 +23,6 @@
     "@fontsource-variable/space-grotesk": "^5.2.10",
     "@google/genai": "^2.13.0",
     "@hiseb/confetti": "^2.2.0",
-    "@lottiefiles/dotlottie-react": "^0.19.7",
     "@paddle/paddle-js": "^1.6.4",
     "@posthog/react": "^1.11.1",
     "@revenuecat/purchases-capacitor": "^13.5.0",

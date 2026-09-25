@@ -1,4 +1,4 @@
-import { useState,lazy, Suspense, } from "react";
+import { useState } from "react";
 import { motion } from "motion/react";
 import {
   Menu,
@@ -402,7 +402,6 @@ export default function Home() {
       }
     };
 
-    const LottieAnimation = lazy(()=>import("../lib/LottieAnimation"))
   return (
     <div
       className="w-full min-h-screen antialiased"
@@ -557,16 +556,12 @@ export default function Home() {
           </Reveal>
 
           <div className="flex-1 flex justify-center relative aspect-[16/12]">
-  <Suspense
-    fallback={
-      <div
-        className="w-full max-w-125 h-125 max-md:w-80 max-md:h-80"
-        aria-hidden="true"
-      />
-    }
-  >
-    <LottieAnimation />
-  </Suspense>
+  <img src="/cooking.svg"
+  alt="Maroon Apron"
+  width={500}
+  height={500}
+   fetchPriority="high"
+  decoding="async"/>
 </div>
         </section>
 

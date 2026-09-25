@@ -51,7 +51,6 @@ interface CustomerProps {
   recieveMethod: string;
   status: string;
   createdAt: Date;
-
   orderTotal: number;
   deliveryArea: string;
   deliveryFee: string;
@@ -59,6 +58,7 @@ interface CustomerProps {
   isPreOrder: boolean;
   scheduledDate: string | null;
   scheduledWindow: string;
+  paymentMethod: string | null
 }
 
 interface RestResponse {
@@ -148,6 +148,7 @@ export default function PlaceOrder({ restId, restName }: RestResponse) {
     isPreOrder: false,
     scheduledDate: null,
     scheduledWindow: "",
+    paymentMethod: "cash"
   });
 
   // ================= ADD TO CART MODAL =================
@@ -344,13 +345,15 @@ export default function PlaceOrder({ restId, restName }: RestResponse) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        custDetails: {
+                custDetails: {
           ...custDetails,
           isPreOrder: preOrdersEnabled, // derived, not user-toggled
           orderTotal: finalTotal,
           deliveryArea:
             custDetails.recieveMethod === "delivery"
-              ? (selectedArea?.areaName ?? "")
+              ? fixRateM?.fixMode
+                ? custDetails.deliveryArea
+                : (selectedArea?.areaName ?? "")
               : "",
 
           deliveryFee:
@@ -406,6 +409,29 @@ export default function PlaceOrder({ restId, restName }: RestResponse) {
   function generateUUID(): string {
     return uuidv4();
   }
+
+  const KARACHI_AREAS = [
+  "Clifton",
+  "Defence (DHA)",
+  "Gulshan-e-Iqbal",
+  "North Nazimabad",
+  "PECHS",
+  "Gulistan-e-Johar",
+  "Malir",
+  "Korangi",
+  "Saddar",
+  "Nazimabad",
+  "Federal B Area",
+  "Bahadurabad",
+  "Tariq Road",
+  "Shahra-e-Faisal",
+  "Gulberg",
+  "Landhi",
+  "Orangi Town",
+  "Lyari",
+  "Surjani Town",
+  "Scheme 33",
+];
 
   const fetchDeliveryZones = async (): Promise<AreaProps[]> => {
     const res = await fetch(
@@ -565,6 +591,14 @@ export default function PlaceOrder({ restId, restName }: RestResponse) {
     custDetails.scheduledWindow,
     preOrderMinHours,
   ]);
+
+  useEffect(() => {
+  if (custDetails.recieveMethod !== "delivery") return;
+  if (!custDetails.deliveryArea) return;
+
+  setCustDetails((prev) => ({ ...prev, deliveryArea: "" }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [fixRateM?.fixMode]);
 
 const ifsubdomainNull = subdomain
 if (ifsubdomainNull === null) {
@@ -956,6 +990,27 @@ if (ifsubdomainNull === null) {
               </div>
 
               <div className="flex flex-col gap-y-1.5">
+  <label className="text-sm font-semibold" style={{ color: INK }}>
+    Payment Method
+  </label>
+
+  <div
+    className="flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium"
+    style={{
+      borderColor: BORDER,
+      color: INK,
+      backgroundColor: "#FAFAFA",
+    }}
+  >
+    <span
+      className="h-2 w-2 rounded-full"
+      style={{ backgroundColor: "#22C55E" }}
+    />
+    Cash
+  </div>
+</div>
+
+              <div className="flex flex-col gap-y-1.5">
                 <label className="text-sm font-semibold" style={{ color: INK }}>
                   Receive Method
                 </label>
@@ -1074,7 +1129,7 @@ if (ifsubdomainNull === null) {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-y-1.5">
+                                    <div className="flex flex-col gap-y-1.5">
                     <label
                       className="text-sm font-semibold"
                       style={{ color: INK }}
@@ -1082,27 +1137,51 @@ if (ifsubdomainNull === null) {
                       Delivery Area
                     </label>
 
-                    <Select
-                      value={custDetails.deliveryArea}
-                      onValueChange={(value) =>
-                        setCustDetails({
-                          ...custDetails,
-                          deliveryArea: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="w-full h-11 rounded-xl">
-                        <SelectValue placeholder="Select your delivery area" />
-                      </SelectTrigger>
+                    {fixRateM?.fixMode ? (
+                      <Select
+                        value={custDetails.deliveryArea}
+                        onValueChange={(value) =>
+                          setCustDetails({
+                            ...custDetails,
+                            deliveryArea: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="w-full h-11 rounded-xl">
+                          <SelectValue placeholder="Select your area" />
+                        </SelectTrigger>
 
-                      <SelectContent>
-                        {deliveryList?.map((area) => (
-                          <SelectItem key={area.areaId} value={area.areaId}>
-                            {area.areaName} ({area.cityName})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                        <SelectContent>
+                          {KARACHI_AREAS.map((area) => (
+                            <SelectItem key={area} value={area}>
+                              {area}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Select
+                        value={custDetails.deliveryArea}
+                        onValueChange={(value) =>
+                          setCustDetails({
+                            ...custDetails,
+                            deliveryArea: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="w-full h-11 rounded-xl">
+                          <SelectValue placeholder="Select your delivery area" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          {deliveryList?.map((area) => (
+                            <SelectItem key={area.areaId} value={area.areaId}>
+                              {area.areaName} ({area.cityName})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
                 </div>
               )}

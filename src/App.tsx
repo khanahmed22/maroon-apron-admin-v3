@@ -2,12 +2,8 @@ import { Route, Routes, Navigate, Outlet } from "react-router";
 import { lazy, Suspense, useEffect } from "react";
 import Home from "./pages/Home";
 import { UserAuth } from "./context/AuthContext";
-import { toast, Toaster } from "sonner";
-import { socket } from "./lib/socket";
-import { useQueryClient } from "@tanstack/react-query";
+import {  Toaster } from "sonner";
 import ScrollToTop from "./lib/ScrollToTop";
-import useSound from "use-sound";
-import { notif } from "./zustand/notifStore";
 import { Capacitor } from "@capacitor/core";
 
 const Login = lazy(() => import("./authPages/Login"));
@@ -71,10 +67,11 @@ function ProtectedRoute() {
 }
 
 function AuthLayout() {
+  const { restId} = UserAuth();
   return (
     <div className="flex max-md:flex-col">
       <Suspense fallback={<PageLoader />}>
-        <SideBar />
+        <SideBar restId={restId}/>
       </Suspense>
 
       <div className="flex-1">
@@ -86,12 +83,8 @@ function AuthLayout() {
 
 function App() {
   const { restId, restName, session, subdomain } = UserAuth();
-  const queryClient = useQueryClient();
-  const [playNewOrder, { sound }] = useSound("/sound.webm", {
-   volume: 0.7,
-   interrupt: true,
-  preload: false,
- });
+ 
+ 
 
  useEffect(() => {
   async function configurePurchases() {
@@ -117,80 +110,7 @@ function App() {
 
   configurePurchases();
 }, [session?.id]);
-
-// fetch the file on the first user interaction instead of at page load
-useEffect(() => {
-  if (!sound) return;
-  const load = () => {
-   if (sound.state() === "unloaded") sound.load();
-  };
-  window.addEventListener("pointerdown", load, { once: true });
-  return () => window.removeEventListener("pointerdown", load);
-}, [sound]);
-
-  useEffect(() => {
-    const unlock = () => {
-      try {
-        const AudioCtx = window.AudioContext || window.AudioContext;
-        const ctx = new AudioCtx();
-
-        if (ctx.state === "suspended") {
-          ctx.resume();
-        }
-      } catch (err) {
-        console.error(err);
-      }
-
-      window.removeEventListener("click", unlock);
-    };
-
-    window.addEventListener("click", unlock);
-
-    return () => {
-      window.removeEventListener("click", unlock);
-    };
-  }, []);
-
-  // Connect once, for the life of the session — not tied to restId
-useEffect(() => {
-  if(!session?.id) return;
-
-  socket.connect();
-
-  return () => {
-    socket.disconnect();
-  };
-}, [session?.id]);
-
-// Join/leave the restaurant room as restId changes, without touching the connection
-useEffect(() => {
-  if (!restId) return;
-
-  socket.emit("joinRestaurant", restId);
-
-  return () => {
-    socket.emit("leaveRestaurant", restId);
-  };
-}, [restId]);
-
-  useEffect(() => {
-    socket.on("newOrder", (order) => {
-      console.log("New order:", order);
-      playNewOrder();
-
-      toast.info(`New order #${order.orderNumber}`);
-      notif(`New order placed! #${order.orderNumber}`, {});
-
-      queryClient.invalidateQueries({
-        queryKey: ["orders"],
-      });
-    });
-
-    return () => {
-      socket.off("newOrder");
-    };
-  }, [queryClient, playNewOrder]);
-
+  
 
 
  return (

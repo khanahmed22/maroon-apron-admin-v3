@@ -1,5 +1,12 @@
 import { Link, useLocation } from "react-router";
-import { useState } from "react";
+import { useState ,useEffect} from "react";
+import { socket } from "../lib/socket";
+import { toast } from "sonner";
+import { notif } from "../zustand/notifStore";
+import { useQueryClient } from "@tanstack/react-query";
+import { UserAuth } from "../context/AuthContext";
+
+import useSound from "use-sound";
 import {
   LayoutDashboard,
   ClipboardList,
@@ -66,12 +73,97 @@ function NavItem({
   );
 }
 
-export default function SideBar() {
+export default function SideBar({restId}:{restId:string | null}) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-
+  const {session} = UserAuth()
   const isActive = (link: string) =>
     location.pathname === link || location.pathname.startsWith(link + "/");
+
+   const queryClient = useQueryClient();
+
+   const [playNewOrder, { sound }] = useSound("/sound.webm", {
+     volume: 0.7,
+     interrupt: true,
+    preload: false,
+   });
+
+   useEffect(() => {
+     if (!sound) return;
+     const load = () => {
+      if (sound.state() === "unloaded") sound.load();
+     };
+     window.addEventListener("pointerdown", load, { once: true });
+     return () => window.removeEventListener("pointerdown", load);
+   }, [sound]);
+   
+     useEffect(() => {
+       const unlock = () => {
+         try {
+           const AudioCtx = window.AudioContext || window.AudioContext;
+           const ctx = new AudioCtx();
+   
+           if (ctx.state === "suspended") {
+             ctx.resume();
+           }
+         } catch (err) {
+           console.error(err);
+         }
+   
+         window.removeEventListener("click", unlock);
+       };
+   
+       window.addEventListener("click", unlock);
+   
+       return () => {
+         window.removeEventListener("click", unlock);
+       };
+     }, []);
+   //socket
+
+     useEffect(() => {
+  if (!session?.id || !restId) return;
+
+  socket.connect();
+
+  const handleConnect = () => {
+    socket.emit("joinRestaurant", restId);
+  };
+
+  socket.on("connect", handleConnect);
+
+  return () => {
+    socket.off("connect", handleConnect);
+
+    if (socket.connected) {
+      socket.emit("leaveRestaurant", restId);
+    }
+
+    socket.disconnect();
+  };
+}, [session?.id, restId]);
+
+     useEffect(() => {
+         socket.on("newOrder", (order) => {
+           console.log("New order:", order);
+           playNewOrder();
+     
+           toast.info(`New order #${order.orderNumber}`);
+           notif(`New order placed! #${order.orderNumber}`, {});
+     
+           queryClient.invalidateQueries({
+             queryKey: ["orders"],
+           });
+         });
+     
+         return () => {
+           socket.off("newOrder");
+         };
+       }, [queryClient, playNewOrder]);
+     
+     
+     
+     
 
   return (
     <>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "motion/react";
+import { Link } from "react-router";
 import {
   Menu,
   X,
@@ -450,9 +451,9 @@ export default function Home() {
             ))}
           </nav>
 
-          <a href="/login" className="hidden md:block">
+          <Link to="/login" className="hidden md:block">
             <SecondaryButton>Sign In</SecondaryButton>
-          </a>
+          </Link>
 
           <button
             className="md:hidden p-2 -mr-2"
@@ -480,9 +481,9 @@ export default function Home() {
               </a>
             ))}
             <div className="pt-2">
-              <a href="/login" className="">
+              <Link to="/login">
                 <SecondaryButton>Sign In</SecondaryButton>
-              </a>
+              </Link>
             </div>
           </div>
         )}

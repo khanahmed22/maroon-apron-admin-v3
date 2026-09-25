@@ -118,8 +118,15 @@ function App() {
     <ScrollToTop />
 
     {/* Non-lazy root route */}
-    <Routes>
-      <Route
+   
+
+    {/* Lazy-loaded routes */}
+    <Suspense fallback={<PageLoader />}>
+    
+      <Routes>
+
+        {/* Public */}
+        <Route
         path="/"
         element={
           Capacitor.isNativePlatform() ? (
@@ -129,12 +136,6 @@ function App() {
           )
         }
       />
-    </Routes>
-
-    {/* Lazy-loaded routes */}
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 

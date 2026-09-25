@@ -85,7 +85,7 @@ export default function SideBar({restId}:{restId:string | null}) {
    const [playNewOrder, { sound }] = useSound("/sound.webm", {
      volume: 0.7,
      interrupt: true,
-    preload: false,
+    preload: true,
    });
 
    useEffect(() => {

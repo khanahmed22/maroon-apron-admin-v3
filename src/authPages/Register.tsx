@@ -27,7 +27,7 @@ export default function RegisterCustomer(){
 
   const registerUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    posthog.capture('button_clicked', { button_name: 'customer_signup' })
+    posthog.capture('button_clicked', { button_name: 'merchant_signup' })
 
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -47,10 +47,10 @@ export default function RegisterCustomer(){
     }
 
     try {
-      const role = "customer";
+      const role = "merchant";
 
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/register`,
+        `${import.meta.env.VITE_BACKEND_URL}/auth/register-merchant`,
         {
           method: "POST",
           credentials: "include",
@@ -83,7 +83,7 @@ export default function RegisterCustomer(){
   const handleGoogleResponse = async (response: { credential: string }) => {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/register-customer-google`,
+        `${import.meta.env.VITE_BACKEND_URL}/auth/register-merchant-google`,
         {
           method: "POST",
           credentials: "include",

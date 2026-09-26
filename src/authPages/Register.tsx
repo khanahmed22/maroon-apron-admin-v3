@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { UserAuth } from "../context/AuthContext";
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, UserRound, Store } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
 import { useNavigate } from "react-router";
 import { usePostHog } from "../lib/posthog";
 
@@ -9,7 +9,6 @@ export default function RegisterCustomer(){
   const [name,setName] = useState<string>("")
   const [email,setEmail] = useState<string>("")
   const [password,setPassword] = useState<string>("")
-  const [subdomain,setSubdomain] = useState<string>("")
   const [showPassword, setShowPassword] = useState(false)
   const [agree,setAgree] = useState(false)
   const navigate = useNavigate()
@@ -40,10 +39,7 @@ export default function RegisterCustomer(){
       return;
     }
 
-    if (!subdomain) {
-      toast.error("Subdomain is missing. Please try again from the store's sign-up page.");
-      return;
-    }
+    
 
     if (!agree) {
       toast.error("Please agree to the Privacy Policy and Terms & Conditions to continue");
@@ -66,7 +62,7 @@ export default function RegisterCustomer(){
             email,
             password,
             role,
-            subdomain,
+            
           }),
         }
       );
@@ -92,7 +88,7 @@ export default function RegisterCustomer(){
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: response.credential, subdomain }),
+          body: JSON.stringify({ idToken: response.credential}),
         }
       );
 
@@ -254,12 +250,7 @@ export default function RegisterCustomer(){
           Minimum 8 characters with uppercase, lowercase, number and special character.
         </p>
 
-        {subdomain && (
-          <div className="flex items-center gap-x-2 text-xs" style={{ color: MUTE }}>
-            <Store className="w-3.5 h-3.5" />
-            <span>Signing up for <strong style={{ color: INK }}>{subdomain}</strong></span>
-          </div>
-        )}
+       
 
         <div className="flex items-start gap-x-2">
           <input

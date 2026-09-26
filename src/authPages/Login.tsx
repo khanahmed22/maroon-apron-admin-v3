@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { UserAuth } from "../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff ,LoaderCircle} from "lucide-react";
@@ -17,6 +17,8 @@ export default function Login() {
   const MUTE = "#6B7280";
   const BORDER = "#E7E5E4";
   const SOFT = "#FBF7F6";
+
+  const googleBtnRef = useRef<HTMLDivElement>(null)
 
   const loginUser = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
@@ -50,6 +52,72 @@ export default function Login() {
     setLoading(false);
   }
 };
+
+  const handleGoogleResponse = async (response: { credential: string }) => {
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/login-merchant-google`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken: response.credential }),
+        }
+      );
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        toast.error(data?.error || "Google sign-in failed");
+        return;
+      }
+
+      await checkAuth();
+      navigate("/dashboard");
+    } catch {
+      toast.error("Unable to connect to the server");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (session) return
+
+    let cancelled = false
+
+    const tryRender = () => {
+      // @ts-ignore
+      if (window.google && googleBtnRef.current) {
+        // @ts-ignore
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+        })
+        // @ts-ignore
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: "outline",
+          size: "large",
+          width: "100%",
+          text: "signin_with",
+        })
+        return true
+      }
+      return false
+    }
+
+    if (!tryRender() && !cancelled) {
+      const interval = setInterval(() => {
+        if (tryRender() || cancelled) clearInterval(interval)
+      }, 100)
+      return () => {
+        cancelled = true
+        clearInterval(interval)
+      }
+    }
+  }, [session]);
+
   if (session) {
     return (
       <div className="flex font-bold flex-col gap-y-4 text-lg min-h-screen items-center justify-center">
@@ -79,6 +147,14 @@ export default function Login() {
           <h1 className="font-bold text-2xl" style={{ color: INK }}>
             Welcome back
           </h1>
+        </div>
+
+        <div ref={googleBtnRef} className="w-full flex justify-center" />
+
+        <div className="flex items-center gap-x-3">
+          <div className="h-px flex-1" style={{ backgroundColor: BORDER }} />
+          <span className="text-xs" style={{ color: MUTE }}>or continue with email</span>
+          <div className="h-px flex-1" style={{ backgroundColor: BORDER }} />
         </div>
 
         <div className="flex flex-col gap-y-1.5">

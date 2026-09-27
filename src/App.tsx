@@ -117,7 +117,7 @@ function App() {
   <>
     <ScrollToTop />
 
-    {/* Non-lazy root route */}
+   
    
 
     {/* Lazy-loaded routes */}

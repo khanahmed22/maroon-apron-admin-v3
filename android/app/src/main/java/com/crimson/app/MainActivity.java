@@ -1,17 +1,25 @@
 package com.maroonapron.app;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.getcapacitor.BridgeActivity;
+import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginHandle;
 
-public class MainActivity extends BridgeActivity {
+import ee.forgr.capacitor.social.login.GoogleProvider;
+import ee.forgr.capacitor.social.login.ModifiedMainActivityForSocialLoginPlugin;
+import ee.forgr.capacitor.social.login.SocialLoginPlugin;
+
+public class MainActivity extends BridgeActivity implements ModifiedMainActivityForSocialLoginPlugin {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private WebView webView;
@@ -22,6 +30,28 @@ public class MainActivity extends BridgeActivity {
 
         setupPullToRefresh();
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode >= GoogleProvider.REQUEST_AUTHORIZE_GOOGLE_MIN
+                && requestCode < GoogleProvider.REQUEST_AUTHORIZE_GOOGLE_MAX) {
+            PluginHandle pluginHandle = getBridge().getPlugin("SocialLogin");
+            if (pluginHandle == null) {
+                Log.i("Google Activity Result", "SocialLogin login handle is null");
+                return;
+            }
+            Plugin plugin = pluginHandle.getInstance();
+            if (!(plugin instanceof SocialLoginPlugin)) {
+                Log.i("Google Activity Result", "SocialLogin plugin instance is not SocialLoginPlugin");
+                return;
+            }
+            ((SocialLoginPlugin) plugin).handleGoogleLoginIntent(requestCode, data);
+        }
+    }
+
+    public void IHaveModifiedTheMainActivityForTheUseWithSocialLoginPlugin() {}
 
     private void setupPullToRefresh() {
         webView = bridge.getWebView();

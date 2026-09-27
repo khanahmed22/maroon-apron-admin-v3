@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { UserAuth } from "../context/AuthContext";
-import { Mail, Lock, Eye, EyeOff ,LoaderCircle} from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Capacitor } from "@capacitor/core";
+import { SocialLogin } from "@capgo/capacitor-social-login";
 
 export default function Login() {
   const { session, checkAuth } = UserAuth();
@@ -10,7 +12,8 @@ export default function Login() {
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [loading,setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const ACCENT = "#D6293F";
   const INK = "#171717";
@@ -18,43 +21,44 @@ export default function Login() {
   const BORDER = "#E7E5E4";
   const SOFT = "#FBF7F6";
 
-  const googleBtnRef = useRef<HTMLDivElement>(null)
+  const isNative = Capacitor.isNativePlatform();
 
   const loginUser = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/auth/login-merchant`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      },
-    );
-
-    if (!res.ok) {
-      await res.json().catch(() => null);
-
-      toast.error("Invalid email or password");
-      return;
-    }
-
-    await checkAuth();
-    navigate("/dashboard");
-  } catch {
-    toast.error("Unable to connect to the server");
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleGoogleResponse = async (response: { credential: string }) => {
+    e.preventDefault();
     setLoading(true);
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/login-merchant`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      if (!res.ok) {
+        await res.json().catch(() => null);
+
+        toast.error("Invalid email or password");
+        return;
+      }
+
+      await checkAuth();
+      navigate("/dashboard");
+    } catch {
+      toast.error("Unable to connect to the server");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Shared: send the Google ID token to the backend, whichever
+  // flow (web or native SocialLogin) produced it.
+  const completeGoogleSignIn = async (idToken: string) => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/login-merchant-google`,
@@ -62,7 +66,7 @@ export default function Login() {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: response.credential }),
+          body: JSON.stringify({ idToken }),
         }
       );
 
@@ -77,46 +81,51 @@ export default function Login() {
       navigate("/dashboard");
     } catch {
       toast.error("Unable to connect to the server");
-    } finally {
-      setLoading(false);
     }
   };
 
+  // Initialize SocialLogin once — used on both web and native
   useEffect(() => {
-    if (session) return
+    SocialLogin.initialize({
+      google: {
+        webClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+        mode: "online",
+      },
+    }).catch((err) => {
+      console.error("SocialLogin init failed:", err);
+    });
+  }, []);
 
-    let cancelled = false
+  const handleGoogleSignIn = async () => {
+    if (googleLoading) return;
+    setGoogleLoading(true);
+    try {
+      const response = await SocialLogin.login({
+        provider: "google",
+        options: { scopes: ["email", "profile"] },
+      });
 
-    const tryRender = () => {
-      // @ts-ignore
-      if (window.google && googleBtnRef.current) {
-        // @ts-ignore
-        window.google.accounts.id.initialize({
-          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-          callback: handleGoogleResponse,
-        })
-        // @ts-ignore
-        window.google.accounts.id.renderButton(googleBtnRef.current, {
-          theme: "outline",
-          size: "large",
-          width: "100%",
-          text: "signin_with",
-        })
-        return true
+      if (response.provider !== "google") {
+        toast.error("Google sign-in failed");
+        return;
       }
-      return false
-    }
 
-    if (!tryRender() && !cancelled) {
-      const interval = setInterval(() => {
-        if (tryRender() || cancelled) clearInterval(interval)
-      }, 100)
-      return () => {
-        cancelled = true
-        clearInterval(interval)
+      const result = response.result;
+      const idToken = "idToken" in result ? result.idToken : null;
+
+      if (!idToken) {
+        toast.error("Google sign-in failed");
+        return;
       }
+      await completeGoogleSignIn(idToken);
+    } catch (err: any) {
+      if (err?.code !== "USER_CANCELLED") {
+        toast.error("Google sign-in failed");
+      }
+    } finally {
+      setGoogleLoading(false);
     }
-  }, [session]);
+  };
 
   if (session) {
     return (
@@ -149,7 +158,15 @@ export default function Login() {
           </h1>
         </div>
 
-        <div ref={googleBtnRef} className="w-full flex justify-center" />
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={googleLoading}
+          className="w-full flex items-center justify-center gap-x-2 border rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
+          style={{ borderColor: BORDER, color: INK }}
+        >
+          {googleLoading ? "Signing in..." : "Sign in with Google"}
+        </button>
 
         <div className="flex items-center gap-x-3">
           <div className="h-px flex-1" style={{ backgroundColor: BORDER }} />
@@ -229,20 +246,20 @@ export default function Login() {
         </div>
 
         <button
-  type="submit"
-  disabled={loading}
-  className="text-white p-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity mt-1 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-  style={{ backgroundColor: ACCENT }}
->
-  {loading ? (
-    <>
-      <LoaderCircle className="w-4 h-4 animate-spin" />
-      Logging In...
-    </>
-  ) : (
-    "Log In"
-  )}
-</button>
+          type="submit"
+          disabled={loading}
+          className="text-white p-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-opacity mt-1 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          style={{ backgroundColor: ACCENT }}
+        >
+          {loading ? (
+            <>
+              <LoaderCircle className="w-4 h-4 animate-spin" />
+              Logging In...
+            </>
+          ) : (
+            "Log In"
+          )}
+        </button>
         <p className="text-sm text-center" style={{ color: MUTE }}>
           Don&apos;t have an account?{" "}
           <a

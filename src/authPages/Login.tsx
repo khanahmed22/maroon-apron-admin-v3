@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { UserAuth } from "../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { Capacitor } from "@capacitor/core";
 import { SocialLogin } from "@capgo/capacitor-social-login";
 
 export default function Login() {
@@ -21,7 +20,6 @@ export default function Login() {
   const BORDER = "#E7E5E4";
   const SOFT = "#FBF7F6";
 
-  const isNative = Capacitor.isNativePlatform();
 
   const loginUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

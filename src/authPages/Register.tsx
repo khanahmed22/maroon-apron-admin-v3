@@ -4,13 +4,16 @@ import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
 import { useNavigate } from "react-router";
 import { usePostHog } from "../lib/posthog";
+import { Capacitor } from "@capacitor/core";
+import { GoogleAuth } from "@shardev/capacitor-google-auth";
 
-export default function RegisterCustomer(){
+export default function RegisterMerchant(){
   const [name,setName] = useState<string>("")
   const [email,setEmail] = useState<string>("")
   const [password,setPassword] = useState<string>("")
   const [showPassword, setShowPassword] = useState(false)
   const [agree,setAgree] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const navigate = useNavigate()
 
   const ACCENT = "#D6293F"
@@ -25,6 +28,10 @@ export default function RegisterCustomer(){
 
   const googleBtnRef = useRef<HTMLDivElement>(null)
 
+  // true when running inside the Capacitor Android (or iOS) shell,
+  // false in the regular browser build
+  const isNative = Capacitor.isNativePlatform()
+
   const registerUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     posthog.capture('button_clicked', { button_name: 'merchant_signup' })
@@ -38,8 +45,6 @@ export default function RegisterCustomer(){
       );
       return;
     }
-
-    
 
     if (!agree) {
       toast.error("Please agree to the Privacy Policy and Terms & Conditions to continue");
@@ -62,7 +67,6 @@ export default function RegisterCustomer(){
             email,
             password,
             role,
-            
           }),
         }
       );
@@ -80,7 +84,9 @@ export default function RegisterCustomer(){
     }
   };
 
-  const handleGoogleResponse = async (response: { credential: string }) => {
+  // Shared: send the Google ID token to the backend, whichever
+  // flow (web GIS or native Capacitor plugin) produced it.
+  const completeGoogleSignUp = async (idToken: string) => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/register-merchant-google`,
@@ -88,7 +94,7 @@ export default function RegisterCustomer(){
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken: response.credential}),
+          body: JSON.stringify({ idToken }),
         }
       );
 
@@ -106,41 +112,83 @@ export default function RegisterCustomer(){
     }
   };
 
+  // Web: Google Identity Services popup callback (unchanged behavior)
+  const handleGoogleResponse = async (response: { credential: string }) => {
+    await completeGoogleSignUp(response.credential);
+  };
+
+  // Native (Android/iOS via Capacitor): plugin-driven sign-in
+  const handleNativeGoogleSignIn = async () => {
+    if (googleLoading) return
+    setGoogleLoading(true)
+    try {
+      const result = await GoogleAuth.login()
+      if (!result?.idToken) {
+        toast.error("Google sign-up failed")
+        return
+      }
+      await completeGoogleSignUp(result.idToken)
+    } catch (err: any) {
+      // Don't show an error toast if the user just closed the picker
+      if (err?.code !== "USER_CANCELLED") {
+        toast.error("Google sign-up failed")
+      }
+    } finally {
+      setGoogleLoading(false)
+    }
+  };
+
+  // Initialize the native plugin once, only on native platforms
   useEffect(() => {
-  if (session) return
+    if (!isNative) return
 
-  let cancelled = false
+    GoogleAuth.initialize({
+      // Android requires the *web* client ID here, not an Android-specific one
+      clientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      serverClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+    }).catch(() => {
+      // If this fails, the error will surface again when the user taps the button
+    })
+  }, [isNative])
 
-  const tryRender = () => {
-    // @ts-ignore
-    if (window.google && googleBtnRef.current) {
+  // Web-only: load the Google Identity Services script + render the button.
+  // Skipped entirely on native so it never tries to touch window.google there.
+  useEffect(() => {
+    if (isNative) return
+    if (session) return
+
+    let cancelled = false
+
+    const tryRender = () => {
       // @ts-ignore
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse,
-      })
-      // @ts-ignore
-      window.google.accounts.id.renderButton(googleBtnRef.current, {
-        theme: "outline",
-        size: "large",
-        width: "100%",
-        text: "signup_with",
-      })
-      return true
+      if (window.google && googleBtnRef.current) {
+        // @ts-ignore
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+          callback: handleGoogleResponse,
+        })
+        // @ts-ignore
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: "outline",
+          size: "large",
+          width: googleBtnRef.current.offsetWidth,
+          text: "signup_with",
+        })
+        return true
+      }
+      return false
     }
-    return false
-  }
 
-  if (!tryRender() && !cancelled) {
-    const interval = setInterval(() => {
-      if (tryRender() || cancelled) clearInterval(interval)
-    }, 100)
-    return () => {
-      cancelled = true
-      clearInterval(interval)
+    if (!tryRender() && !cancelled) {
+      const interval = setInterval(() => {
+        if (tryRender() || cancelled) clearInterval(interval)
+      }, 100)
+      return () => {
+        cancelled = true
+        clearInterval(interval)
+      }
     }
-  }
-}, [session])
+  }, [session, isNative])
 
   if(session){
     return(
@@ -166,7 +214,19 @@ export default function RegisterCustomer(){
           </h1>
         </div>
 
-        <div ref={googleBtnRef} className="w-full flex justify-center" />
+        {isNative ? (
+          <button
+            type="button"
+            onClick={handleNativeGoogleSignIn}
+            disabled={googleLoading}
+            className="w-full flex items-center justify-center gap-x-2 border rounded-xl py-2.5 text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-60"
+            style={{ borderColor: BORDER, color: INK }}
+          >
+            {googleLoading ? "Signing up..." : "Sign up with Google"}
+          </button>
+        ) : (
+          <div ref={googleBtnRef} className="w-full flex justify-center" />
+        )}
 
         <div className="flex items-center gap-x-3">
           <div className="h-px flex-1" style={{ backgroundColor: BORDER }} />
@@ -250,8 +310,6 @@ export default function RegisterCustomer(){
           Minimum 8 characters with uppercase, lowercase, number and special character.
         </p>
 
-       
-
         <div className="flex items-start gap-x-2">
           <input
             id="terms"
@@ -262,24 +320,28 @@ export default function RegisterCustomer(){
             required
           />
 
-          <label htmlFor="terms" className="text-xs" style={{ color: INK }}>
-            I agree to the{" "}
-            <a
-              href="/privacy-policy"
-              className="hover:underline"
-              style={{ color: ACCENT }}
-            >
-              Privacy Policy
-            </a>{" "}
-            and{" "}
-            <a
-              href="/terms-and-conditions"
-              className="hover:underline"
-              style={{ color: ACCENT }}
-            >
-              Terms & Conditions
-            </a>
-          </label>
+          <label
+  htmlFor="terms"
+  className="text-xs"
+  style={{ color: INK }}
+>
+  I agree to the{" "}
+  <a
+    href="/privacy-policy"
+    className="hover:underline"
+    style={{ color: ACCENT }}
+  >
+    Privacy Policy
+  </a>{" "}
+  and{" "}
+  <a
+    href="/terms-and-conditions"
+    className="hover:underline"
+    style={{ color: ACCENT }}
+  >
+    Terms & Conditions
+  </a>
+</label>
         </div>
         <button
           disabled={!agree}

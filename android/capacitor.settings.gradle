@@ -22,3 +22,6 @@ project(':capgo-capacitor-printer').projectDir = new File('../node_modules/@capg
 
 include ':revenuecat-purchases-capacitor'
 project(':revenuecat-purchases-capacitor').projectDir = new File('../node_modules/@revenuecat/purchases-capacitor/android')
+
+include ':shardev-capacitor-google-auth'
+project(':shardev-capacitor-google-auth').projectDir = new File('../node_modules/@shardev/capacitor-google-auth/android')

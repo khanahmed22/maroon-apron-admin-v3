@@ -7,7 +7,7 @@ import ScrollToTop from "./lib/ScrollToTop";
 import { Capacitor } from "@capacitor/core";
 
 const Login = lazy(() => import("./authPages/Login"));
-const Register = lazy(() => import("./authPages/Register"));
+const RegisterMerchant = lazy(() => import("./authPages/Register"));
 const VerifyEmail = lazy(() => import("./authPages/VerifyEmail"));
 const ForgotPassword = lazy(() => import("./authPages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./authPages/ResetPassword"));
@@ -137,7 +137,7 @@ function App() {
         }
       />
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<RegisterMerchant />} />
 
         <Route
           path="/verify-email/:role/:token"

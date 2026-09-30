@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { SocialLogin } from "@capgo/capacitor-social-login";
 
 export default function Login() {
-  const { session, checkAuth } = UserAuth();
+  const { session, checkAuth ,loading:authLoading} = UserAuth();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ export default function Login() {
       }
 
       await checkAuth();
-      navigate("/dashboard");
+navigate("/dashboard", { replace: true });
     } catch {
       toast.error("Unable to connect to the server");
     } finally {
@@ -124,6 +124,16 @@ export default function Login() {
       setGoogleLoading(false);
     }
   };
+
+  if(authLoading){
+    return (
+    <div className="min-h-screen flex items-center justify-center">
+      <LoaderCircle
+        className="w-6 h-6 animate-spin"
+        style={{ color: ACCENT }}
+      />
+    </div>)
+  }
 
   if (session) {
     return (

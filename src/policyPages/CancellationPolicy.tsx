@@ -1,18 +1,19 @@
-import { Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export default function CancellationPolicy() {
+  const navigate = useNavigate()
   return (
     <main className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-40 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 mb-8">
         <div className="max-w-3xl mx-auto">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Home
-          </Link>
+          <button
+    onClick={() => navigate(-1)}
+    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+  >
+    <ArrowLeft size={16} />
+    Back
+  </button>
         </div>
       </div>
 

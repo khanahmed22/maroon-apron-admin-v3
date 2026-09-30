@@ -690,29 +690,34 @@ export default function Orders({ restId }: { restId: string | null }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-2 pt-2 border-t" style={{ borderColor: BORDER }}>
-          <OrderDetailsDialog o={o} />
+        <div
+  className="flex items-center justify-between gap-2 pt-2 border-t"
+  style={{ borderColor: BORDER }}
+>
+  <OrderDetailsDialog o={o} />
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleShareOrder(o)}
-            className="rounded-lg gap-1.5"
-          >
-            <Share2 className="w-4 h-4" />
-            Share
-          </Button>
+  <div className="flex items-center gap-2">
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => handleShareOrder(o)}
+      className="rounded-lg gap-1.5"
+    >
+      <Share2 className="w-4 h-4" />
+      Share
+    </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePrint(o.orderNumber)}
-            className="rounded-lg gap-1.5"
-          >
-            <Printer className="w-4 h-4" />
-            Print
-          </Button>
-        </div>
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => handlePrint(o.orderNumber)}
+      className="rounded-lg gap-1.5"
+    >
+      <Printer className="w-4 h-4" />
+      Print
+    </Button>
+  </div>
+</div>
       </div>
     ))
   ) : (
@@ -822,12 +827,12 @@ export default function Orders({ restId }: { restId: string | null }) {
                     <StatusSelect o={o} />
                   </td>
 
-                  <td className="p-4">
+                  <td className="p-4 ">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleShareOrder(o)}
-                      className="rounded-lg gap-1.5 text-base"
+                      className="rounded-lg gap-1.5 text-base w-20"
                     >
                       <Share2 className="w-4 h-4" />
                       Share
@@ -837,7 +842,7 @@ export default function Orders({ restId }: { restId: string | null }) {
                       variant="outline"
                       size="sm"
                       onClick={() => handlePrint(o.orderNumber)}
-                      className="rounded-lg gap-1.5 text-base"
+                      className="rounded-lg gap-1.5 text-base mt-4 w-20"
                     >
                       <Printer className="w-4 h-4" />
                       Print

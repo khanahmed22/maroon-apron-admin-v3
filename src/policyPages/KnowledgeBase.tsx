@@ -12,9 +12,11 @@ import {
   Users,
   User,
   HelpCircle,
+  ArrowLeft
 } from "lucide-react";
 import { Input } from "../components/ui/input";
 import type { LucideIcon } from "lucide-react";
+import { useNavigate } from "react-router";
 
 type KnowledgeBaseItem = {
   id: string;
@@ -173,8 +175,10 @@ const knowledgeBaseItems: KnowledgeBaseItem[] = [
 function AccordionItem({ item, isOpen, onToggle }: AccordionItemProps) {
   const IconComponent = item.icon;
 
+
   return (
     <div className="border border-[#e0e0e0] rounded-xl overflow-hidden">
+
       <button
         onClick={onToggle}
         className="w-full flex items-center justify-between p-4 sm:p-6 bg-[#ffffff] hover:bg-[#f9f9f9] transition-colors"
@@ -231,14 +235,23 @@ export default function KnowledgeBase() {
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+  const navigate = useNavigate()
 
   return (
+    
     <div className="min-h-screen bg-[#f8f9fa]">
       {/* Header */}
       <div className="bg-[#ffffff] border-b border-[#e0e0e0] sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col gap-4">
             <div>
+              <button
+    onClick={() => navigate(-1)}
+    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-4"
+  >
+    <ArrowLeft size={16} />
+    Back
+  </button>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#1a1a1a] mb-2">
                 Maroon Apron
               </h1>

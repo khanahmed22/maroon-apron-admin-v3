@@ -177,7 +177,7 @@ export default function FirstTimeSetup({ restId }: RestProps) {
 
   if (restDetails?.getRest?.restName && restDetails?.getRest?.subdomain) {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center px-4">
+    <div className="min-h-[70vh] flex items-center justify-center px-5">
       <div className="w-full max-w-md text-center">
         <div
           className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full"
@@ -236,11 +236,11 @@ export default function FirstTimeSetup({ restId }: RestProps) {
         </div>
 
         <a
-  href="/dashboard"
+  href="/settings"
   className="mt-6 flex h-11 w-full items-center justify-center rounded-xl text-white transition-opacity hover:opacity-90"
   style={{ backgroundColor: ACCENT }}
 >
-  Go to Dashboard
+   Go to Store Settings
 </a>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { UserAuth } from "../context/AuthContext";
 import { Input } from "../components/ui/input";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "../components/ui/button";
@@ -38,7 +38,8 @@ import {
   MessageCircle,
   DatabaseSearch,
   SunMoon,
-  LocateFixed
+  LocateFixed,
+  
 } from "lucide-react";
 import { THEME_NAMES, DEFAULT_THEME } from "../lib/themes";
 import type { ThemeName } from "../lib/themes";
@@ -51,10 +52,16 @@ import {
 } from "../components/ui/select";
 import Map from "./Map";
 import { Bell } from "lucide-react";
-import { enableNotifications, disableNotifications, fetchNotificationStatus } from "../lib/firebase";
+import {
+  enableNotifications,
+  disableNotifications,
+  fetchNotificationStatus,
+} from "../lib/firebase";
 import { Switch } from "../components/ui/switch";
 import { Geolocation } from "@capacitor/geolocation";
 import { Capacitor } from "@capacitor/core";
+import type { DriveStep } from "driver.js";
+
 const CRIMSON_BASE_DOMAIN = "crimsoncastle.shop";
 
 const ACCENT = "#D6293F";
@@ -104,6 +111,7 @@ interface RestListProps {
   orderingDisabled: boolean;
   pickupEnabled: boolean;
   deliveryEnabled: boolean;
+  
 }
 interface RestResponse {
   getRest: RestListProps;
@@ -116,6 +124,7 @@ interface PreorderPayload {
   pickUpWindows?: string[];
   deliveryWindows?: string[];
 }
+
 
 function FieldLabel({
   icon,
@@ -318,11 +327,9 @@ export default function Settings({ restId }: { restId: string | null }) {
     pickupEnabled: true,
     deliveryEnabled: true,
   });
-  const { session } = UserAuth();
+  const { session} = UserAuth();
 
   const isFreePlan = !merchantStatus?.plan || merchantStatus.plan === "free";
-
- 
 
   const isValidCustomDomain = (domain: string, sub?: string) => {
     if (!domain || !sub) return false;
@@ -380,6 +387,168 @@ export default function Settings({ restId }: { restId: string | null }) {
     setPickupEnabled(restDetails.getRest.pickupEnabled ?? true);
     setSetDeliveryEnabled(restDetails.getRest.deliveryEnabled ?? true);
   }, [restDetails]);
+
+  // ================= GUIDED TOUR =================
+  
+
+  const completeTour = async (): Promise<{ success: boolean }> => {
+  const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/tour`, {
+    method: "PATCH",
+    credentials: "include",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to complete tour");
+  }
+
+  return res.json();
+};
+
+const { mutate: completeTourM } = useMutation({
+  mutationKey: ["completeTourM"],
+  mutationFn: completeTour,
+
+  onSuccess: () => {
+   
+
+    toast.success("Tour completed 🎉");
+  },
+
+  onError: () => {
+    toast.error("Couldn't save tour progress");
+  },
+});
+  // guards against the auto-start effect firing twice (StrictMode / re-renders)
+  const tourStartedRef = useRef(false);
+
+  const startSettingsTour = async () => {
+    // make sure every card is visible before the tour looks for targets
+    setSettingsSearch("");
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    const [{ driver }] = await Promise.all([
+      import("driver.js"),
+      import("driver.js/dist/driver.css"),
+    ]);
+
+    const allSteps: DriveStep[] = [
+      {
+        element: "#tour-profile",
+        popover: {
+          title: "Your store profile",
+          description: "Tap the pencil icons to change your logo and banner.",
+          side: "bottom",
+        },
+      },
+      {
+        element: "#tour-domain",
+        popover: {
+          title: "Domain",
+          description: "Your store URL and custom domain live here.",
+          side: "bottom",
+        },
+      },
+      {
+        element: "#tour-announcement",
+        popover: {
+          title: "Announcement",
+          description: "This message shows at the top of your store.",
+          side: "bottom",
+        },
+      },
+      {
+        element: "#tour-contact",
+        popover: {
+          title: "Contact details",
+          description: "Your phone, email and address shown to customers.",
+          side: "bottom",
+        },
+      },
+      {
+        element: "#tour-theme",
+        popover: {
+          title: "Store theme",
+          description: "Pick the colour theme of your storefront.",
+          side: "bottom",
+        },
+      },
+      {
+        element: "#tour-notifications",
+        popover: {
+          title: "Push notifications",
+          description: "Get alerted the moment a new order comes in.",
+          side: "top",
+        },
+      },
+      {
+        element: "#tour-fulfillment",
+        popover: {
+          title: "Order fulfillment",
+          description:
+            "Turn ordering, pickup and delivery on or off, and set your pickup location.",
+          side: "top",
+        },
+      },
+      {
+        element: "#tour-preorder",
+        popover: {
+          title: "Preorders",
+          description:
+            "Let customers schedule orders ahead, with your own time windows.",
+          side: "top",
+        },
+      },
+      {
+        element: "#tour-support",
+        popover: {
+          title: "Need help?",
+          description: "Our support team is one tap away.",
+          side: "top",
+        },
+      },
+    ];
+
+    // skip any step whose target isn't on screen
+    const steps = allSteps.filter(
+      (s) => typeof s.element === "string" && document.querySelector(s.element),
+    );
+    if (steps.length === 0) return;
+
+    const driverObj = driver({
+      showProgress: true,
+      allowClose: true,
+      nextBtnText: "Next",
+      prevBtnText: "Back",
+      doneBtnText: "Complete Tour",
+      steps,
+      onDestroyStarted: () => {
+        // fires on close (X / overlay / Esc) AND on the final "Complete Tour" click.
+        // only mark as completed if the user reached the last step.
+        if (!driverObj.hasNextStep()) {
+          completeTourM();
+        }
+        driverObj.destroy();
+      },
+    });
+
+    driverObj.drive();
+  };
+
+  // auto-start once for merchants who haven't completed the tour
+  // auto-start once for merchants who haven't completed the tour
+useEffect(() => {
+  if (isPending || !restDetails?.getRest) return;
+  if (!session) return; // wait until the session has loaded
+  if (session.tourCompleted) return; // already completed, never auto-start
+  if (tourStartedRef.current) return;
+
+  tourStartedRef.current = true;
+  const t = setTimeout(() => {
+    startSettingsTour();
+  }, 400);
+  return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [isPending, restDetails, session]);
 
   // ================= PER-SECTION EDIT MODE =================
 
@@ -646,8 +815,6 @@ export default function Settings({ restId }: { restId: string | null }) {
       );
     },
   });
-
-  
 
   const updatePreorderSettings = async (
     payload: PreorderPayload,
@@ -936,14 +1103,14 @@ export default function Settings({ restId }: { restId: string | null }) {
       setDisablingNotifs(false);
     }
   };
- const DEFAULT_LAT = 24.8607; // Karachi, adjust to wherever makes sense for your merchants
- const DEFAULT_LONG = 67.0011;
+  const DEFAULT_LAT = 24.8607; // Karachi, adjust to wherever makes sense for your merchants
+  const DEFAULT_LONG = 67.0011;
 
- 
-
-   const hasSavedLocation = !!(restDetails?.getRest?.lat && restDetails?.getRest?.long);
+  const hasSavedLocation = !!(
+    restDetails?.getRest?.lat && restDetails?.getRest?.long
+  );
   const lat = restDetails?.getRest?.lat || DEFAULT_LAT;
-const long = restDetails?.getRest?.long || DEFAULT_LONG;
+  const long = restDetails?.getRest?.long || DEFAULT_LONG;
 
   // ================= PICKUP LOCATION (VIEW MODE MAP EDIT) =================
   const [pendingLocation, setPendingLocation] = useState<{
@@ -999,61 +1166,61 @@ const long = restDetails?.getRest?.long || DEFAULT_LONG;
 
   const [locatingUser, setLocatingUser] = useState(false);
 
-const handleUseCurrentLocation = async () => {
-  setLocatingUser(true);
+  const handleUseCurrentLocation = async () => {
+    setLocatingUser(true);
 
-  try {
-    if (Capacitor.isNativePlatform()) {
-      const permStatus = await Geolocation.checkPermissions();
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const permStatus = await Geolocation.checkPermissions();
 
-      if (permStatus.location !== "granted") {
-        const requested = await Geolocation.requestPermissions();
-        if (requested.location !== "granted") {
-          toast.error("Location permission denied");
+        if (permStatus.location !== "granted") {
+          const requested = await Geolocation.requestPermissions();
+          if (requested.location !== "granted") {
+            toast.error("Location permission denied");
+            return;
+          }
+        }
+
+        const position = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 10000,
+        });
+
+        setPendingLocation({
+          lat: position.coords.latitude,
+          long: position.coords.longitude,
+        });
+      } else {
+        if (!navigator.geolocation) {
+          toast.error("Geolocation isn't supported in this browser");
           return;
         }
+
+        await new Promise<void>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setPendingLocation({
+                lat: position.coords.latitude,
+                long: position.coords.longitude,
+              });
+              resolve();
+            },
+            (err) => reject(err),
+            { enableHighAccuracy: true, timeout: 10000 },
+          );
+        });
       }
-
-      const position = await Geolocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-      });
-
-      setPendingLocation({
-        lat: position.coords.latitude,
-        long: position.coords.longitude,
-      });
-    } else {
-      if (!navigator.geolocation) {
-        toast.error("Geolocation isn't supported in this browser");
-        return;
+    } catch (err: any) {
+      console.error(err);
+      if (err?.code === 1) {
+        toast.error("Location permission denied");
+      } else {
+        toast.error("Couldn't get your location");
       }
-
-      await new Promise<void>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setPendingLocation({
-              lat: position.coords.latitude,
-              long: position.coords.longitude,
-            });
-            resolve();
-          },
-          (err) => reject(err),
-          { enableHighAccuracy: true, timeout: 10000 },
-        );
-      });
+    } finally {
+      setLocatingUser(false);
     }
-  } catch (err: any) {
-    console.error(err);
-    if (err?.code === 1) {
-      toast.error("Location permission denied");
-    } else {
-      toast.error("Couldn't get your location");
-    }
-  } finally {
-    setLocatingUser(false);
-  }
-};
+  };
 
   function isValidTimeWindow(value: string): boolean {
     const timePattern = /^(\d{1,2})(:\d{2})?\s*(am|pm)?$/i;
@@ -1080,9 +1247,6 @@ const handleUseCurrentLocation = async () => {
 
   return (
     <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
-      {/* ================= FIRST-TIME SETUP MODAL ================= */}
-      
-
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between gap-4 mb-4">
           <h1
@@ -1091,6 +1255,7 @@ const handleUseCurrentLocation = async () => {
           >
             Settings
           </h1>
+          
         </div>
 
         {/* ================= SETTINGS SEARCH ================= */}
@@ -1110,6 +1275,7 @@ const handleUseCurrentLocation = async () => {
 
         {/* ================= PROFILE HEADER ================= */}
         <div
+          id="tour-profile"
           className="bg-white rounded-2xl border overflow-hidden mb-6"
           style={{ borderColor: BORDER }}
         >
@@ -1224,16 +1390,16 @@ const handleUseCurrentLocation = async () => {
             </p>
             {restDetails?.getRest?.restSite && (
               <div className="mb-2">
-  <a
-    className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs"
-    href={restDetails?.getRest?.restSite}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <span className="max-md:hidden">Visit Store</span>
-    <span className="md:hidden">Store</span>
-  </a>
-</div>
+                <a
+                  className="bg-red-500 text-white p-3 rounded-2xl font-bold shadow-lg max-md:text-xs"
+                  href={restDetails?.getRest?.restSite}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="max-md:hidden">Visit Store</span>
+                  <span className="md:hidden">Store</span>
+                </a>
+              </div>
             )}
           </div>
         </div>
@@ -1247,6 +1413,7 @@ const handleUseCurrentLocation = async () => {
           "subdomain",
         ]) && (
           <div
+            id="tour-domain"
             className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
@@ -1364,6 +1531,7 @@ const handleUseCurrentLocation = async () => {
         {/* ================= ANNOUNCEMENT ================= */}
         {matchesSearch(["announcement", "banner message", "promo text"]) && (
           <div
+            id="tour-announcement"
             className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
@@ -1371,7 +1539,7 @@ const handleUseCurrentLocation = async () => {
               <div className="flex items-center gap-2">
                 <PartyPopper className="w-5 h-5" style={{ color: ACCENT }} />
                 <h2 className="text-lg font-bold" style={{ color: INK }}>
-                  Announcement 
+                  Announcement
                 </h2>
               </div>
               {!announcementEditMode && (
@@ -1419,6 +1587,7 @@ const handleUseCurrentLocation = async () => {
           "address",
         ]) && (
           <div
+            id="tour-contact"
             className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
@@ -1514,6 +1683,7 @@ const handleUseCurrentLocation = async () => {
         {/* ================= SOCIALS ================= */}
         {matchesSearch(["social", "socials", "instagram", "facebook"]) && (
           <div
+            id="tour-socials"
             className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
@@ -1585,6 +1755,7 @@ const handleUseCurrentLocation = async () => {
         {/* ================= SEO ================= */}
         {matchesSearch(["seo", "meta title", "meta description"]) && (
           <div
+            id="tour-seo"
             className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
@@ -1657,6 +1828,7 @@ const handleUseCurrentLocation = async () => {
         {/* ================= THEME ================= */}
         {matchesSearch(["theme", "store theme", "appearance"]) && (
           <div
+            id="tour-theme"
             className="bg-white rounded-2xl border p-6 mb-3"
             style={{ borderColor: BORDER }}
           >
@@ -1737,6 +1909,7 @@ const handleUseCurrentLocation = async () => {
           "white label",
         ]) && (
           <div
+            id="tour-branding"
             className="bg-white rounded-2xl border p-6"
             style={{ borderColor: BORDER }}
           >
@@ -1777,6 +1950,7 @@ const handleUseCurrentLocation = async () => {
 
         {matchesSearch(["notifications", "push", "alerts", "orders"]) && (
           <div
+            id="tour-notifications"
             className="bg-white rounded-2xl border p-6 mt-3"
             style={{ borderColor: BORDER }}
           >
@@ -1844,6 +2018,7 @@ const handleUseCurrentLocation = async () => {
           "courier",
         ]) && (
           <div
+            id="tour-fulfillment"
             className="bg-white rounded-2xl border p-6 divide-y"
             style={{ borderColor: BORDER }}
           >
@@ -1911,7 +2086,6 @@ const handleUseCurrentLocation = async () => {
               </div>
 
               {/* Pickup location editor */}
-                            {/* Pickup location editor */}
               {pickupLocEditMode && (
                 <div
                   className="bg-white rounded-2xl border p-6"
@@ -1943,32 +2117,34 @@ const handleUseCurrentLocation = async () => {
                           onClick={() => updateLocationM(pendingLocation)}
                         >
                           {locationSaving ? "Saving…" : "Save Location"}
-
-
                         </Button>
                       </div>
                     )}
-                    
                   </div>
-                  
 
-                  
-
-               
-                 <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-                   <p className="text-xs" style={{ color: MUTE }}>
-                    {hasSavedLocation ?"Click on the map, or drag the pin, to update your pickup location":"No pickup location set yet — click the map, drag the pin, or use your current location below"}
-                    
-                  </p>
-                  <Button
-                   variant="outline"
-                     disabled={locatingUser}
-                     onClick={handleUseCurrentLocation}
-                    className="h-8 rounded-lg text-xs px-3 gap-1.5 shrink-0"                    >
-                    {locatingUser ? (                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                     ) : (                       <LocateFixed className="w-3.5 h-3.5" style={{ color: ACCENT }} />
-                    )}                    Use my current location                   </Button>
-                </div>
+                  <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+                    <p className="text-xs" style={{ color: MUTE }}>
+                      {hasSavedLocation
+                        ? "Click on the map, or drag the pin, to update your pickup location"
+                        : "No pickup location set yet — click the map, drag the pin, or use your current location below"}
+                    </p>
+                    <Button
+                      variant="outline"
+                      disabled={locatingUser}
+                      onClick={handleUseCurrentLocation}
+                      className="h-8 rounded-lg text-xs px-3 gap-1.5 shrink-0"
+                    >
+                      {locatingUser ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <LocateFixed
+                          className="w-3.5 h-3.5"
+                          style={{ color: ACCENT }}
+                        />
+                      )}
+                      Use my current location
+                    </Button>
+                  </div>
 
                   <Map
                     latitude={pendingLocation?.lat ?? lat}
@@ -2015,6 +2191,7 @@ const handleUseCurrentLocation = async () => {
           "advance order",
         ]) && (
           <div
+            id="tour-preorder"
             className="bg-white rounded-2xl border p-6 mt-3"
             style={{ borderColor: BORDER }}
           >
@@ -2256,6 +2433,7 @@ const handleUseCurrentLocation = async () => {
 
         {matchesSearch(["support", "help", "question", "contact"]) && (
           <div
+            id="tour-support"
             className="bg-white rounded-2xl border p-6 flex flex-col gap-y-5"
             style={{ borderColor: BORDER }}
           >

@@ -9,9 +9,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
 import * as Sentry from "@sentry/react";
 import "../SentryConfig.ts";
 import { Capacitor } from "@capacitor/core";
@@ -84,8 +82,11 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <BrowserRouter>
-
+        
+          
           <App />
+         
+        
         </BrowserRouter>
       </AuthContextProvider>
 

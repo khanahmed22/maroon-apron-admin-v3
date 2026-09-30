@@ -1,17 +1,19 @@
 import { Link } from "react-router";
-import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router";
+import { ArrowLeft } from "lucide-react";
 
 export default function DeliveryPolicy() {
+  const navigate = useNavigate()
   return (
     <main className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-8 font-medium"
-        >
-          <ChevronLeft size={20} />
-          Back to Home
-        </Link>
+        <button
+    onClick={() => navigate(-1)}
+    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+  >
+    <ArrowLeft size={16} />
+    Back
+  </button>
 
         <div className="bg-card rounded-lg shadow-sm p-8 sm:p-12">
           <h1 className="text-4xl font-bold text-foreground mb-2">

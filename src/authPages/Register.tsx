@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { UserAuth } from "../context/AuthContext";
 import { toast } from "sonner";
-import { Mail, Lock, Eye, EyeOff, UserRound } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, UserRound,LoaderCircle } from "lucide-react"
 import { useNavigate } from "react-router";
 import { usePostHog } from "../lib/posthog";
 import { Capacitor } from "@capacitor/core";
@@ -22,7 +22,7 @@ export default function RegisterMerchant(){
   const BORDER = "#E7E5E4"
   const SOFT = "#FBF7F6"
 
-  const { session } = UserAuth()
+  const { session,loading:authLoading } = UserAuth()
   const posthog = usePostHog()
 
   const isNative = Capacitor.isNativePlatform()
@@ -175,6 +175,17 @@ export default function RegisterMerchant(){
       setGoogleLoading(false)
     }
   };
+
+  
+  if(authLoading){
+    return (
+    <div className="min-h-screen flex items-center justify-center">
+      <LoaderCircle
+        className="w-6 h-6 animate-spin"
+        style={{ color: ACCENT }}
+      />
+    </div>)
+  }
 
   if(session){
     return(

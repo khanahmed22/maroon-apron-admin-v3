@@ -16,6 +16,8 @@ import {
   Globe,
   Check,
   Sparkles,
+  ChefHat,
+  CookingPot,
 
 } from "lucide-react"
 
@@ -517,7 +519,7 @@ const deleteAccountMutation = useMutation({
             
 
             <div className="w-14 h-14 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-3 border border-white/20">
-              <Crown className="w-7 h-7 text-white" />
+              <ChefHat className="w-7 h-7 text-white" />
             </div>
 
             <h2 className="text-2xl font-extrabold text-white">
@@ -563,8 +565,8 @@ const deleteAccountMutation = useMutation({
                 </>
               ) : (
                 <>
-                  <Crown className="w-4.5 h-4.5" />
-                  Upgrade to Pro
+                  <CookingPot className="w-4.5 h-4.5" />
+                  Unlock Pro
                 </>
               )}
             </button>
@@ -579,6 +581,98 @@ const deleteAccountMutation = useMutation({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/*HELP AND LEGAL*/}
+
+      {/* ================= HELP & LEGAL ================= */}
+<div 
+  className="max-w-md w-full mx-auto bg-white rounded-2xl border p-5 sm:p-6 mb-6 mt-12" 
+  style={{ borderColor: BORDER }} 
+>
+  <h2
+    className="text-lg font-bold mb-4"
+    style={{ color: INK }}
+  >
+    Help & Legal
+  </h2>
+
+  <div className="divide-y" style={{ borderColor: BORDER }}>
+    <button
+      onClick={() => navigate("/support")}
+      className="w-full flex items-center justify-between py-3 text-left hover:opacity-70 transition-opacity"
+    >
+      <span
+        className="text-sm font-medium"
+        style={{ color: INK }}
+      >
+        Help & Support
+      </span>
+
+      <span
+        className="text-sm"
+        style={{ color: MUTE }}
+      >
+        →
+      </span>
+    </button>
+
+    <button
+      onClick={() => navigate("/privacy-policy")}
+      className="w-full flex items-center justify-between py-3 text-left hover:opacity-70 transition-opacity"
+    >
+      <span
+        className="text-sm font-medium"
+        style={{ color: INK }}
+      >
+        Privacy Policy
+      </span>
+
+      <span
+        className="text-sm"
+        style={{ color: MUTE }}
+      >
+        →
+      </span>
+    </button>
+
+    <button
+      onClick={() => navigate("/terms-and-conditions")}
+      className="w-full flex items-center justify-between py-3 text-left hover:opacity-70 transition-opacity"
+    >
+      <span
+        className="text-sm font-medium"
+        style={{ color: INK }}
+      >
+        Terms and Conditions
+      </span>
+
+      <span
+        className="text-sm"
+        style={{ color: MUTE }}
+      >
+        →
+      </span>
+    </button>
+    <button
+      onClick={() => navigate("/knowledge-base")}
+      className="w-full flex items-center justify-between py-3 text-left hover:opacity-70 transition-opacity"
+    >
+      <span
+        className="text-sm font-medium"
+        style={{ color: INK }}
+      >
+        Knowledge Base
+      </span>
+
+      <span
+        className="text-sm"
+        style={{ color: MUTE }}
+      >
+        →
+      </span>
+    </button>
+  </div>
+</div>
 
       <div
   className="max-w-md w-full mx-auto rounded-2xl border bg-white p-5 sm:p-6 mt-44"

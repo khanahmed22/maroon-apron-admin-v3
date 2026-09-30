@@ -1,19 +1,20 @@
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { ArrowLeft } from "lucide-react";
 
 export default function PrivacyPolicy() {
+  const navigate = useNavigate()
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft size={16} />
-            Back to Home
-          </Link>
-        </div>
+  <button
+    onClick={() => navigate(-1)}
+    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+  >
+    <ArrowLeft size={16} />
+    Back
+  </button>
+</div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-12">
@@ -25,11 +26,12 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold mb-4">1. Data Controller</h2>
             <p className="text-muted-foreground">
-              Maroon Apron Shop (“we”, “us”, “our”) acts as the data controller
-              for merchant information processed through the Maroon Apron SaaS
-              platform. We determine how and why merchant data is processed in
-              accordance with applicable data protection laws.
-            </p>
+  Maroon Apron, a sole proprietorship registered in Pakistan (“Maroon
+  Apron”, “we”, “us”, “our”), acts as the data controller for merchant
+  information processed through the Maroon Apron SaaS platform. Contact:
+  privacy@maroonapron.com. We determine how and why merchant data is
+  processed in accordance with applicable data protection laws.
+</p>
           </section>
 
           {/* 2 */}
@@ -78,16 +80,16 @@ export default function PrivacyPolicy() {
               4. Payment & Financial Data
             </h2>
             <p className="text-muted-foreground">
-              Subscription payments are processed by Paddle.com Market Limited
-              ("Paddle"), which acts as the Merchant of Record for all
-              subscription transactions on the platform. This means Paddle is
-              the authorized reseller and handles payment processing, billing,
-              tax calculation, and tax remittance on our behalf. Maroon Apron
-              Shop does not store full payment card details. Financial
-              information is processed securely by Paddle in accordance with
-              industry standards. For details on how Paddle handles your data,
-              please refer to Paddle's own privacy policy.
-            </p>
+  Payment processing depends on where you subscribe. Subscriptions purchased
+  on our website are processed by Paddle.com Market Limited (“Paddle”), which
+  acts as the Merchant of Record and handles payment processing, billing, tax
+  calculation, and tax remittance. Subscriptions purchased through our
+  Android app are processed by Google Play (Google LLC) using Google Play
+  Billing, and are governed by Google’s terms and privacy policy. Maroon
+  Apron does not store full payment card details in either case. For details
+  on how these providers handle your data, please refer to Paddle’s and
+  Google’s own privacy policies.
+</p>
           </section>
 
           {/* 5 */}
@@ -117,10 +119,10 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc list-inside space-y-2 text-muted-foreground">
               <li>
-                <span className="font-medium text-foreground">Payments:</span>{" "}
-                Paddle (Merchant of Record for subscription billing and tax
-                compliance)
-              </li>
+  <span className="font-medium text-foreground">Payments:</span> Paddle
+  (web subscriptions) and Google Play (Android app subscriptions), each
+  acting as Merchant of Record for their respective channel
+</li>
               <li>
                 <span className="font-medium text-foreground">
                   Email delivery:
@@ -160,7 +162,7 @@ export default function PrivacyPolicy() {
             </h2>
             <p className="text-muted-foreground">
               Merchant data may be processed or stored outside your country of
-              residence, including by service providers such as Paddle, Resend,
+              residence, including by service providers such as Paddle, Google Play, Resend,
               Sentry, Umami Cloud, PostHog and UptimeRobot, which may operate
               infrastructure in the United States, European Union, or other
               jurisdictions. Where international transfers occur, appropriate
@@ -194,7 +196,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold mb-4">10. Children’s Data</h2>
             <p className="text-muted-foreground">
-              Maroon Apron Shop does not knowingly collect personal data from
+              Maroon Apron does not knowingly collect personal data from
               individuals under the age of 18.
             </p>
           </section>
@@ -213,7 +215,9 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-bold mb-4">12. Contact Information</h2>
             <p className="text-muted-foreground">
-              Email: support@maroonapron.com
+              Privacy enquiries: privacy@maroonapron.com
+<br />
+General support: support@maroonapron.com
               <br />
               Phone: +92 (334)-820-4806
               <br />

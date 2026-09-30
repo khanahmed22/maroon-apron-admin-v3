@@ -63,24 +63,27 @@ export default function Dashboard() {
   const { session } = UserAuth()
 
   return (
-    <div className="min-h-screen p-4 sm:p-6" style={{ backgroundColor: SOFT }}>
+    <div
+      className="min-h-screen p-4 sm:p-6 max-md:p-3"
+      style={{ backgroundColor: SOFT }}
+    >
       <div className="max-w-5xl mx-auto">
         {/* ================= GREETING HERO ================= */}
         <div
-          className="relative overflow-hidden rounded-2xl mb-8 px-6 sm:px-8 py-8 sm:py-10 flex items-center justify-between gap-6"
+          className="relative overflow-hidden rounded-2xl mb-8 px-6 sm:px-8 py-8 sm:py-10 flex items-center justify-between gap-6 max-md:mb-4 max-md:rounded-xl max-md:px-4 max-md:py-4 max-md:gap-3"
           style={{ background: `linear-gradient(135deg, ${ACCENT} 0%, #8E1522 100%)` }}
         >
-          <UtensilsCrossed className="absolute -left-4 -top-6 w-28 h-28 text-white/10 rotate-[-15deg]" />
-          <Soup className="absolute right-10 -bottom-8 w-32 h-32 text-white/10 rotate-[10deg]" />
+          <UtensilsCrossed className="absolute -left-4 -top-6 w-28 h-28 text-white/10 rotate-[-15deg] max-md:hidden" />
+          <Soup className="absolute right-10 -bottom-8 w-32 h-32 text-white/10 rotate-[10deg] max-md:hidden" />
 
           <div className="relative z-10">
-            <p className="text-sm font-semibold uppercase tracking-wide text-white/70 mb-2">
+            <p className="text-sm font-semibold uppercase tracking-wide text-white/70 mb-2 max-md:text-[10px] max-md:mb-0.5">
               Dashboard
             </p>
-            <h1 className="text-2xl sm:text-3xl max-md:text-xl font-extrabold text-white">
+            <h1 className="text-2xl sm:text-3xl max-md:text-lg font-extrabold text-white">
               Welcome back{session?.name ? `, ${session.name}` : ""}
             </h1>
-            <p className="text-white/80 text-base mt-2 max-w-md max-md:text-sm">
+            <p className="text-white/80 text-base mt-2 max-w-md max-md:text-xs max-md:mt-1">
               Here's a quick way to get to everything you manage day to day.
             </p>
           </div>
@@ -94,25 +97,31 @@ export default function Dashboard() {
         </div>
 
         {/* ================= QUICK LINKS ================= */}
-        <h2 className="text-lg font-bold mb-4" style={{ color: INK }}>
+        <h2
+          className="text-lg max-md:text-sm font-bold mb-4 max-md:mb-2"
+          style={{ color: INK }}
+        >
           Quick Links
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-md:grid-cols-2">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-md:grid-cols-2 max-md:gap-2.5">
           {quickLinks.map((q) => (
             <Link
               key={q.link}
               to={q.link}
-              className="group bg-white rounded-2xl border p-5 flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all"
+              className="group bg-white rounded-2xl border p-5 flex flex-col hover:shadow-lg hover:-translate-y-0.5 transition-all max-md:p-3 max-md:rounded-xl"
               style={{ borderColor: BORDER }}
             >
               <div
-                className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 "
+                className="w-11 h-11 max-md:w-7 max-md:h-7 rounded-xl flex items-center justify-center mb-4 max-md:mb-2"
                 style={{ backgroundColor: SOFT, color: ACCENT }}
               >
-                <q.icon className="w-5 h-5" />
+                <q.icon className="w-5 h-5 max-md:w-4 max-md:h-4" />
               </div>
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <span className="font-bold text-base" style={{ color: INK }}>
+              <div className="flex items-center justify-between gap-2 mb-1 max-md:mb-0.5">
+                <span
+                  className="font-bold text-base max-md:text-sm"
+                  style={{ color: INK }}
+                >
                   {q.label}
                 </span>
                 <ArrowRight
@@ -120,7 +129,10 @@ export default function Dashboard() {
                   style={{ color: ACCENT }}
                 />
               </div>
-              <p className="text-sm" style={{ color: MUTE }}>
+              <p
+                className="text-sm max-md:text-xs max-md:leading-snug"
+                style={{ color: MUTE }}
+              >
                 {q.desc}
               </p>
             </Link>

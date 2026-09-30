@@ -254,6 +254,7 @@ export default function DeliveryZones({ restId }: RestProps) {
 
     const [fixRate,setFixRate]= useState(0)
     const [FixMinOrder,setFixMinOrder] = useState(0)
+    
 
   const updateFixRate = async()=>{
    
@@ -268,8 +269,8 @@ export default function DeliveryZones({ restId }: RestProps) {
         body:JSON.stringify({fixRate,FixMinOrder})
       })
       if(!fixRateResponse.ok){
-        return
-      }
+  throw new Error("Failed to update fixed rate")
+}
     const data = await fixRateResponse.json()
     return data
     }
@@ -281,11 +282,15 @@ export default function DeliveryZones({ restId }: RestProps) {
   }
 
   const {mutate:updateFixRateM} = useMutation({
-    mutationKey:['updateFixRate'],
-    mutationFn: updateFixRate,
-    onSuccess:()=>toast.success('Rate updated'),
-    onError:()=>toast.error('Could not update rate')
-  })
+  mutationKey:['updateFixRate'],
+  mutationFn: updateFixRate,
+  onSuccess:()=>{
+    toast.success('Rate updated')
+    queryClient.invalidateQueries({ queryKey: ["fixRate", restId] })
+    setIsEditingFix(false)
+  },
+  onError:()=>toast.error('Could not update rate')
+})
 
   function handleFixRate(e:React.FormEvent<HTMLFormElement>){
      e.preventDefault()
@@ -294,7 +299,12 @@ export default function DeliveryZones({ restId }: RestProps) {
 
 
 
-  
+   const [isEditingFix, setIsEditingFix] = useState(false)
+  const cancelFixEdit = () => {
+  setFixRate(FixQuery?.rate || 0)
+  setFixMinOrder(FixQuery?.FixMinOrder || 0)
+  setIsEditingFix(false)
+}
 
   const enableFixRate = async () => {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/fix-rate/enableFixRate`, {
@@ -342,11 +352,19 @@ export default function DeliveryZones({ restId }: RestProps) {
     setFixRate(FixQuery?.rate || 0)
     setFixMinOrder(FixQuery?.FixMinOrder || 0)
   },[FixQuery])
+  const MUTE = "#6B7280";
+    const ACCENT = "#D6293F";
 
-  if (isPending) {
+
+ 
+if (isPending) {
     return (
-      <div className="flex justify-center py-10">
-        <Loader2 className="w-6 h-6 animate-spin" />
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-3"
+        style={{ color: MUTE }}
+      >
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: ACCENT }} />
+        <p className="text-sm font-medium">Loading Delivery Zone…</p>
       </div>
     );
   }
@@ -386,36 +404,62 @@ export default function DeliveryZones({ restId }: RestProps) {
         </div>
 
         {FixQuery?.fixMode && (
-          <form onSubmit={handleFixRate} className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5">
-            <div className="flex-1 flex flex-col gap-y-1.5">
-              <Label className="flex items-center gap-1.5">
-                <Wallet className="w-4 h-4 text-muted-foreground" />
-                Flat Delivery Rate
-              </Label>
-              <Input
-                type="number"
-                placeholder="Rs. 0"
-                value={fixRate}
-                onChange={(e) => setFixRate(Number(e.target.value))}
-                className="h-11 rounded-xl text-base"
-              />
-              <Label className="flex items-center gap-1.5">
-                <Wallet className="w-4 h-4 text-muted-foreground" />
-                Min Order
-              </Label>
-              <Input
-                type="number"
-                placeholder="Rs. 0"
-                value={FixMinOrder}
-                onChange={(e) => setFixMinOrder(Number(e.target.value))}
-                className="h-11 rounded-xl text-base"
-              />
-            </div>
-            <Button type="submit" className="h-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
-              Update
-            </Button>
-          </form>
-        )}
+  isEditingFix ? (
+    <form onSubmit={handleFixRate} className="flex flex-col sm:flex-row sm:items-end gap-3 mt-5">
+      <div className="flex-1 flex flex-col gap-y-1.5">
+        <Label className="flex items-center gap-1.5">
+          <Wallet className="w-4 h-4 text-muted-foreground" />
+          Flat Delivery Rate
+        </Label>
+        <Input
+          type="number"
+          placeholder="Rs. 0"
+          value={fixRate}
+          onChange={(e) => setFixRate(Number(e.target.value))}
+          className="h-11 rounded-xl text-base"
+        />
+        <Label className="flex items-center gap-1.5">
+          <Wallet className="w-4 h-4 text-muted-foreground" />
+          Min Order
+        </Label>
+        <Input
+          type="number"
+          placeholder="Rs. 0"
+          value={FixMinOrder}
+          onChange={(e) => setFixMinOrder(Number(e.target.value))}
+          className="h-11 rounded-xl text-base"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button type="button" variant="outline" className="h-11 rounded-xl" onClick={cancelFixEdit}>
+          Cancel
+        </Button>
+        <Button type="submit" className="h-11 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90">
+          Update
+        </Button>
+      </div>
+    </form>
+  ) : (
+    <div className="flex items-center justify-between mt-5 border-t border-border pt-4">
+      <div className="space-y-1">
+        <p className="text-sm">
+          Flat Delivery Rate: <strong className="text-primary">Rs. {FixQuery.rate}</strong>
+        </p>
+        <p className="text-sm">
+          Minimum Order: <strong>Rs. {FixQuery.FixMinOrder}</strong>
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={() => setIsEditingFix(true)}
+        className="text-muted-foreground hover:text-primary transition-colors"
+        aria-label="Edit fixed rate"
+      >
+        <Pencil className="w-5 h-5" />
+      </button>
+    </div>
+  )
+)}
       </div>
 
       {/* ================= AREA-BASED PRICING ================= */}

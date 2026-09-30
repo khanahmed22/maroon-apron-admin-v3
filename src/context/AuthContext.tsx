@@ -7,6 +7,7 @@ interface UserProps {
   name: string;
   email: string;
   createdAt?: string;
+  tourCompleted: boolean
 }
 
 interface AuthContextType {

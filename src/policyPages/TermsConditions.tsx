@@ -1,18 +1,19 @@
-import { Link } from "react-router";
 import { ArrowLeft } from "lucide-react";
-
+import { useNavigate } from "react-router";
+import { Link } from "react-router";
 export default function MerchantTermsAndConditions() {
+  const navigate = useNavigate()
   return (
     <main className="min-h-screen bg-background text-foreground">
       <div className="border-b border-border bg-background/50 backdrop-blur-sm sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to Home
-          </Link>
+          <button
+    onClick={() => navigate(-1)}
+    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+  >
+    <ArrowLeft size={16} />
+    Back
+  </button>
         </div>
       </div>
 

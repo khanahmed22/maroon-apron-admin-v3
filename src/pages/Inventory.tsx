@@ -203,6 +203,7 @@ export default function Inventory({ restId, restName }: restProps) {
           `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
           {
             method: "POST",
+            credentials:'include',
             body: formData,
           },
         );
@@ -264,6 +265,8 @@ export default function Inventory({ restId, restName }: restProps) {
       toast.success("Item added");
 
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["account"] });
+
     },
     onError: () => {
       toast.error("Item was not added");
@@ -609,6 +612,7 @@ export default function Inventory({ restId, restName }: restProps) {
           `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
           {
             method: "POST",
+            credentials:'include',
             body: formData,
           },
         );

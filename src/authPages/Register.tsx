@@ -22,7 +22,7 @@ export default function RegisterMerchant(){
   const BORDER = "#E7E5E4"
   const SOFT = "#FBF7F6"
 
-  const { session,loading:authLoading } = UserAuth()
+  const { session,loading:authLoading, checkAuth } = UserAuth()
   const posthog = usePostHog()
 
   const isNative = Capacitor.isNativePlatform()
@@ -94,6 +94,7 @@ export default function RegisterMerchant(){
       }
 
       toast.success("Account created!");
+      await checkAuth();
       navigate("/dashboard");
     } catch {
       toast.error("Unable to connect to the server");

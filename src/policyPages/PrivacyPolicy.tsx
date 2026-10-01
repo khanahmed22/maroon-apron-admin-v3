@@ -149,6 +149,12 @@ export default function PrivacyPolicy() {
                 </span>{" "}
                 UptimeRobot (automated availability checks)
               </li>
+              <li>
+  <span className="font-medium text-foreground">
+    Customer support:
+  </span>{" "}
+  Tawk.to (live chat and customer support)
+</li>
             </ul>
             <p className="text-muted-foreground mt-4">
               We may also share data with authorities where legally required.
@@ -163,7 +169,7 @@ export default function PrivacyPolicy() {
             <p className="text-muted-foreground">
               Merchant data may be processed or stored outside your country of
               residence, including by service providers such as Paddle, Google Play, Resend,
-              Sentry, Umami Cloud, PostHog and UptimeRobot, which may operate
+              Sentry, Umami Cloud, PostHog, Tawk.to and UptimeRobot, which may operate
               infrastructure in the United States, European Union, or other
               jurisdictions. Where international transfers occur, appropriate
               safeguards are applied to protect your information.

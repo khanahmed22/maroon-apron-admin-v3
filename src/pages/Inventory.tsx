@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -62,7 +62,7 @@ interface restProps {
 }
 
 export default function Inventory({ restId, restName }: restProps) {
-  const { session } = UserAuth();
+  const { session,subdomain } = UserAuth();
   const [addMode, setAddMode] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
   const [search, setSearch] = useState<string>("");
@@ -81,6 +81,12 @@ export default function Inventory({ restId, restName }: restProps) {
   const [isImportingCSV, setIsImportingCSV] = useState<boolean>(false);
   const [isSavingCSV, setIsSavingCSV] = useState<boolean>(false);
   const [csvProgress, setCSVProgress] = useState<number>(0);
+  const [csvInfoOpen, setCSVInfoOpen] = useState<boolean>(false);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [addForm, setAddForm] = useState({
@@ -168,7 +174,7 @@ export default function Inventory({ restId, restName }: restProps) {
     queryKey: ["account"],
     queryFn: getPaymentStatus,
     refetchOnWindowFocus: false,
-    enabled:!session?.id,
+    enabled:!!session?.id,
     staleTime: 5 * 60 * 1000,
 
   });
@@ -197,7 +203,7 @@ export default function Inventory({ restId, restName }: restProps) {
       if (file) {
         const formData = new FormData();
         formData.append("image", file);
-        formData.append("folder", "inventory");
+        formData.append("folder", `inventory/${subdomain}`);
 
         const uploadRes = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
@@ -339,7 +345,7 @@ export default function Inventory({ restId, restName }: restProps) {
     }
   };
 
-  const { mutate: deleteItemM } = useMutation({
+  const { mutate: deleteItemM, isPending: isDeleting } = useMutation({
     mutationKey: ["deleteItem"],
     mutationFn: deleteItem,
     onSuccess: () => {
@@ -348,6 +354,9 @@ export default function Inventory({ restId, restName }: restProps) {
     },
     onError: () => {
       toast.error("Item was not deleted");
+    },
+    onSettled: () => {
+      setDeleteTarget(null);
     },
   });
 
@@ -519,6 +528,15 @@ export default function Inventory({ restId, restName }: restProps) {
       complete: (results) => {
         const rows = results.data.map(mapHeaders);
 
+        // none of the headers matched, or the file has no data rows
+        if (rows.length === 0 || rows.every((r) => !r.name)) {
+          toast.error(
+            "No matching columns found. Make sure your CSV has a header row with a name column (e.g. name, item, food name).",
+          );
+          setIsImportingCSV(false);
+          return;
+        }
+
         const items: ScannedItem[] = rows.map((row: any) => ({
           name: row.name || "",
           price: Number(row.price) || 0,
@@ -607,6 +625,7 @@ export default function Inventory({ restId, restName }: restProps) {
       if (file) {
         const formData = new FormData();
         formData.append("image", file);
+        formData.append("folder", `inventory/${subdomain}`);
 
         const uploadRes = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
@@ -744,7 +763,7 @@ export default function Inventory({ restId, restName }: restProps) {
                 <Button
                   variant="outline"
                   disabled={merchantStatus?.plan === "free"}
-                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none disabled:opacity-60"
+                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base "
                   style={{ borderColor: BORDER }}
                 >
                   <ScanIcon className="w-4.5 h-4.5" />
@@ -760,25 +779,30 @@ export default function Inventory({ restId, restName }: restProps) {
                 </Button>
               </div>
 
-              <div className="relative flex-1 sm:flex-none">
-                <input
-                  type="file"
-                  accept=".csv"
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleCSVUpload(file);
-                  }}
-                />
-
+              <div className="flex-1 sm:flex-none">
                 <Button
                   variant="outline"
-                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base pointer-events-none"
+                  disabled={isLimitReached}
+                  onClick={() => setCSVInfoOpen(true)}
+                  className="w-full sm:w-auto h-11 rounded-xl gap-2 text-base disabled:cursor-not-allowed"
                   style={{ borderColor: BORDER }}
                 >
                   <FileSpreadsheet className="w-4.5 h-4.5" />
                   <span>Import CSV</span>
                 </Button>
+
+                {/* hidden input, triggered from the info dialog */}
+                <input
+                  ref={csvInputRef}
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleCSVUpload(f);
+                    e.target.value = ""; // allows re-selecting the same file
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -799,6 +823,75 @@ export default function Inventory({ restId, restName }: restProps) {
           </div>
         </div>
       )}
+
+      {/* ================= CSV INFO ================= */}
+      <Dialog open={csvInfoOpen} onOpenChange={setCSVInfoOpen}>
+        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Import from CSV</DialogTitle>
+            <DialogDescription className="text-base">
+              Your CSV's first row must be a header row using these column
+              names. Columns with other names will be ignored, and the import
+              won't work without them.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-y-2">
+            {Object.entries(headerMap).map(([field, aliases]) => (
+              <div
+                key={field}
+                className="rounded-xl border p-3"
+                style={{ borderColor: BORDER }}
+              >
+                <p
+                  className="text-sm font-semibold capitalize"
+                  style={{ color: INK }}
+                >
+                  {field === "costPrice"
+                    ? "Cost Price"
+                    : field === "stockAmount"
+                      ? "Stock Amount"
+                      : field}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {aliases.map((a) => (
+                    <span
+                      key={a}
+                      className="text-xs font-medium px-2 py-0.5 rounded-full border"
+                      style={{ borderColor: BORDER, color: MUTE }}
+                    >
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <p className="text-xs" style={{ color: MUTE }}>
+              Use any one name per field. Header names are not case-sensitive.
+            </p>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setCSVInfoOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="flex-1 text-white"
+              style={{ backgroundColor: ACCENT }}
+              onClick={() => {
+                setCSVInfoOpen(false);
+                csvInputRef.current?.click();
+              }}
+            >
+              Choose CSV file
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={csvPreviewOpen} onOpenChange={setCSVPreviewOpen}>
         <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
@@ -990,6 +1083,7 @@ export default function Inventory({ restId, restName }: restProps) {
                       style={{ color: ACCENT }}
                     >
                       Rs: {inv.price}
+                      
                     </span>
                   )}
 
@@ -1003,7 +1097,7 @@ export default function Inventory({ restId, restName }: restProps) {
                     className="text-xs font-semibold"
                     style={{ color: ACCENT }}
                   >
-                    Cost: Rs {inv.costPrice || ""}
+                    {inv.variants?.length > 0 ? "" : `Cost Price ${inv.costPrice}`}
                   </span>
                 </div>
 
@@ -1061,7 +1155,9 @@ export default function Inventory({ restId, restName }: restProps) {
                     variant="destructive"
                     size="sm"
                     className="flex-1 rounded-lg gap-1 text-xs h-8"
-                    onClick={() => deleteItemM(inv.id)}
+                    onClick={() =>
+                      setDeleteTarget({ id: inv.id, name: inv.name })
+                    }
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                     Delete
@@ -1083,6 +1179,54 @@ export default function Inventory({ restId, restName }: restProps) {
           <p className="text-base">Items you add will show up here.</p>
         </div>
       )}
+
+      {/* ================= DELETE CONFIRM ================= */}
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) setDeleteTarget(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Delete item?</DialogTitle>
+            <DialogDescription className="text-base">
+              <span className="font-semibold" style={{ color: INK }}>
+                {deleteTarget?.name}
+              </span>{" "}
+              will be permanently removed from your inventory. This can't be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex gap-3 pt-2">
+            <button
+            
+              className="flex-1 border rounded-2xl"
+              disabled={isDeleting}
+              onClick={() => setDeleteTarget(null)}
+            >
+              Cancel
+            </button>
+            <button
+              
+              className="flex-1 gap-2 h-11 rounded-xl  text-base text-white"
+              style={{ backgroundColor: ACCENT }}
+              disabled={isDeleting}
+              onClick={() => deleteTarget && deleteItemM(deleteTarget.id)}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ================= ADD ITEM ================= */}
       <Dialog

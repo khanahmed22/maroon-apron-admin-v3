@@ -327,7 +327,7 @@ export default function Settings({ restId }: { restId: string | null }) {
     pickupEnabled: true,
     deliveryEnabled: true,
   });
-  const { session} = UserAuth();
+  const { session,subdomain} = UserAuth();
 
   const isFreePlan = !merchantStatus?.plan || merchantStatus.plan === "free";
 
@@ -633,6 +633,7 @@ useEffect(() => {
       `${import.meta.env.VITE_BACKEND_URL}/assets/upload`,
       {
         method: "POST",
+        credentials:'include',
         body: formData,
       },
     );
@@ -648,7 +649,7 @@ useEffect(() => {
   const { mutate: saveLogoM, isPending: logoSaving } = useMutation({
     mutationKey: ["saveLogoM"],
     mutationFn: async (file: File) => {
-      const uploaded = await uploadImage(file, "restaurant/logos");
+      const uploaded = await uploadImage(file, `restaurant/logos/${subdomain}`);
       return savePartialSettings({
         restLogo: uploaded.imageUrl,
         logoId: uploaded.publicId,
@@ -668,7 +669,7 @@ useEffect(() => {
   const { mutate: saveBannerM, isPending: bannerSaving } = useMutation({
     mutationKey: ["saveBannerM"],
     mutationFn: async (file: File) => {
-      const uploaded = await uploadImage(file, "restaurant/banners");
+      const uploaded = await uploadImage(file, `restaurant/banners/${subdomain}`);
       return savePartialSettings({
         restBanner: uploaded.imageUrl,
         bannerId: uploaded.publicId,

@@ -5,6 +5,9 @@ import { UserAuth } from "./context/AuthContext";
 import {  Toaster } from "sonner";
 import ScrollToTop from "./lib/ScrollToTop";
 import { Capacitor } from "@capacitor/core";
+import { useForceUpdate } from "./lib/Hooks/useForceUpdate";
+import { useNetworkStatus } from "./lib/Hooks/useNetworkStatus";
+import NoNetwork from "./pages/NoNetwork";
 
 const Login = lazy(() => import("./authPages/Login"));
 const RegisterMerchant = lazy(() => import("./authPages/Register"));
@@ -83,7 +86,8 @@ function AuthLayout() {
 
 function App() {
   const { restId, restName, session, subdomain } = UserAuth();
- 
+ const { online, recheck } = useNetworkStatus();
+ const { blocked, retry, openStore } = useForceUpdate(online);
  
 
  useEffect(() => {
@@ -110,6 +114,31 @@ function App() {
 
   configurePurchases();
 }, [session?.id]);
+
+
+if (blocked) {
+   return (
+     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#FBF7F6] px-6 text-center">
+      <h2 className="text-xl font-semibold text-[#1F2937]">Update required</h2>
+       <p className="mt-3 max-w-sm text-sm text-[#6B7280]">
+         The update couldn't be completed. Check your connection, and if your
+         device is low on storage, free up some space and try again.
+       </p>
+       <button
+         onClick={retry}
+         className="mt-6 rounded-lg bg-[#D6293F] px-6 py-3 text-sm font-medium text-white"
+       >
+         Try again
+      </button>
+       <button
+         onClick={openStore}
+         className="mt-3 text-sm font-medium text-[#D6293F]"
+       >
+         Open Play Store
+       </button>
+     </div>
+   );
+ }
   
 
 
@@ -247,6 +276,7 @@ function App() {
     </Suspense>
 
     <Toaster richColors position="top-center" />
+    {!online && <NoNetwork onRetry={recheck} />}
   </>
 );
 }

@@ -1,0 +1,94 @@
+
+# Maroon Apron: Order Manager & Online Store
+
+> Maroon Apron is an order management app and online store for home chefs, home bakers, and homemade food businesses. It helps merchants manage their menus, customer orders, finished-product inventory, delivery settings, discounts, revenue, and profit from one place.
+
+Maroon Apron gives independent food businesses their own online storefront where customers can browse menus and place orders directly. Merchants can manage online orders alongside orders received by phone or other channels, without relying on scattered WhatsApp chats, notebooks, or spreadsheets.
+
+You cook. Maroon Apron handles the rest.
+
+## Who Is Maroon Apron For?
+
+- Home chefs selling homemade meals.
+- Home bakers and cake businesses.
+- Homemade food merchants.
+- Cloud kitchens.
+- Meal prep businesses.
+- Home-based catering businesses.
+- Dessert and specialty food businesses.
+
+Maroon Apron is designed for individuals and small family-run food businesses, rather than traditional restaurants requiring point-of-sale systems, table management, or staff scheduling.
+
+## Features
+
+### Order Management
+
+Manage customer orders from one dashboard. Track order statuses, including pending, confirmed, and dispatched, to keep orders organized and know what needs to be prepared.
+
+Orders received by phone or other channels can be added manually through the Place Order section.
+
+### Online Store
+
+Give your food business its own online storefront where customers can browse products and place orders directly.
+
+Customize your store with your logo, banner, colors, announcements, and social links. Use a custom domain with the applicable plan.
+
+### Menu Management
+
+Add dishes, baked goods, desserts, and prices. Import menu information from photos, PDFs, or CSV files, and update products and prices whenever the menu changes.
+
+AI-assisted menu importing is available on the Pro plan.
+
+### Finished-Product Inventory
+
+Track ready-to-sell food items, such as biryani boxes, cakes, and kheer portions. When an order is confirmed, the corresponding product quantities are automatically deducted from available stock to help prevent overselling.
+
+### Delivery and Pickup Settings
+
+Configure delivery areas and charges, offer customer pickup, or use a fixed delivery rate.
+
+Maroon Apron provides delivery settings and order management software. It does not provide food delivery services.
+
+### Discount Coupons
+
+Create discount codes for Eid, Ramadan, and other special occasions. Customers can apply eligible coupons when ordering through the online store.
+
+### Business Analytics
+
+Track total revenue, total orders, average order value, profit margin, and actual profit to understand business performance and make better decisions.
+
+## Pricing
+
+Maroon Apron offers a free plan for merchants starting their businesses and a Pro subscription for merchants who need more products and advanced features.
+
+The Pro plan includes features such as expanded product capacity, custom domains, AI-assisted menu importing, removal of Maroon Apron branding, and priority support.
+
+Check the official pricing section for current plan limits, prices, and features.
+
+## How It Works
+
+1. Create an account for your home food business.
+2. Set up your online store and add your menu.
+3. Configure your stock, delivery, and pickup options.
+4. Share your store link with customers.
+5. Receive orders through your store and manage them from your dashboard.
+6. Track stock, sales, and business profitability.
+
+## Important Distinctions
+
+- Maroon Apron is business management software, not a food marketplace.
+- Customers order directly through each merchant's online storefront.
+- Merchants can manually record orders received by phone or other channels.
+- Maroon Apron does not provide food delivery.
+- The product is designed for home-based food businesses and small kitchens.
+
+## Official Website and App
+
+- [Official website](https://maroonapron.com/)
+- [Android app on Google Play](https://play.google.com/store/apps/details?id=com.maroonapron.app)
+
+## Geographic Focus
+
+Maroon Apron is focused on home-based food businesses in Karachi, Pakistan.
+
+For current subscription prices, onboarding details, eligibility, and other product information, refer to the official website.

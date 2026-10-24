@@ -10,6 +10,67 @@
   <meta property="og:image" content="https://maroonapron.com/social.jpg" />
   <meta name="twitter:card" content="summary_large" />
   <link rel="manifest" href="/manifest.json" />
+
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://maroonapron.com/#organization",
+      "name": "Maroon Apron",
+      "alternateName": "Crimson Castle",
+      "url": "https://maroonapron.com/",
+      "logo": "https://maroonapron.com/logo.png",
+      "description": "Maroon Apron gives Home Chefs their own store and the tools to run their business from home.",
+      "sameAs": [
+        "https://play.google.com/store/apps/details?id=com.maroonapron.app",
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://maroonapron.com/#website",
+      "name": "Maroon Apron",
+      "url": "https://maroonapron.com/",
+      "publisher": {
+        "@id": "https://maroonapron.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://maroonapron.com/#app",
+      "name": "Maroon Apron - For Home Chefs",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Android",
+      "url": "https://play.google.com/store/apps/details?id=com.maroonapron.app",
+      "description": "Order management, branded online store, menu import, stock tracking and analytics for home chefs, bakers and homemade food sellers.",
+      "publisher": {
+        "@id": "https://maroonapron.com/#organization"
+      },
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free",
+          "price": "0",
+          "priceCurrency": "PKR"
+        },
+        {
+          "@type": "Offer",
+          "name": "Pro",
+          "priceCurrency": "PKR",
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "1399",
+            "priceCurrency": "PKR",
+            "billingDuration": "P1M",
+            "unitCode": "MON"
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
   </head>
   <body>
     <div id="root"></div>

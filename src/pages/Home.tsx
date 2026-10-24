@@ -106,6 +106,8 @@ const SOFT = "#FBF7F6";
 
 const DEMO_STORE_URL = "https://pizzatown.crimsoncastle.shop";
 
+const PLAY_STORE_URL ="https://play.google.com/store/apps/details?id=com.maroonapron.app";
+
 const CLOUD_NAME = "dgmfm08s8";
 
 const cldImage = (id: string, width: number = 800): string =>
@@ -117,6 +119,7 @@ const NAV_LINKS: NavLink[] = [
   { label: "Why Maroon Apron?", href: "#why" },
   { label: "Pricing", href: "#pricing" },
   { label: "FAQ", href: "#faq" },
+  { label: "Get the App", href: "#app" },
 ];
 
 const TINTS: Tint[] = [
@@ -358,6 +361,8 @@ function SecondaryButton({ children, className = "", ...props }: ButtonProps) {
   );
 }
 
+
+
 function FeaturePreview({ imageId, title }: FeaturePreviewProps) {
   return (
     <img
@@ -374,6 +379,46 @@ function FeaturePreview({ imageId, title }: FeaturePreviewProps) {
       loading="lazy"
       decoding="async"
     />
+  );
+}
+
+function PlayStoreButton() {
+  return (
+    <motion.a
+      href={PLAY_STORE_URL}
+      target="_blank"
+      rel="noreferrer"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.98 }}
+      aria-label="Get Maroon Apron on Google Play"
+      className="inline-flex items-center gap-3 rounded-xl px-5 py-2.5 text-white"
+      style={{ backgroundColor: "#000", border: "1px solid #3A3A3A" }}
+    >
+      <svg viewBox="0 0 28.99 31.99" className="h-7 w-7" aria-hidden="true">
+  <path
+    d="M13.54 15.28.12 29.34a3.66 3.66 0 0 0 5.33 2.16l15.1-8.6-7-7.62Z"
+    fill="#EA4335"
+  />
+  <path
+    d="m27.11 12.89-6.53-3.74-7.35 6.45 7.38 7.28 6.48-3.7a3.54 3.54 0 0 0 1.5-4.79 3.62 3.62 0 0 0-1.5-1.5Z"
+    fill="#FBBC04"
+  />
+  <path
+    d="M.12 2.66a3.57 3.57 0 0 0-.12.92v24.84a3.57 3.57 0 0 0 .12.92L14 15.64.12 2.66Z"
+    fill="#4285F4"
+  />
+  <path
+    d="m13.64 16 6.94-6.85L5.5.51A3.73 3.73 0 0 0 3.63 0 3.64 3.64 0 0 0 .12 2.65L13.64 16Z"
+    fill="#34A853"
+  />
+</svg>
+      <span className="flex flex-col text-left leading-tight">
+        <span className="text-[10px] font-medium uppercase tracking-wide opacity-80">
+          Get it on
+        </span>
+        <span className="text-base font-semibold">Google Play</span>
+      </span>
+    </motion.a>
   );
 }
 
@@ -405,7 +450,7 @@ export default function Home() {
       <div className="w-full bg-red-700 px-4 py-2.5 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 text-center text-sm sm:gap-4">
           <span className="font-semibold">
-            Maroon Apron is now Maroon Apron
+            Crimson Castle is now Maroon Apron
           </span>
 
           <span className="hidden text-white/50 sm:inline">·</span>
@@ -596,224 +641,248 @@ export default function Home() {
         </section>
 
         {/* ================= WHATSAPP VS Maroon Apron ================= */}
-        {/* ================= WHATSAPP VS Maroon Apron ================= */}
-        <section
-          className="max-w-6xl mx-auto px-6 py-24 border-t"
+<section
+  className="max-w-6xl mx-auto px-6 py-24 border-t"
+  style={{ borderColor: BORDER }}
+>
+  <Reveal>
+    <SectionHeading
+      eyebrow=" The difference"
+      title="From scattered messages to one organized business"
+      subtitle="Every order starts as a message. Maroon Apron turns it into a complete workflow."
+    />
+  </Reveal>
+
+  <div className="mt-16 grid grid-cols-2 max-md:grid-cols-1 gap-3 sm:gap-10 items-stretch">
+    {/* LEFT */}
+    <div
+      className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
+      style={{ borderColor: BORDER }}
+    >
+      <div className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl">
+        💬
+      </div>
+
+      <h3
+        className="text-sm text-center sm:text-xl font-bold mb-4 sm:mb-8"
+        style={{ color: MUTE }}
+      >
+        WhatsApp &amp; Social Media
+      </h3>
+
+      <div className="space-y-2.5 sm:space-y-5 flex-1">
+        {/* WhatsApp */}
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
           style={{ borderColor: BORDER }}
         >
-          <Reveal>
-            <SectionHeading
-              eyebrow=" The difference"
-              title="From scattered messages to one organized business"
-              subtitle="Every order starts as a message. Maroon Apron turns it into a complete workflow."
-            />
-          </Reveal>
-
-          <div className="mt-16 grid grid-cols-2 gap-3 sm:gap-10 items-stretch">
-            {/* LEFT */}
-            <div
-              className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
-              style={{ borderColor: BORDER }}
+          <div
+            className="h-6 w-6 sm:h-9 sm:w-9 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: "#ECFDF5" }}
+          >
+            <svg
+              className="h-3.5 w-3.5 sm:h-5 sm:w-5"
+              viewBox="0 0 24 24"
+              fill="#059669"
             >
-              <div className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl">
-                💬
-              </div>
-
-              <h3
-                className="text-sm sm:text-xl font-bold mb-4 sm:mb-8"
-                style={{ color: MUTE }}
-              >
-                WhatsApp &amp; Social Media
-              </h3>
-
-              <div className="space-y-2.5 sm:space-y-5 flex-1">
-                <div
-                  className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
-                  style={{ borderColor: BORDER }}
-                >
-                  <svg
-                    className="h-4 w-4 sm:h-5 sm:w-5 shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12.04 2C6.54 2 2.08 6.46 2.08 11.96c0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.92 9.92 0 004.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm0 18.12a8.13 8.13 0 01-4.14-1.13l-.3-.18-3.08.81.82-3-.2-.31a8.1 8.1 0 01-1.25-4.35c0-4.49 3.66-8.15 8.15-8.15 2.18 0 4.23.85 5.77 2.39a8.1 8.1 0 012.38 5.76c0 4.49-3.66 8.16-8.15 8.16zm4.47-6.12c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06a6.64 6.64 0 01-1.95-1.2 7.34 7.34 0 01-1.35-1.68c-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.48-.4-.42-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.52.58.18 1.1.16 1.52.1.46-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z" />
-                  </svg>
-                  <div>
-                    <p
-                      className="text-[11px] sm:text-base"
-                      style={{ color: INK }}
-                    >
-                      Hi, is biryani available?
-                    </p>
-                    <p
-                      className="text-[10px] sm:text-sm mt-1"
-                      style={{ color: MUTE }}
-                    >
-                      Customer asks in WhatsApp
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown
-                  className="mx-auto"
-                  size={16}
-                  style={{ color: "#D1D5DB" }}
-                />
-
-                <div
-                  className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
-                  style={{ borderColor: BORDER }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
-                    className="sm:w-6 sm:h-6 shrink-0"
-                    fill="none"
-                    stroke="#000000"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37m1.5-4.87h.01" />
-                  </svg>
-                  <div>
-                    <p
-                      className="text-[11px] sm:text-base"
-                      style={{ color: INK }}
-                    >
-                      Another customer orders from Instagram
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown
-                  className="mx-auto"
-                  size={16}
-                  style={{ color: "#D1D5DB" }}
-                />
-
-                <div
-                  className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
-                  style={{ borderColor: BORDER }}
-                >
-                  <StickyNote
-                    size={16}
-                    className="shrink-0 sm:!w-5 sm:!h-5"
-                    style={{ color: "#9CA3AF" }}
-                  />
-                  <div>
-                    <p
-                      className="text-[11px] sm:text-base"
-                      style={{ color: INK }}
-                    >
-                      Write everything manually...
-                    </p>
-                    <p
-                      className="text-[10px] sm:text-sm mt-1 sm:mt-2"
-                      style={{ color: MUTE }}
-                    >
-                      Easy to miss orders or forget payments.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT */}
-            <div
-              className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
-              style={{ borderColor: BORDER }}
-            >
-              <div
-                className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl font-black"
-                style={{ color: ACCENT }}
-              >
-                ✓
-              </div>
-
-              <h3
-                className="text-sm sm:text-xl font-bold mb-4 sm:mb-8"
-                style={{ color: ACCENT }}
-              >
-                Maroon Apron
-              </h3>
-
-              <div className="space-y-2.5 sm:space-y-5 flex-1">
-                <div
-                  className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Store
-                    size={16}
-                    className="shrink-0 sm:!w-5 sm:!h-5"
-                    style={{ color: ACCENT }}
-                  />
-                  <div>
-                    <p
-                      className="text-[11px] sm:text-base"
-                      style={{ color: INK }}
-                    >
-                      Customer orders from your store
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown
-                  className="mx-auto"
-                  size={16}
-                  style={{ color: ACCENT }}
-                />
-
-                <div
-                  className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Package
-                    size={16}
-                    className="shrink-0 sm:!w-5 sm:!h-5"
-                    style={{ color: ACCENT }}
-                  />
-                  <div>
-                    <p
-                      className="text-[11px] sm:text-base"
-                      style={{ color: INK }}
-                    >
-                      Order appears instantly in dashboard
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowDown
-                  className="mx-auto"
-                  size={16}
-                  style={{ color: ACCENT }}
-                />
-
-                <div
-                  className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center"
-                  style={{ borderColor: BORDER }}
-                >
-                  <Wallet
-                    size={16}
-                    className="shrink-0 sm:!w-5 sm:!h-5"
-                    style={{ color: ACCENT }}
-                  />
-                  <div>
-                    <p
-                      className="text-[11px] sm:text-base"
-                      style={{ color: INK }}
-                    >
-                      Track payments, customers and sales
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              <path d="M12.04 2C6.54 2 2.08 6.46 2.08 11.96c0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.92 9.92 0 004.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2zm0 18.12a8.13 8.13 0 01-4.14-1.13l-.3-.18-3.08.81.82-3-.2-.31a8.1 8.1 0 01-1.25-4.35c0-4.49 3.66-8.15 8.15-8.15 2.18 0 4.23.85 5.77 2.39a8.1 8.1 0 012.38 5.76c0 4.49-3.66 8.16-8.15 8.16zm4.47-6.12c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06a6.64 6.64 0 01-1.95-1.2 7.34 7.34 0 01-1.35-1.68c-.14-.24-.01-.37.11-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.2-.48-.4-.42-.54-.42h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.12 3.65.58.25 1.03.4 1.38.52.58.18 1.1.16 1.52.1.46-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z" />
+            </svg>
           </div>
-        </section>
+          <div>
+            <p
+              className="text-[11px] sm:text-base"
+              style={{ color: INK }}
+            >
+              Hi, is biryani available?
+            </p>
+            <p
+              className="text-[10px] sm:text-sm mt-1"
+              style={{ color: MUTE }}
+            >
+              Customer asks in WhatsApp
+            </p>
+          </div>
+        </div>
+
+        <ArrowDown
+          className="mx-auto"
+          size={16}
+          style={{ color: "#D1D5DB" }}
+        />
+
+        {/* Instagram */}
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
+          style={{ borderColor: BORDER }}
+        >
+          <div
+            className="h-6 w-6 sm:h-9 sm:w-9 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: "#FDF2F8" }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              className="h-3.5 w-3.5 sm:h-5 sm:w-5"
+              fill="none"
+              stroke="#DB2777"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+              <path d="M16 11.37A4 4 0 1 1 12.63 8A4 4 0 0 1 16 11.37m1.5-4.87h.01" />
+            </svg>
+          </div>
+          <div>
+            <p
+              className="text-[11px] sm:text-base"
+              style={{ color: INK }}
+            >
+              Another customer orders from Instagram
+            </p>
+          </div>
+        </div>
+
+        <ArrowDown
+          className="mx-auto"
+          size={16}
+          style={{ color: "#D1D5DB" }}
+        />
+
+        {/* Manual notes */}
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-start"
+          style={{ borderColor: BORDER }}
+        >
+          <div
+            className="h-6 w-6 sm:h-9 sm:w-9 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: "#FFF3E8" }}
+          >
+            <StickyNote
+              size={16}
+              className="sm:!w-5 sm:!h-5"
+              style={{ color: "#C2600A" }}
+            />
+          </div>
+          <div>
+            <p
+              className="text-[11px] sm:text-base"
+              style={{ color: INK }}
+            >
+              Write everything manually...
+            </p>
+            <p
+              className="text-[10px] sm:text-sm mt-1 sm:mt-2"
+              style={{ color: MUTE }}
+            >
+              Easy to miss orders or forget payments.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* RIGHT */}
+    <div
+      className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
+      style={{ borderColor: ACCENT, backgroundColor: SOFT }}
+    >
+      <div
+        className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl font-black"
+        style={{ color: ACCENT }}
+      >
+        ✓
+      </div>
+
+      <h3
+        className="text-sm sm:text-xl text-center font-bold mb-4 sm:mb-8"
+        style={{ color: ACCENT }}
+      >
+        Maroon Apron
+      </h3>
+
+      <div className="space-y-2.5 sm:space-y-5 flex-1">
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center bg-white"
+          style={{ borderColor: BORDER }}
+        >
+          <div
+            className="h-6 w-6 sm:h-9 sm:w-9 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: SOFT }}
+          >
+            <Store
+              size={16}
+              className="sm:!w-5 sm:!h-5"
+              style={{ color: ACCENT }}
+            />
+          </div>
+          <p
+            className="text-[11px] sm:text-base"
+            style={{ color: INK }}
+          >
+            Customer orders from your store
+          </p>
+        </div>
+
+        <ArrowDown
+          className="mx-auto"
+          size={16}
+          style={{ color: ACCENT }}
+        />
+
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center bg-white"
+          style={{ borderColor: BORDER }}
+        >
+          <div
+            className="h-6 w-6 sm:h-9 sm:w-9 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: SOFT }}
+          >
+            <Package
+              size={16}
+              className="sm:!w-5 sm:!h-5"
+              style={{ color: ACCENT }}
+            />
+          </div>
+          <p
+            className="text-[11px] sm:text-base"
+            style={{ color: INK }}
+          >
+            Order appears instantly in dashboard
+          </p>
+        </div>
+
+        <ArrowDown
+          className="mx-auto"
+          size={16}
+          style={{ color: ACCENT }}
+        />
+
+        <div
+          className="rounded-xl border p-2.5 sm:p-4 flex gap-2 sm:gap-4 items-center bg-white"
+          style={{ borderColor: BORDER }}
+        >
+          <div
+            className="h-6 w-6 sm:h-9 sm:w-9 shrink-0 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: SOFT }}
+          >
+            <Wallet
+              size={16}
+              className="sm:!w-5 sm:!h-5"
+              style={{ color: ACCENT }}
+            />
+          </div>
+          <p
+            className="text-[11px] sm:text-base"
+            style={{ color: INK }}
+          >
+            Track payments, customers and sales
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* ================= OUR PRODUCT ================= */}
         <section
@@ -994,7 +1063,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                 <div>
                   <Eyebrow> See it for yourself</Eyebrow>
-                  <h2 className="text-2xl font-bold mb-2">
+                  <h2 className="text-2xl max-md:text-lg font-bold mb-2">
                     This is the store your customers will see
                   </h2>
                   <p
@@ -1057,6 +1126,112 @@ export default function Home() {
             </div>
           </Reveal>
         </section>
+
+       {/* ================= MOBILE APP ================= */}
+<section
+  id="app"
+  className="max-w-6xl mx-auto px-6 border-t"
+  style={{ borderColor: BORDER }}
+>
+  <Reveal>
+    <div
+      className="rounded-2xl border overflow-hidden flex max-md:flex-col-reverse items-center gap-10 p-8 sm:p-12"
+      style={{ borderColor: BORDER, backgroundColor: SOFT }}
+    >
+      {/* Text column */}
+      <div className="w-full md:flex-1">
+        <Eyebrow>Now on Android</Eyebrow>
+        <h2
+          className="text-3xl max-md:text-xl font-bold leading-[1.2]"
+          style={{ color: INK }}
+        >
+          Run your kitchen from your phone
+        </h2>
+        <p
+          className="mt-4 text-[15px] leading-[1.7] max-w-xl"
+          style={{ color: MUTE }}
+        >
+          The Maroon Apron app puts your dashboard in your pocket, so you can
+          handle orders while you cook.
+        </p>
+
+        <ul className="mt-6 space-y-3">
+          {[
+            "Get notified the moment an order comes in",
+            "Move orders from received to dispatched",
+            "Check and update stock on the go",
+          ].map((item) => (
+            <li
+              key={item}
+              className="flex items-start gap-2.5 text-sm leading-normal"
+            >
+              <Check
+                size={15}
+                className="mt-0.5 shrink-0"
+                style={{ color: ACCENT }}
+              />
+              <span style={{ color: INK }}>{item}</span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-8">
+          <PlayStoreButton />
+        </div>
+      </div>
+
+      {/* App screenshot on a sticky note */}
+<div className="flex justify-center md:justify-end md:shrink-0 py-4 px-2">
+  <motion.div
+    whileHover={{ rotate: 0, y: -4 }}
+    initial={{ rotate: 3 }}
+    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+    className="relative w-64 p-3 pb-12"
+    style={{
+      backgroundColor: "#FFF1A8",
+      boxShadow: "0 12px 24px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.08)",
+    }}
+  >
+    {/* Tape */}
+    <div
+      aria-hidden
+      className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 -rotate-2"
+      style={{ backgroundColor: "rgba(214, 41, 63, 0.25)" }}
+    />
+
+    {/* Screenshot (9:16) */}
+    <div className="overflow-hidden rounded-md bg-white shadow-sm">
+      <img
+        src={cldImage("app_in_pocket_jeveun", 600)}
+        alt="Maroon Apron mobile app"
+        className="w-full h-auto object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+
+    {/* Caption */}
+    <p
+      className="absolute bottom-3 left-4 text-sm font-semibold italic"
+      style={{ color: INK }}
+    >
+      Orders in your pocket
+    </p>
+
+    {/* Folded corner */}
+    <div
+      aria-hidden
+      className="absolute bottom-0 right-0 h-8 w-8"
+      style={{
+        background:
+          "linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.12) 50%)",
+      }}
+    />
+  </motion.div>
+</div>
+    </div>
+  </Reveal>
+</section>
 
         {/* ================= PRICING ================= */}
         <section

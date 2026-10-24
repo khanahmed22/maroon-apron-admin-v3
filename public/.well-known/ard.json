@@ -1,0 +1,35 @@
+
+{
+  "entries": [
+    {
+      "@context": "https://agenticresourcediscovery.org/context/v1",
+      "identifier": "urn:air:maroonapron.com:website",
+      "displayName": "Maroon Apron Official Website",
+      "type": "text/html",
+      "url": "https://maroonapron.com/",
+      "description": "Official website for Maroon Apron, an order management app and online store for home chefs, home bakers, and homemade food businesses in Pakistan.",
+      "tags": [
+        "home-chef-business",
+        "order-management",
+        "online-store",
+        "inventory-management"
+      ],
+      "representativeQueries": [
+        "Find an order management app for home chefs",
+        "Find software for managing a home baking business",
+        "Find an online store for homemade food sellers"
+      ]
+    },
+    {
+      "identifier": "urn:air:maroonapron.com:llms-guide",
+      "displayName": "Maroon Apron AI Information Guide",
+      "type": "text/markdown",
+      "url": "https://maroonapron.com/llms.txt",
+      "description": "A guide to Maroon Apron's features, intended users, pricing, and online store capabilities.",
+      "representativeQueries": [
+        "What features does Maroon Apron offer?",
+        "How does Maroon Apron help home food businesses?"
+      ]
+    }
+  ]
+}

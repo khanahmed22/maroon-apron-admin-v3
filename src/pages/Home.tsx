@@ -1518,7 +1518,7 @@ export default function Home() {
           <ul className="flex flex-row items-center gap-x-3 sm:gap-x-5 mt-9 text-muted-foreground">
             <li>
               <a
-                href="https://www.instagram.com/maroonapron.com"
+                href="https://www.instagram.com/maroonapronapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Maroon Apron Instagram Page"
@@ -1536,7 +1536,7 @@ export default function Home() {
 
             <li>
               <a
-                href="https://www.facebook.com/profile.php?id=61570768106092"
+                href="https://www.facebook.com/people/Maroon-Apron/61570768106092/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Maroon Apron Facebook Page"

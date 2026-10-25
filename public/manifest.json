@@ -50,12 +50,12 @@
   "screenshots": [
     {
       "src": "/desktop.png",
-      "sizes": "1280x720",
+      "sizes": "1505x704",
       "type": "image/png"
     },
     {
       "src": "/mobile.png",
-      "sizes": "720x1280",
+      "sizes": "1080x1920",
       "type": "image/png"
     }
   ],

@@ -13,7 +13,7 @@ export function initPostHog() {
       defaults: "2026-05-30",
       // turn off the heavy stuff you don't need:
        autocapture: false,
-       disable_session_recording: true,
+       disable_session_recording: false,
        capture_heatmaps: false,
        capture_dead_clicks: false,
        disable_surveys: true,

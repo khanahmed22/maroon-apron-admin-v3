@@ -14,7 +14,7 @@ export function initPostHog() {
       // turn off the heavy stuff you don't need:
        autocapture: false,
        disable_session_recording: false,
-       capture_heatmaps: false,
+       capture_heatmaps: true,
        capture_dead_clicks: false,
        disable_surveys: true,
     });

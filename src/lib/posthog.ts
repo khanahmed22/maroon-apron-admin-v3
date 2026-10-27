@@ -12,10 +12,10 @@ export function initPostHog() {
       api_host: import.meta.env.VITE_POSTHOG_HOST,
       defaults: "2026-05-30",
       // turn off the heavy stuff you don't need:
-       autocapture: false,
+       autocapture: true,
        disable_session_recording: false,
        capture_heatmaps: true,
-       capture_dead_clicks: false,
+       capture_dead_clicks: true,
        disable_surveys: true,
     });
     client = posthog;

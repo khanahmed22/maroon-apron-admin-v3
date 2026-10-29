@@ -1515,79 +1515,135 @@ export default function Home() {
             </ul>
           </div>
 
-          <ul className="flex flex-row items-center gap-x-3 sm:gap-x-5 mt-9 text-muted-foreground">
-            <li>
-              <a
-                href="https://www.instagram.com/maroonapronapp"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron Instagram Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M7.75 2C4.574 2 2 4.574 2 7.75v8.5C2 19.426 4.574 22 7.75 22h8.5C19.426 22 22 19.426 22 16.25v-8.5C22 4.574 19.426 2 16.25 2h-8.5zm0 1.8h8.5a3.95 3.95 0 013.95 3.95v8.5a3.95 3.95 0 01-3.95 3.95h-8.5a3.95 3.95 0 01-3.95-3.95v-8.5A3.95 3.95 0 017.75 3.8zm8.95 1.35a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1zM12 7a5 5 0 100 10 5 5 0 000-10zm0 1.8A3.2 3.2 0 1112 15.2 3.2 3.2 0 0112 8.8z" />
-                </svg>
-              </a>
-            </li>
+          <div className="flex flex-col gap-y-3">
 
-            <li>
-              <a
-                href="https://www.facebook.com/people/Maroon-Apron/61570768106092/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron Facebook Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.25.2 2.25.2v2.46H15.2c-1.25 0-1.64.77-1.64 1.57V12h2.8l-.45 2.89h-2.35v6.99A10 10 0 0022 12z" />
-                </svg>
-              </a>
-            </li>
+          <ul className="flex flex-row items-center gap-x-1 sm:gap-x-2 -ml-2 mt-9 text-muted-foreground">
+  <li>
+    <a
+      href="https://www.instagram.com/maroonapronapp"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron Instagram Page"
+      className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#B1111C]/10 hover:text-[#B1111C] focus-visible:text-[#B1111C] focus-visible:outline-none"
+    >
+      <svg
+        className="block h-5 w-5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M7.75 2C4.574 2 2 4.574 2 7.75v8.5C2 19.426 4.574 22 7.75 22h8.5C19.426 22 22 19.426 22 16.25v-8.5C22 4.574 19.426 2 16.25 2h-8.5zm0 1.8h8.5a3.95 3.95 0 013.95 3.95v8.5a3.95 3.95 0 01-3.95 3.95h-8.5a3.95 3.95 0 01-3.95-3.95v-8.5A3.95 3.95 0 017.75 3.8zm8.95 1.35a1.05 1.05 0 100 2.1 1.05 1.05 0 000-2.1zM12 7a5 5 0 100 10 5 5 0 000-10zm0 1.8A3.2 3.2 0 1112 15.2 3.2 3.2 0 0112 8.8z" />
+      </svg>
+    </a>
+  </li>
 
-            <li>
-              <a
-                href="https://www.linkedin.com/company/maroon-apron"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron LinkedIn Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6A2.5 2.5 0 010 3.5 2.5 2.5 0 012.49 1a2.5 2.5 0 012.49 2.5zM.5 8h4V23h-4V8zm7 0h3.83v2.05h.05c.53-1.01 1.84-2.08 3.79-2.08 4.05 0 4.8 2.66 4.8 6.12V23h-4v-7.79c0-1.86-.03-4.26-2.6-4.26-2.6 0-3 2.03-3 4.13V23h-4V8z" />
-                </svg>
-              </a>
-            </li>
+  <li>
+    <a
+      href="https://www.facebook.com/people/Maroon-Apron/61570768106092/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron Facebook Page"
+      className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#B1111C]/10 hover:text-[#B1111C] focus-visible:text-[#B1111C] focus-visible:outline-none"
+    >
+      <svg
+        className="block h-5 w-5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.25.2 2.25.2v2.46H15.2c-1.25 0-1.64.77-1.64 1.57V12h2.8l-.45 2.89h-2.35v6.99A10 10 0 0022 12z" />
+      </svg>
+    </a>
+  </li>
 
-            <li>
-              <a
-                href="https://www.youtube.com/@maroon-apron"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Maroon Apron YouTube Page"
-                className="transition-colors hover:text-[#B1111C]"
-              >
-                <svg
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M23.5 6.2a3.02 3.02 0 00-2.12-2.13C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.57A3.02 3.02 0 00.5 6.2 31.72 31.72 0 000 12a31.72 31.72 0 00.5 5.8 3.02 3.02 0 002.12 2.13c1.88.57 9.38.57 9.38.57s7.5 0 9.38-.57a3.02 3.02 0 002.12-2.13A31.72 31.72 0 0024 12a31.72 31.72 0 00-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
-                </svg>
-              </a>
-            </li>
-          </ul>
+  <li>
+    <a
+      href="https://www.linkedin.com/company/maroon-apron"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron LinkedIn Page"
+      className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#B1111C]/10 hover:text-[#B1111C] focus-visible:text-[#B1111C] focus-visible:outline-none"
+    >
+      <svg
+        className="block h-5 w-5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M4.98 3.5C4.98 4.88 3.87 6 2.49 6A2.5 2.5 0 010 3.5 2.5 2.5 0 012.49 1a2.5 2.5 0 012.49 2.5zM.5 8h4V23h-4V8zm7 0h3.83v2.05h.05c.53-1.01 1.84-2.08 3.79-2.08 4.05 0 4.8 2.66 4.8 6.12V23h-4v-7.79c0-1.86-.03-4.26-2.6-4.26-2.6 0-3 2.03-3 4.13V23h-4V8z" />
+      </svg>
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="https://www.youtube.com/@maroon-apron"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron YouTube Page"
+      className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#B1111C]/10 hover:text-[#B1111C] focus-visible:text-[#B1111C] focus-visible:outline-none"
+    >
+      <svg
+        className="block h-5 w-5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M23.5 6.2a3.02 3.02 0 00-2.12-2.13C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.38.57A3.02 3.02 0 00.5 6.2 31.72 31.72 0 000 12a31.72 31.72 0 00.5 5.8 3.02 3.02 0 002.12 2.13c1.88.57 9.38.57 9.38.57s7.5 0 9.38-.57a3.02 3.02 0 002.12-2.13A31.72 31.72 0 0024 12a31.72 31.72 0 00-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
+      </svg>
+    </a>
+  </li>
+
+  <li>
+    <a
+      href="https://www.threads.com/@maroonapronapp"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Maroon Apron Threads Page"
+      className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-[#B1111C]/10 hover:text-[#B1111C] focus-visible:text-[#B1111C] focus-visible:outline-none"
+    >
+      <svg
+        className="block h-5 w-5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.29 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.361-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.734 7.847c.98-1.454 2.568-2.256 4.478-2.256h.044c3.194.02 5.097 1.975 5.287 5.388.108.046.216.094.321.142 1.49.7 2.58 1.761 3.154 3.07.797 1.82.871 4.79-1.548 7.158-1.85 1.81-4.094 2.628-7.277 2.65Zm1.003-11.69c-.242 0-.487.007-.739.021-1.836.103-2.98.946-2.916 2.143.067 1.256 1.452 1.839 2.784 1.767 1.224-.065 2.818-.543 3.086-3.71a10.5 10.5 0 0 0-2.215-.221z" />
+      </svg>
+    </a>
+  </li>
+  
+  
+</ul>
+<a
+  href="https://www.producthunt.com/products/maroon-apron-for-home-chefs?utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-maroon-apron-for-home-chefs"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Maroon Apron on Product Hunt"
+  className="group mt-4 inline-flex items-center gap-x-3 rounded-lg border border-border bg-background px-3.5 py-2.5 transition-colors hover:border-[#B1111C] focus-visible:border-[#B1111C] focus-visible:outline-none"
+>
+  <svg
+    className="block h-9 w-9 shrink-0"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+  >
+    <path
+      fill="#FF6154"
+      d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0z"
+    />
+    <path
+      fill="#fff"
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M7.8 6h5.805c2.319 0 4.2 1.88 4.2 4.199 0 2.321-1.881 4.201-4.201 4.201H10.2V18H7.8V6zm2.4 2.4V12h3.405c.995 0 1.801-.806 1.801-1.801 0-.993-.805-1.799-1.801-1.799H10.2z"
+    />
+  </svg>
+  <span className="flex flex-col leading-tight">
+    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+      Find us on
+    </span>
+    <span className="text-lg font-bold text-foreground transition-colors group-hover:text-[#B1111C]">
+      Product Hunt
+    </span>
+  </span>
+</a>
+</div>
+
         </div>
         <div
           className="border-t py-6 text-center text-xs"

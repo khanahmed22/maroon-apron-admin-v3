@@ -118,8 +118,9 @@ const NAV_LINKS: NavLink[] = [
   { label: "Our Product", href: "#product" },
   { label: "Why Maroon Apron?", href: "#why" },
   { label: "Pricing", href: "#pricing" },
-  { label: "FAQ", href: "#faq" },
+ 
   { label: "Get the App", href: "#app" },
+   { label: "FAQ", href: "#faq" },
 ];
 
 const TINTS: Tint[] = [

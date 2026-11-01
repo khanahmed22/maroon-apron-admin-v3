@@ -549,20 +549,13 @@ export default function Home() {
           />
 
           <Reveal className="max-w-2xl flex-1 relative">
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span
-                className="text-xs font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full"
-                style={{ color: ACCENT, backgroundColor: SOFT }}
-              >
-                Built for home chefs
-              </span>
-            </div>
+            
 
             <h1
               className="text-4xl max-md:text-2xl sm:text-5xl font-extrabold leading-[1.15]"
               style={{ color: INK }}
             >
-              Run your food business from one place, not three chat apps
+              Run your home food business from one place, not three chat apps
             </h1>
 
             <p
@@ -571,18 +564,18 @@ export default function Home() {
             >
               Maroon Apron replaces WhatsApp, Instagram, and Facebook
               order-taking with a proper storefront and dashboard. You keep 100%
-              of what you earn, with no commission on any order.
+              of what you earn, with no commission on any order. Built for Home Chefs.
             </p>
 
-            <div className="mt-9 flex flex-wrap items-center gap-4">
-              <PrimaryButton onClick={() => navigate("/register")}>
-                Start now <ArrowRight size={16} />
-              </PrimaryButton>
+            <div className="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+  <PrimaryButton onClick={() => navigate("/register")}>
+    Start now <ArrowRight size={16} />
+  </PrimaryButton>
 
-              <SecondaryButton onClick={handleNavClick("#demo")}>
-                See the demo store
-              </SecondaryButton>
-            </div>
+  <SecondaryButton onClick={handleNavClick("#demo")}>
+    See the demo store
+  </SecondaryButton>
+</div>
           </Reveal>
 
           <div className="flex-1 flex justify-center relative aspect-[16/12]">
@@ -659,15 +652,13 @@ export default function Home() {
       className="rounded-3xl border p-3 sm:p-8 relative overflow-hidden h-full flex flex-col"
       style={{ borderColor: BORDER }}
     >
-      <div className="absolute right-4 top-4 sm:right-6 sm:top-6 opacity-10 text-4xl sm:text-8xl">
-        💬
-      </div>
+      
 
       <h3
         className="text-sm text-center sm:text-xl font-bold mb-4 sm:mb-8"
         style={{ color: MUTE }}
       >
-        WhatsApp &amp; Social Media
+        WhatsApp &amp; Instagram
       </h3>
 
       <div className="space-y-2.5 sm:space-y-5 flex-1">

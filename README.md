@@ -184,11 +184,10 @@ Capacitor plugins bridge the gap between web technologies and native Android fea
 
 This gives Maroon Apron the development efficiency of a shared web codebase while providing access to device-level capabilities through native plugins.
 
----
 
 ## Android App
 
-[Android App](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795535577/1_ujn0nj.jpg)
+![Android App](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795535577/1_ujn0nj.jpg)
 
 Maroon Apron is also available on Android, providing the same business management experience on mobile devices.
 

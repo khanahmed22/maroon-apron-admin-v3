@@ -146,7 +146,7 @@ View and manage customers who sign up through your store.
 - Neon Postgres
 - Firebase Cloud Messaging (Push Notifications)
 
-Backend Repository: [Maroon Apron Backend](https://github.com/khanahmed22/crimson-backend-v3)
+Backend Repository: [Maroon Apron Backend](https://github.com/khanahmed22/maroon-apron-backend-v3)
 
 ## Payments
 

@@ -3,7 +3,7 @@
 Maroon Apron is split into two interconnected systems:
 
 - **Maroon Apron Customer App**: Handles customer interactions including ordering, menus, and order tracking. Visit here: https://github.com/khanahmed22/maroon-apron-next-v3
-- **Maroon Apron Merchant App**: Handles platform operations such as user management, order moderation, analytics, and payouts.(This one)
+- **Maroon Apron Admin App**: Handles platform operations such as user management, order moderation, analytics, and payouts.(This one)
 
 # Maroon Apron Admin App
 

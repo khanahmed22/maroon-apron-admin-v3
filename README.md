@@ -152,6 +152,62 @@ Backend Repository: [Maroon Apron Backend](https://github.com/khanahmed22/maroon
 
 - Paddle
 
+
+---
+
+---
+
+## Android App
+
+Maroon Apron is also available as an Android application, bringing the same business management experience to mobile devices.
+
+[**Download Maroon Apron on Google Play**](https://play.google.com/store/apps/details?id=com.maroonapron.app)
+
+### Shared Codebase with Capacitor
+
+The web and Android applications share the same React + TypeScript codebase. Instead of maintaining two separate applications, **Capacitor** bridges the existing web application with native Android capabilities.
+
+This approach allows the same UI, business logic, API integrations, and state management to work across both platforms while using native plugins to extend functionality where needed.
+
+### Native Android Integration
+
+Capacitor plugins bridge the gap between web technologies and native Android features, including:
+
+- **Push Notifications:** Firebase Cloud Messaging for real-time order updates.
+- **Receipt Printing:** Native printing integration for generating and printing order receipts.
+- **Network Detection:** Monitor connectivity and handle network changes.
+- **Location Services:** Access device location for delivery-related functionality.
+- **Native Sharing:** Share order details and other relevant content through Android's native share interface.
+- **File Handling:** Download and export reports directly from the application.
+
+**Architecture:** React + TypeScript → Vite Build → Capacitor → Native Android Application.
+
+This gives Maroon Apron the development efficiency of a shared web codebase while providing access to device-level capabilities through native plugins.
+
+---
+
+## Android App
+
+[Android App](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795535577/1_ujn0nj.jpg)
+
+Maroon Apron is also available on Android, providing the same business management experience on mobile devices.
+
+[**Download on Google Play**](https://play.google.com/store/apps/details?id=com.maroonapron.app)
+
+### Shared Codebase with Capacitor
+
+Both web and Android applications share the same React + TypeScript codebase. **Capacitor** bridges the web application with native Android capabilities, eliminating the need to maintain separate codebases.
+
+Native Capacitor plugins extend functionality with:
+
+- **Push Notifications:** Firebase Cloud Messaging.
+- **Receipt Printing:** Native printing integration.
+- **Network Detection:** Connectivity monitoring.
+- **Location Services:** Device location access.
+- **Native Sharing:** Android share functionality.
+- **File Handling:** Report downloads and exports.
+
+**Architecture:** React + TypeScript → Vite → Capacitor → Android
 ---
 
 # Vision

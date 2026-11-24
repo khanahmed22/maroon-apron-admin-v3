@@ -2,8 +2,8 @@
 
 Maroon Apron is split into two interconnected systems:
 
-- **Crimson Client App**: Handles customer interactions including ordering, menus, and order tracking. Visit here: https://github.com/khanahmed22/crimson-next-v3
-- **Crimson Admin App**: Handles platform operations such as user management, order moderation, analytics, and payouts.(This one)
+- **Maroon Apron Customer App**: Handles customer interactions including ordering, menus, and order tracking. Visit here: https://github.com/khanahmed22/maroon-apron-next-v3
+- **Maroon Apron Merchant App**: Handles platform operations such as user management, order moderation, analytics, and payouts.(This one)
 
 # Maroon Apron Admin App
 
@@ -12,7 +12,7 @@ Manage orders, inventory, customers, delivery operations, analytics, and store c
 
 **Keep 100% of your earnings. No commissions.**
 
-![Home Page](https://res.cloudinary.com/dgmfm08s8/image/upload/v1787327145/Homepage_yatmmn.png)
+![Home Page](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533162/homepage_mpxdf9.png)
 
 ---
 
@@ -24,7 +24,7 @@ https://maroonapron.com
 
 ## Demo Video
 
-https://www.youtube.com/watch?v=gFH15YnGEZ8&t=6s
+https://www.youtube.com/watch?v=quDtYABFbi4
 
 ---
 
@@ -49,7 +49,7 @@ Home chefs often struggle with:
 
 Every home chef gets their own professional online storefront where customers can browse menus and place orders directly.
 
-![Online Store](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785400663/Storefront_kwawka.png)
+![Online Store](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533165/Storefront_q6codo.png)
 
 Visit Demo store: https://pizzatown.crimsoncastle.shop/
 
@@ -59,11 +59,11 @@ Visit Demo store: https://pizzatown.crimsoncastle.shop/
 
 Track and manage all customer orders from a unified dashboard.
 
-![Orders Dashboard](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785425430/dashboard_nsmx8x.png)
+![Orders Dashboard](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533161/dashboard_ymikt5.png)
 
 View detailed order information, statuses, payment details, and fulfillment progress.
 
-![Orders List](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785399774/Orders_od5unj.png)
+![Orders List](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533163/Orders_psdlde.png)
 
 ---
 
@@ -71,7 +71,7 @@ View detailed order information, statuses, payment details, and fulfillment prog
 
 Monitor stock levels and manage inventory efficiently.
 
-![Inventory Management](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785426092/Inventory_o0yda9.png)
+![Inventory Management](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533162/Inventory_hfxzzl.png)
 
 ---
 
@@ -79,7 +79,7 @@ Monitor stock levels and manage inventory efficiently.
 
 Access business insights and performance metrics to understand sales trends and customer activity.
 
-![Store Analytics](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785399741/Analytics_tkwakc.png)
+![Store Analytics](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533160/Analytics_wn3o1w.png)
 
 ---
 
@@ -87,7 +87,7 @@ Access business insights and performance metrics to understand sales trends and 
 
 Customize your storefront experience, branding, and settings.
 
-![Store Customization](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785399782/Settings_i6fe8e.png)
+![Store Customization](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533163/Settings_jmzqlz.png)
 
 ---
 
@@ -95,7 +95,7 @@ Customize your storefront experience, branding, and settings.
 
 Create orders manually for customers who place orders through phone calls or direct messages.
 
-![Manual Orders](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785399778/PlaceOrder_zm6b17.png)
+![Manual Orders](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533163/PlaceOrder_earql6.png)
 
 ---
 
@@ -103,7 +103,7 @@ Create orders manually for customers who place orders through phone calls or dir
 
 Create and manage promotional coupons and discount campaigns.
 
-![Coupons](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785399756/Coupon_llt3ya.png)
+![Coupons](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533161/Coupon_i7awjz.png)
 
 ---
 
@@ -111,7 +111,7 @@ Create and manage promotional coupons and discount campaigns.
 
 Configure delivery charges based on zones or apply fixed delivery fees.
 
-![Delivery Zones](https://res.cloudinary.com/dgmfm08s8/image/upload/v1785399771/DeliveryZones_qxutne.png)
+![Delivery Zones](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533161/DeliveryZones_kzfiz7.png)
 
 ---
 
@@ -119,7 +119,7 @@ Configure delivery charges based on zones or apply fixed delivery fees.
 
 View and manage customers who sign up through your store.
 
-![Customer Management](https://res.cloudinary.com/dgmfm08s8/image/upload/v1787327027/Customers_shva7o.png)
+![Customer Management](https://res.cloudinary.com/dgmfm08s8/image/upload/v1795533160/Customers_azwcwi.png)
 
 ---
 

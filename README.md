@@ -143,7 +143,7 @@ View and manage customers who sign up through your store.
 - Express.js
 - Node.js
 - Prisma ORM
-- Neon Postgres
+- Postgres
 - Firebase Cloud Messaging (Push Notifications)
 
 Backend Repository: [Maroon Apron Backend](https://github.com/khanahmed22/maroon-apron-backend-v3)

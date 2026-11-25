@@ -168,7 +168,7 @@ Maroon Apron is also available on Android, providing the same business managemen
 
 Both web and Android applications share the same React + TypeScript codebase. **Capacitor** bridges the web application with native Android capabilities, eliminating the need to maintain separate codebases.
 
-Native Capacitor plugins extend functionality with:
+Native Capacitor plugins extend functionality with :
 
 - **Push Notifications:** Firebase Cloud Messaging.
 - **Receipt Printing:** Native printing integration.
